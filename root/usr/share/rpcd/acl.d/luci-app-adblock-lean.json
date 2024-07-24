@@ -1,78 +1,54 @@
 {
-	"luci-app-banip": {
-		"description": "Grant access to LuCI app banIP",
+	"luci-app-adblock-lean": {
+		"description": "Grant access to LuCI app AdBlock Lean",
 		"write": {
 			"file": {
-				"/etc/banip/*": [
+				"/root/adblock-lean/*": [
 					"read",
 					"write"
 				],
-				"/etc/banip/banip.allowlist": [
+				"/root/adblock-lean/allowlist": [
 					"write"
 				],
-				"/etc/banip/banip.blocklist": [
+				"/root/adblock-lean/blocklist": [
 					"write"
 				],
-				"/etc/banip/banip.custom.feeds": [
+				"/tmp/adblock-lean-output.luci": [
 					"read",
 					"write"
 				]
-			},
-			"uci": [
-				"banip"
-			]
+			}
 		},
 		"read": {
 			"cgi-io": [
 				"exec"
 			],
 			"file": {
-				"/var/run/banip.lock": [
-					"read"
-				],
-				"/sbin/logread -e banIP-": [
+				"/etc/init.d/adblock-lean start": [
 					"exec"
 				],
-				"/usr/sbin/logread -e banIP-": [
+				"/etc/init.d/adblock-lean stop": [
 					"exec"
 				],
-				"/sbin/logread -e  banIP/": [
+				"/etc/init.d/adblock-lean gen_stats": [
 					"exec"
 				],
-				"/usr/sbin/logread -e  banIP/": [
+				"/etc/init.d/adblock-lean status": [
 					"exec"
 				],
-				"/usr/sbin/nft -tj list ruleset": [
+				"/etc/init.d/adblock-lean pause": [
 					"exec"
 				],
-				"/etc/init.d/banip stop": [
+				"/etc/init.d/adblock-lean resume": [
 					"exec"
 				],
-				"/etc/init.d/banip reload": [
+				"/etc/init.d/adblock-lean check_for_updates": [
 					"exec"
 				],
-				"/etc/init.d/banip restart": [
-					"exec"
-				],
-				"/etc/init.d/banip report json": [
-					"exec"
-				],
-				"/etc/init.d/banip search [A-Za-z0-9:.]*": [
-					"exec"
-				],
-				"/etc/init.d/banip survey [A-Za-z0-9]*": [
-					"exec"
-				],
-				"/etc/init.d/banip status": [
-					"exec"
-				],
-				"/etc/init.d/banip lookup": [
+				"/etc/init.d/adblock-lean update": [
 					"exec"
 				]
-			},
-			"uci": [
-				"banip"
-			]
+			}
 		}
 	}
 }
