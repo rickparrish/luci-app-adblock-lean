@@ -13,7 +13,12 @@ if [[ -t 0 ]]
 then
 	msgs_dest="/dev/tty"
 else
-	msgs_dest="/dev/null"
+	if [[ -z "${SERVER_SOFTWARE}" ]]
+	then	
+		msgs_dest="/dev/null"
+	else
+		msgs_dest="/tmp/adblock-lean-output.luci"
+	fi
 fi
 
 PREFIX=/root/adblock-lean
@@ -133,7 +138,7 @@ log_msg()
 	done
 	_msg="${msg% }"
 
-	printf "${msg}\n" > "$msgs_dest"
+	printf "${msg}\n" >> "$msgs_dest"
 	logger -t adblock-lean -p user."${err_l}" "${msg}"
 }
 
