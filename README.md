@@ -18,3 +18,38 @@ To install the luci-app-adblock-lean to your OpenWrt instance (assuming your Ope
 scp -r root/* root@192.168.1.1:/
 scp -r htdocs/* root@192.168.1.1:/www/
 ```
+
+# Required adblock-lean tweaks
+
+The overview page requires a customization in /etc/init.d/adblock-lean.  The code that sets the msgs_dest variable needs to set it to /tmp/adblock-lean-output.luci when called from luci, which I'm currently checking for via the presence of a SERVER_SOFTWARE environment variable:
+
+```
+if [[ -t 0 ]]
+then
+        msgs_dest="/dev/tty"
+else
+        if [[ -z "${SERVER_SOFTWARE}" ]]
+        then
+                msgs_dest="/dev/null"
+        else
+                msgs_dest="/tmp/adblock-lean-output.luci"
+        fi
+fi
+```
+
+It also requires the `printf` call in `log_msg()` to append instead of overwrite:
+
+```
+printf "${msg}\n" >> "$msgs_dest"
+```
+
+# TODO list
+
+- [ ] Possibly pass an environment variable when calling `/etc/init.d/adblock-lean status` to have it write to a different file for each request, just in case two luci-based requests are sent at the same time.
+- [ ] Replace the &lt;textarea&gt; on the `Config` view with separate inputs for each of the configuration options.
+  - [ ] For the `blocklist_urls` setting, render that as radio collections, for example:
+    - Multi: ( ) Light ( ) Normal ( ) Pro-Full ( ) Pro-Mini ( ) Pro++-Full ( ) Pro++-Mini ( ) Ultimate-Full ( ) Ultimate-Mini
+    - Threat Intelligence: ( ) Full ( ) Medium ( ) Mini
+    - etc.
+  - [ ] Would also need a method for supplying additional blocklists.
+- [ ] Start, stop, pause, resume, etc, buttons
