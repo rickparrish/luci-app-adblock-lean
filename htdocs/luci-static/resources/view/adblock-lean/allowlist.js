@@ -3,8 +3,6 @@
 'require fs';
 'require ui';
 
-let notMsg, errMsg;
-
 return view.extend({
 	load: function () {
 		return Promise.all([
@@ -13,21 +11,21 @@ return view.extend({
 		]);
 	},
 	handleSave: function (ev) {
+		// Remove any existing notifications
+		var notifications = document.getElementsByClassName("alert-message");
+		for (var i = 0; i < notifications.length; i++) {
+			notifications[i].style.display = 'none';
+		}
+
 		let value = ((document.querySelector('textarea').value || '').trim().toLowerCase().replace(/\r\n/g, '\n')) + '\n';
 		return fs.write('/root/adblock-lean/allowlist', value)
 			.then(function () {
 				document.querySelector('textarea').value = value;
 				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				if (!notMsg) {
-					ui.addNotification(null, E('p', _('Allowlist modifications have been saved, reload adblock-lean for changes to take effect.')), 'info');
-					notMsg = true;
-				}
+				ui.addNotification(null, E('p', _('Allowlist modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
 			}).catch(function (e) {
 				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				if (!errMsg) {
-					ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
-					errMsg = true;
-				}
+				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
 			});
 	},
 	render: function (allowlist) {
@@ -45,7 +43,7 @@ return view.extend({
 					'spellcheck': 'false',
 					'wrap': 'off',
 					'rows': 25
-				}, [allowlist[1] != null ? allowlist[1] : ''])
+				}, [allowlist[1] ?? ''])
 			)
 		]);
 	},

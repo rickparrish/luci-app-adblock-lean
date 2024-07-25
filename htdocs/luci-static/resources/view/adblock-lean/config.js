@@ -3,8 +3,6 @@
 'require fs';
 'require ui';
 
-let notMsg, errMsg;
-
 return view.extend({
 	load: function () {
 		return Promise.all([
@@ -13,27 +11,24 @@ return view.extend({
 		]);
 	},
 	handleSave: function (ev) {
+		// Remove any existing notifications
+		var notifications = document.getElementsByClassName("alert-message");
+		for (var i = 0; i < notifications.length; i++) {
+			notifications[i].style.display = 'none';
+		}
+
 		let value = ((document.querySelector('textarea').value || '').trim().replace(/\r\n/g, '\n'));
 		return fs.write('/root/adblock-lean/config', value)
 			.then(function () {
 				document.querySelector('textarea').value = value;
 				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				if (!notMsg) {
-					ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'info');
-					notMsg = true;
-				}
+				ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
 			}).catch(function (e) {
 				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				if (!errMsg) {
-					ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
-					errMsg = true;
-				}
+				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
 			});
 	},
 	render: function (arr) {
-		var config = arr[1] == null ? '' : arr[1];
-		var lines = config.split('\n');
-		var rows = lines.length < 25 ? 25 : lines.length + 1;
 		return E([
 			E('p', {},
 				_('This is the local adblock-lean config file, /root/adblock-lean/config<br /> \
@@ -44,8 +39,8 @@ return view.extend({
 					'style': 'width: 100% !important; padding: 5px; font-family: monospace',
 					'spellcheck': 'false',
 					'wrap': 'off',
-					'rows': rows
-				}, [config])
+					'rows': 25
+				}, [arr[1] ?? ''])
 			)
 		]);
 	},
