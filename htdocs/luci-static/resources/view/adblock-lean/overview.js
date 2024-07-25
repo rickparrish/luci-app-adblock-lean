@@ -4,7 +4,6 @@
 'require fs';
 'require ui';
 
-let notMsg, errMsg;
 let m, data;
 
 function cleanValue(value) {
@@ -82,7 +81,7 @@ function parseConfig(config) {
 
 			// TODO Only going to warn via alert for now, since as mentioned above, the check needs to be improved
 			// throw new Error('Did not parse expected keys from config file, see console log for details');
-			alert('Did not parse expected keys from config file, see console log for details');
+			alert('Warning: Did not parse expected keys from config file, see console log for details');
 		}
 
 		// *_urls need to be an array, not a space-separated string
@@ -102,17 +101,94 @@ return view.extend({
 		]);
 	},
 	handleSave: function (ev) {
-		// TODO Empty numeric fields are not triggering validation errors
-		m.save()
+		// Remove any existing notifications
+		var notifications = document.getElementsByClassName("alert-message");
+		for (var i = 0; i < notifications.length; i++) {
+			notifications[i].style.display = 'none';
+		}
+
+		// Call m.save() with silent=true, because we'll call ui.addNotification to display a banner
+		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
+		m.save(function() { /* do nothing */ }, true)
 			.then((result) => {
-				console.log(data);
-				alert('I don\'t do anything yet');
-				// TODO Update config file
+				// Grab values for keys that might not exist
+				// var blocklist_urls = data.config.blocklist_urls ? data.config.blocklist_urls.join(' ') : "";
+				// var allowlist_urls = data.config.allowlist_urls ? data.config.allowlist_urls.join(' ') : "";
+				// var compress_blocklist = data.config.compress_blocklist ? 1 : 0;
+				// var initial_dnsmasq_restart = data.config.initial_dnsmasq_restart ? 1 : 0;
+
+				var config = '# adblock-lean configuration options\n\
+\n\
+# One or more dnsmasq blocklist urls separated by spaces\n\
+blocklist_urls="' + (data.config.blocklist_urls ?? []).join(' ') + '"\n\
+\n\
+# One or more allowlist urls separated by spaces\n\
+allowlist_urls="' + (data.config.allowlist_urls ?? []).join(' ') + '"\n\
+\n\
+# Path to optional local allowlist/blocklist files in the form:\n\
+# site1.com\n\
+# site2.com\n\
+local_allowlist_path="' + data.config.local_allowlist_path + '"\n\
+local_blocklist_path="' + data.config.local_blocklist_path + '"\n\
+\n\
+# Mininum number of lines of any individual downloaded blocklist part\n\
+min_blocklist_file_part_line_count=' + data.config.min_blocklist_file_part_line_count + '\n\
+# Maximum size of any individual downloaded blocklist part\n\
+max_blocklist_file_part_size_KB=' + data.config.max_blocklist_file_part_size_KB + '\n\
+# Maximum total size of combined, processed blocklist\n\
+max_blocklist_file_size_KB=' + data.config.max_blocklist_file_size_KB + '\n\
+# Minimum number of good lines in final postprocessed blocklist\n\
+min_good_line_count=' + data.config.min_good_line_count + '\n\
+\n\
+# compress blocklist to save memory once blocklist has been loaded\n\
+compress_blocklist=' + ((data.config.compress_blocklist ?? false) ? '1' : '0') + ' # enable (1) or disable (0) blocklist compression\n\
+\n\
+# restart dnsmasq if previous blocklist was extracted and before generation of\n\
+# new blocklist thereby to free up memory during generaiton of new blocklist\n\
+initial_dnsmasq_restart=' + ((data.config.initial_dnsmasq_restart ?? false) ? '1' : '0') + ' # enable (1) or disable (0) initial dnsmasq restart\n\
+\n\
+# Maximum number of download retries\n\
+max_download_retries=' + data.config.max_download_retries + '\n\
+\n\
+# Download failed action:\n\
+# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
+# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
+download_failed_action="' + data.config.download_failed_action + '"\n\
+\n\
+# Rogue element action:\n\
+# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
+# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
+# IGNORE - ignore any rogue elements (warning: use with caution)\n\
+rogue_element_action="' + data.config.rogue_element_action + '"\n\
+\n\
+# dnsmasq --test failed action:\n\
+# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
+# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
+dnsmasq_test_failed_action="' + data.config.dnsmasq_test_failed_action + '"\n\
+\n\
+# The following shell variables are invoked using:\n\
+# \'eval \${report_failure}\' and \'eval \${report_success}\'\n\
+# thereby to facilitate sending e.g. mailsend/sms notifications\n\
+# The variables \'\${failure_msg}\' and \'\${success_msg}\' can be employed\n\
+report_failure="' + (data.config.report_failure ?? '') + '"\n\
+report_success="' + (data.config.report_success ?? '') + '"\n\
+\n\
+# Start delay in seconds when service is started from system boot\n\
+boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
+
+				// Save config file
+				return fs.write('/root/adblock-lean/config', config)
+					.then(function () {
+						document.body.scrollTop = document.documentElement.scrollTop = 0;
+						ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
+					}).catch(function (e) {
+						document.body.scrollTop = document.documentElement.scrollTop = 0;
+						ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
+					});
 			})
 			.catch((error) => {
-				// m.save() will show a dialog when there is a validation error,
-				// so no need to alert the user here.
-				console.log(error);
+				document.body.scrollTop = document.documentElement.scrollTop = 0;
+				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(error.message)), 'error');
 			});
 	},
 	render: function (arr) {
@@ -177,6 +253,9 @@ return view.extend({
 			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
 		);
 		o.datatype = 'range(1,100000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		o = s.option(
 			form.Value,
@@ -185,6 +264,9 @@ return view.extend({
 			_('Maximum size of any individual downloaded blocklist part (1000-100000)') // TODO range
 		);
 		o.datatype = 'range(1000,100000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		o = s.option(
 			form.Value,
@@ -193,6 +275,9 @@ return view.extend({
 			_('Maximum total size of combined, processed blocklist (1000-100000)') // TODO range
 		);
 		o.datatype = 'range(1000,100000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		o = s.option(
 			form.Value,
@@ -201,6 +286,9 @@ return view.extend({
 			_('Minimum number of good lines in final postprocessed blocklist (1-1000000)') // TODO range
 		);
 		o.datatype = 'range(1,1000000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		o = s.option(
 			form.Flag,
@@ -223,6 +311,9 @@ return view.extend({
 			_('Maximum number of download retries (1-5)') // TODO range
 		);
 		o.datatype = 'range(1,5)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		o = s.option(
 			form.ListValue,
@@ -257,14 +348,14 @@ return view.extend({
 		o.value('STOP');
 
 		o = s.option(
-			form.TextValue,
+			form.Value,
 			'report_failure',
 			_('Report failure'),
 		);
 		o.datatype = 'string';
 
 		o = s.option(
-			form.TextValue,
+			form.Value,
 			'report_success',
 			_('Report success'),
 			_("The following shell variables are invoked using: \
@@ -281,6 +372,9 @@ return view.extend({
 			_('Start delay in seconds when service is started from system boot (0-300)') // TODO range
 		);
 		o.datatype = 'range(0,300)'; // TODO range		
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
 		return Promise.all([status.render(), m.render()]);
 	},
