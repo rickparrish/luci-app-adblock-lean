@@ -7,37 +7,102 @@
 let notMsg, errMsg;
 let m, data;
 
+function cleanValue(value) {
+	// Remove inline comments
+	var hashPos = value.indexOf('#');
+	if (hashPos == 0) {
+		value = '';
+	} else if (hashPos >= 1) {
+		value = value.substring(0, hashPos).trim();
+	}
+
+	// Remove quotation marks surrounding string values
+	// From: https://stackoverflow.com/a/18268011
+	if (value.indexOf('"') >= 0) {
+		value = value.trim().replace(/^"+|"+$/g, '');
+	}
+
+	return value;
+}
+
+function parseConfig(config) {
+	// Default configuration options
+	var obj = {
+		'blocklist_urls': [
+			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/light.txt'
+		],
+		'allowlist_urls': [
+		],
+		'local_allowlist_path': '',
+		'local_blocklist_path': '',
+		'min_blocklist_file_part_line_count': 1,
+		'max_blocklist_file_part_size_KB': 20000,
+		'max_blocklist_file_size_KB': 30000,
+		'min_good_line_count': 100000,
+		'compress_blocklist': 1,
+		'initial_dnsmasq_restart': 0,
+		'max_download_retries': 3,
+		'download_failed_action': 'SKIP_PARTIAL',
+		'rogue_element_action': 'SKIP_PARTIAL',
+		'dnsmasq_test_failed_action': 'SKIP_PARTIAL',
+		'report_failure': '',
+		'report_success': '',
+		'boot_start_delay_s': 120,
+	};
+	var expectedKeys = Object.keys(obj).sort().join(';');
+
+	if (config) {
+		// Parse the config file format, converting the key=value lines into an object
+		// From: https://stackoverflow.com/a/52043870
+		obj = config
+			// split the data by line
+			.split("\n")
+			// filter comments
+			.filter(row => (row.trim() != '') && !row.trim().startsWith('#'))
+			// split each row into key and property
+			.map(row => row.split("="))
+			// use reduce to assign key-value pairs to a new object
+			// using Array.prototype.reduce
+			.reduce((acc, [key, value]) => (acc[key] = cleanValue(value), acc), {});
+
+		// Ensure the expected keys and parsed keys match
+		// TODO This check probably needs to be more nuanced.  What I want to avoid is a situation where
+		//      adblock-lean adds a new config option that this app doesn't know about yet, to ensure this
+		//      app doesn't rewrite an outdated config file format and lose some options in the process.
+		//      But the current check would also error out in the situation where adblock-lean is updated
+		//      with a new config option, and this app does know about it, but the user's config file doesn't
+		//      have an entry for that new option yet.  That shouldn't be considered an error scenario, that
+		//      should just prepopulate the form with a sane default for the new config option.
+		//      That also means we can't do obj = config.split().filter().map().reduce() above, because that
+		//      would clobber the sane default previously set in the var obj = { ... } code.  Instead we'd
+		//      have to use a temp object, then loop through its keys to update the values in obj.
+		var parsedKeys = Object.keys(obj).sort().join(';');
+		if (expectedKeys != parsedKeys) {
+			console.log({expectedKeys, parsedKeys});
+
+			// TODO Only going to warn via alert for now, since as mentioned above, the check needs to be improved
+			// throw new Error('Did not parse expected keys from config file, see console log for details');
+			alert('Did not parse expected keys from config file, see console log for details');
+		}
+
+		// *_urls need to be an array, not a space-separated string
+		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
+		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
+	}
+
+	// Set the data variable in the format needed by form.JSONMap()
+	return { 'config': obj };
+}
+
 return view.extend({
 	load: function () {
-		// TODOX Read and parse /root/adblock-lean/config
-		data = {
-			'config': {
-				'blocklist_urls': [
-					'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/light.txt'
-				],
-				'allowlist_urls': [
-				],
-				'min_blocklist_file_part_line_count': 1,
-				'max_blocklist_file_part_size_KB': 20000,
-				'max_blocklist_file_size_KB': 30000,
-				'min_good_line_count': 100000,
-				'compress_blocklist': 1,
-				'initial_dnsmasq_restart': 0,
-				'max_download_retries': 3,
-				'download_failed_action': 'SKIP_PARTIAL',
-				'rogue_element_action': 'SKIP_PARTIAL',
-				'dnsmasq_test_failed_action': 'SKIP_PARTIAL',
-				'report_failure': '',
-				'report_success': '',
-				'boot_start_delay_s': 120
-			}
-		};
-		
 		return Promise.all([
-			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['status']), '')
+			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['status']), ''),
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
 		]);
 	},
 	handleSave: function (ev) {
+		// TODO Empty numeric fields are not triggering validation errors
 		m.save()
 			.then((result) => {
 				console.log(data);
@@ -45,6 +110,8 @@ return view.extend({
 				// TODO Update config file
 			})
 			.catch((error) => {
+				// m.save() will show a dialog when there is a validation error,
+				// so no need to alert the user here.
 				console.log(error);
 			});
 	},
@@ -72,6 +139,8 @@ return view.extend({
 			]);
 		}, o, this);
 
+		// Setup the form inputs for each config option
+		data = parseConfig(arr[1]);
 		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
 			For further information please check the <a style="color:#37c;font-weight:bold;" href="https://github.com/lynxthecat/adblock-lean" target="_blank" rel="noreferrer noopener" >online documentation</a>'));
 
@@ -105,9 +174,9 @@ return view.extend({
 			form.Value,
 			'min_blocklist_file_part_line_count',
 			_('Min line count'),
-			_('Mininum number of lines of any individual downloaded blocklist part (1-100)') // TODO range
+			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
 		);
-		o.datatype = 'range(1,100)'; // TODO range
+		o.datatype = 'range(1,100000)'; // TODO range
 
 		o = s.option(
 			form.Value,
