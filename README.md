@@ -53,3 +53,7 @@ printf "${msg}\n" >> "$msgs_dest"
     - etc.
   - [ ] Would also need a method for supplying additional blocklists.
 - [ ] Start, stop, pause, resume, etc, buttons
+
+# Screenshot
+
+![image](https://github.com/user-attachments/assets/6d42ac1a-fd73-4f4c-b6dc-0ad88a15ca41)
