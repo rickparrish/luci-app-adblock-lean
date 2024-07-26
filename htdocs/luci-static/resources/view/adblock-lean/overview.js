@@ -6,6 +6,16 @@
 
 let m, data;
 
+// Result values used by various adblock-lean functions.
+// Values here must match the values in adblock-lean
+var RESULT_DNSMASQ_LOOKUP_FAILED=1;
+var RESULT_DNSMASQ_LOOKUP_QUADZERO=2;
+var RESULT_DNSMASQ_NOT_RUNNING=3;
+var RESULT_NOT_ACTIVE=4;
+var RESULT_UPDATE_CHECK_ERROR=5;
+var RESULT_UPDATE_CHECK_LATEST=6;
+var RESULT_UPDATE_CHECK_OUTDATED=7;
+
 function cleanValue(value) {
 	// Remove inline comments
 	// TODO This will break if a string value contains a #
@@ -246,18 +256,18 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 					var status_label;
 					switch (json.status) {
 						case 0: status_label = 'Started'; break;
-						case 1: status_label = 'ERROR: dnsmasq not started'; break;
-						case 2: status_label = 'ERROR: Test domain lookup failed'; break;
-						case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-						case 4: status_label = 'Stopped'; break;
+						case RESULT_DNSMASQ_LOOKUP_FAILED: status_label = 'ERROR: Test domain lookup failed'; break;
+						case RESULT_DNSMASQ_LOOKUP_QUADZERO: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
+						case RESULT_DNSMASQ_NOT_RUNNING: status_label = 'ERROR: dnsmasq not running'; break;
+						case RESULT_NOT_ACTIVE: status_label = 'Stopped'; break;
 						default: status_label = 'Unknown'; break;
 					}
 
 					var update_status_label;
 					switch (json.update_status) {
-						case 0: update_status_label = 'Up to date'; break;
-						case 1: update_status_label = 'Update available'; break;
-						case 2: update_status_label = 'Error checking'; break;
+						case RESULT_UPDATE_CHECK_ERROR: update_status_label = 'Error checking'; break;
+						case RESULT_UPDATE_CHECK_LATEST: update_status_label = 'Up to date'; break;
+						case RESULT_UPDATE_CHECK_OUTDATED: update_status_label = 'Update available'; break;
 						default: update_status_label = 'Unknown'; break;
 					}
 
