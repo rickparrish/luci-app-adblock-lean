@@ -25,6 +25,21 @@ function cleanValue(value) {
 	return value;
 }
 
+function joinWithSemicolon(text) {
+	var lines = (text ?? '').replace(/\r\n/g, '\n').split('\n');
+	
+	var result = lines[0].trim();
+
+	for (var i = 1; i < lines.length; i++) {
+		if (!result.endsWith(';')) {
+			result += '; ';
+		}
+		result += lines[i].trim();
+	}
+
+	return result;
+}
+
 function parseConfig(config) {
 	// Default configuration options
 	var obj = {
@@ -117,12 +132,6 @@ return view.extend({
 		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
 		m.save(function() { /* do nothing */ }, true)
 			.then((result) => {
-				// Grab values for keys that might not exist
-				// var blocklist_urls = data.config.blocklist_urls ? data.config.blocklist_urls.join(' ') : "";
-				// var allowlist_urls = data.config.allowlist_urls ? data.config.allowlist_urls.join(' ') : "";
-				// var compress_blocklist = data.config.compress_blocklist ? 1 : 0;
-				// var initial_dnsmasq_restart = data.config.initial_dnsmasq_restart ? 1 : 0;
-
 				var config = '# adblock-lean configuration options\n\
 \n\
 # One or more dnsmasq blocklist urls separated by spaces\n\
@@ -176,8 +185,8 @@ dnsmasq_test_failed_action="' + data.config.dnsmasq_test_failed_action + '"\n\
 # \'eval \${report_failure}\' and \'eval \${report_success}\'\n\
 # thereby to facilitate sending e.g. mailsend/sms notifications\n\
 # The variables \'\${failure_msg}\' and \'\${success_msg}\' can be employed\n\
-report_failure="' + (data.config.report_failure ?? '') + '"\n\
-report_success="' + (data.config.report_success ?? '') + '"\n\
+report_failure="' + joinWithSemicolon(data.config.report_failure) + '"\n\
+report_success="' + joinWithSemicolon(data.config.report_success) + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
 boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
@@ -376,22 +385,25 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.value('STOP');
 
 		o = s.option(
-			form.Value,
+			form.TextValue,
 			'report_failure',
 			_('Report failure'),
 		);
 		o.datatype = 'string';
+		o.rows = 5;
 
 		o = s.option(
-			form.Value,
+			form.TextValue,
 			'report_success',
 			_('Report success'),
 			_("The following shell variables are invoked using: \
 			   'eval \${report_failure}' and 'eval \${report_success}' \
 			   thereby to facilitate sending e.g. mailsend/sms notifications. \
-			   The variables '\${failure_msg}' and '\${success_msg}' can be employed")
+			   The variables '\${failure_msg}' and '\${success_msg}' can be employed<br /> \
+			   <strong>NB: Don't forget to escape special chars like \" and $ as necessary.</strong>")
 		);
 		o.datatype = 'string';
+		o.rows = 5;
 
 		o = s.option(
 			form.Value,
