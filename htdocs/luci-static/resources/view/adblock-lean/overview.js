@@ -209,54 +209,80 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 	},
 	render: function (arr) {
 		let s, o;
-
-		// Wrap status in try..catch, because if no config file exists the call to luci_status will fail
 		var status;
-		try {
-			var json = JSON.parse(arr[0]);
 
-			var status = new form.JSONMap(data, 'AdBlock Lean - Status');
-			s = status.section(form.NamedSection, 'global');
-			s.render = L.bind(async function (view, section_id) {
-				var status_label;
-				switch (json.status) {
-					case 0: status_label = 'OK'; break;
-					case 1: status_label = 'ERROR: dnsmasq not started'; break;
-					case 2: status_label = 'ERROR: Test domain lookup failed'; break;
-					case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-					case 4: status_label = 'ERROR: adblock-lean not started'; break;
-					default: status_label = 'Unknown'; break;
-				}
+		if (arr[1] == '') {
+			// Display a message saying config doesn't exist yet
+			// var status = new form.JSONMap(data, 'AdBlock Lean - Status');
+			// s = status.section(form.NamedSection, 'global');
+			// s.render = L.bind(async function (view, section_id) {
+			// 	E('p', { style: "color: red;" },
+			// 		_('Your AdBlock Lean configuration file does not exist.  Review the options below \
+			// 			and click <strong>Save</strong> to configure AdBlock Lean now.'))
+			// }, o, this);
+			ui.addNotification(null, E('p', 
+				_('Your AdBlock Lean configuration file does not exist.  Review the options below \
+					and click <strong>Save</strong> to configure AdBlock Lean now.')
+			), 'info');
+		} else {
+			// Wrap in try..catch so we can warn the user if the luci_status call failed to return valid json
+			try {
+				var json = JSON.parse(arr[0]);
 
-				var update_status_label;
-				switch (json.update_status) {
-					case 0: update_status_label = 'Up to date'; break;
-					case 1: update_status_label = 'Update available'; break;
-					case 2: update_status_label = 'Error checking'; break;
-					default: update_status_label = 'Unknown'; break;
-				}
+				var status = new form.JSONMap(data, 'AdBlock Lean - Status');
+				s = status.section(form.NamedSection, 'global');
+				s.render = L.bind(async function (view, section_id) {
+					var status_label;
+					switch (json.status) {
+						case 0: status_label = 'OK'; break;
+						case 1: status_label = 'ERROR: dnsmasq not started'; break;
+						case 2: status_label = 'ERROR: Test domain lookup failed'; break;
+						case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
+						case 4: status_label = 'ERROR: adblock-lean not started'; break;
+						default: status_label = 'Unknown'; break;
+					}
 
-				return E(
-					"table",
-					{ class: "table", id: "adblock-fast_status_table" },
-					[
-						E("tr", { class: "tr table-titles" }, [
-							E("th", { class: "th" }, _("Status")),
-							E("th", { class: "th" }, _("Blocklist line count")),
-							E("th", { class: "th" }, _("Time since blocklist update")),
-							E("th", { class: "th" }, _("Update status")),
-						]),
-						E("tr", { class: "tr" }, [
-							E("td", { class: "td" }, status_label),
-							E("td", { class: "td" }, json.good_line_count),
-							E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
-							E("td", { class: "td" }, update_status_label),
-						]),
-					]
-				);
-			}, o, this);
-		} catch (err) {
-			console.log(err);
+					var update_status_label;
+					switch (json.update_status) {
+						case 0: update_status_label = 'Up to date'; break;
+						case 1: update_status_label = 'Update available'; break;
+						case 2: update_status_label = 'Error checking'; break;
+						default: update_status_label = 'Unknown'; break;
+					}
+
+					return E(
+						"table",
+						{ class: "table", id: "adblock-fast_status_table" },
+						[
+							E("tr", { class: "tr table-titles" }, [
+								E("th", { class: "th" }, _("Status")),
+								E("th", { class: "th" }, _("Blocklist line count")),
+								E("th", { class: "th" }, _("Time since blocklist update")),
+								E("th", { class: "th" }, _("Update status")),
+							]),
+							E("tr", { class: "tr" }, [
+								E("td", { class: "td" }, status_label),
+								E("td", { class: "td" }, json.good_line_count),
+								E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
+								E("td", { class: "td" }, update_status_label),
+							]),
+						]
+					);
+				}, o, this);
+			} catch (err) {
+				console.log({arr, err});
+
+				// The most likely cause for entering this catch is that luci_status failed to run, and the most likely reason
+				// for that is because the config file is malformed.  One such cause is the user entering a report_failure
+				// or report_success without escaping special character correctly, so we'll tell them to go take a look at
+				// the raw config file and fix as needed.
+				ui.addNotification(null, E('p', 
+					_('ERROR: Failed to load your /root/adblock-lean/config file, which may be because it is malformed. \
+					One known cause is entering a <strong>Report failure</strong> or <strong>Report success</strong> \
+					command that fails to escape special characters correctly.  Click the <strong>Config</strong> tab \
+					at the top of this page to view your raw config file, and fix as necessary.')
+				), 'danger');
+			}
 		}
 
 		// Setup the form inputs for each config option
@@ -264,13 +290,19 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
 			For further information please check the <a style="color:#37c;font-weight:bold;" href="https://github.com/lynxthecat/adblock-lean" target="_blank" rel="noreferrer noopener" >online documentation</a>'));
 
-		s = m.section(
-			form.NamedSection,
-			'config',
-			'adblock-lean-section'
-		);
-
-		o = s.option(
+		/*
+			tabbed config section
+		*/
+		s = m.section(form.NamedSection, 'config', 'adblock-lean-section');
+		s.addremove = false;
+		s.tab('general', _('General Settings'));
+		s.tab('advanced', _('Advanced Settings'));
+		
+		/*
+			general tab
+		*/
+		o = s.taboption(
+			'general',
 			form.DynamicList,
 			'blocklist_urls',
 			_('Blocklist Urls'),
@@ -280,7 +312,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.DynamicList,
 			'allowlist_urls',
 			_('Allowlist Urls'),
@@ -290,18 +323,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
-			form.Value,
-			'min_blocklist_file_part_line_count',
-			_('Min line count'),
-			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
-		);
-		o.datatype = 'range(1,100000)'; // TODO range
-		o.optional = false;
-		o.retain = true;
-		o.rmempty = false;
-
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.Value,
 			'max_blocklist_file_part_size_KB',
 			_('Max file size (KB)'),
@@ -312,7 +335,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.Value,
 			'max_blocklist_file_size_KB',
 			_('Max total size (KB)'),
@@ -323,7 +347,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.Value,
 			'min_good_line_count',
 			_('Min good lines'),
@@ -334,21 +359,58 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.Flag,
 			'compress_blocklist',
 			_('Compress blocklist'),
 			_('Compress blocklist to save memory once blocklist has been loaded')
 		);
 
-		o = s.option(
+		o = s.taboption(
+			'general',
 			form.Flag,
 			'initial_dnsmasq_restart',
 			_('Restart dnsmasq'),
 			_('Restart dnsmasq if previous blocklist was extracted and before generation of new blocklist thereby to free up memory during generaiton of new blocklist')
 		);
 
-		o = s.option(
+		/*
+			advanced tab
+		*/
+		o = s.taboption(
+			'advanced',
+			form.ListValue,
+			'download_failed_action',
+			_('Download failed action'),
+		);
+		o.value('SKIP_PARTIAL');
+		o.value('STOP');
+
+		o = s.taboption(
+			'advanced',
+			form.ListValue,
+			'rogue_element_action',
+			_('Rogue element action'),
+		);
+		o.value('SKIP_PARTIAL');
+		o.value('STOP');
+		o.value('IGNORE');
+
+		o = s.taboption(
+			'advanced',
+			form.ListValue,
+			'dnsmasq_test_failed_action',
+			_('"dnsmasq --test" failed action'),
+			_('SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation<br /> \
+				STOP - stop blocklist generation (and fallback to previous blocklist if available)<br /> \
+				IGNORE - ignore any rogue elements (warning: use with caution)'),
+		 );
+		o.value('SKIP_PARTIAL');
+		o.value('STOP');
+		
+		o = s.taboption(
+			'advanced',
 			form.Value,
 			'max_download_retries',
 			_('Max download retries'),
@@ -359,39 +421,32 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		o = s.option(
-			form.ListValue,
-			'download_failed_action',
-			_('Download failed action'),
-			_('SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation<br /> \
-			   STOP - stop blocklist generation (and fallback to previous blocklist if available)'),
+		o = s.taboption(
+			'advanced',
+			form.Value,
+			'min_blocklist_file_part_line_count',
+			_('Min line count'),
+			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
 		);
-		o.value('SKIP_PARTIAL');
-		o.value('STOP');
+		o.datatype = 'range(1,100000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
-		o = s.option(
-			form.ListValue,
-			'rogue_element_action',
-			_('Rogue element action'),
-			_('SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation<br /> \
-			   STOP - stop blocklist generation (and fallback to previous blocklist if available)<br /> \
-			   IGNORE - ignore any rogue elements (warning: use with caution)'),
+		o = s.taboption(
+			'advanced',
+			form.Value,
+			'boot_start_delay_s',
+			_('Boot start delay (seconds)'),
+			_('Start delay in seconds when service is started from system boot (0-300)') // TODO range
 		);
-		o.value('SKIP_PARTIAL');
-		o.value('STOP');
-		o.value('IGNORE');
+		o.datatype = 'range(0,300)'; // TODO range		
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
 
-		o = s.option(
-			form.ListValue,
-			'dnsmasq_test_failed_action',
-			_('"dnsmasq --test" failed action'),
-			_('SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation<br /> \
-			   STOP - stop blocklist generation (and fallback to previous blocklist if available)'),
-		);
-		o.value('SKIP_PARTIAL');
-		o.value('STOP');
-
-		o = s.option(
+		o = s.taboption(
+			'advanced',
 			form.TextValue,
 			'report_failure',
 			_('Report failure'),
@@ -399,7 +454,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.datatype = 'string';
 		o.rows = 5;
 
-		o = s.option(
+		o = s.taboption(
+			'advanced',
 			form.TextValue,
 			'report_success',
 			_('Report success'),
@@ -411,17 +467,6 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		);
 		o.datatype = 'string';
 		o.rows = 5;
-
-		o = s.option(
-			form.Value,
-			'boot_start_delay_s',
-			_('Boot start delay (s)'),
-			_('Start delay in seconds when service is started from system boot (0-300)') // TODO range
-		);
-		o.datatype = 'range(0,300)'; // TODO range		
-		o.optional = false;
-		o.retain = true;
-		o.rmempty = false;
 
 		if (status) {
 			return Promise.all([status.render(), m.render()]);

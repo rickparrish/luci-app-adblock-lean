@@ -19,19 +19,29 @@ return baseclass.extend({
 
 		return Promise.all([
 			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['luci_status']), ''),
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
 		]);
 	},
 	render: function (arr) {
-		// Wrap status in try..catch, because if no config file exists the call to luci_status will fail
-		try {
-			// Save arr to cachedArr if we have a new arr (ie first call, or 5 minutes since last call)
-			// Or load the cachedArr into arr if we don't have a new arr (ie not been five minutes since previous call)
-			if (arr) {
-				cachedArr = arr;
-			} else {
-				arr = cachedArr;
-			}
+		// Save arr to cachedArr if we have a new arr (ie first call, or 5 minutes since last call)
+		// Or load the cachedArr into arr if we don't have a new arr (ie not been five minutes since previous call)
+		if (arr) {
+			cachedArr = arr;
+		} else {
+			arr = cachedArr;
+		}
 
+		// Return a message saying config doesn't exist yet, if it doesn't exist yet
+		if (arr[1] == '') {
+			return E([
+				E('p', { style: "color: red;" },
+					_('Your AdBlock Lean configuration file does not exist.  Click \
+						<strong>Services -> AdBlock Lean</strong> to configure AdBlock Lean now.'))
+			]);
+		}
+
+		// Wrap in try..catch so we can warn the user if the luci_status call failed to return valid json
+		try {
 			var json = JSON.parse(arr[0]);
 				
 			var status_label;
@@ -71,7 +81,19 @@ return baseclass.extend({
 				]
 			);
 		} catch (err) {
-			console.log(err);
+			console.log({arr, err});
+
+			// The most likely cause for entering this catch is that luci_status failed to run, and the most likely reason
+			// for that is because the config file is malformed.  One such cause is the user entering a report_failure
+			// or report_success without escaping special character correctly, so we'll tell them to go take a look at
+			// the raw config file and fix as needed.
+			return E([
+				E('p', { style: "color: red;" },
+					_('ERROR: Failed to load the AdBlock Lean configuration file, which may be because it is malformed. \
+						One known cause is entering a <strong>Report failure</strong> or <strong>Report success</strong> \
+						command without escaping special characters correctly.  Click the <strong>Config</strong> tab \
+						on the <strong>Services -> AdBlock Lean</strong> page to view your raw config file and fix it.'))
+			]);
 		}
 	},
 });
