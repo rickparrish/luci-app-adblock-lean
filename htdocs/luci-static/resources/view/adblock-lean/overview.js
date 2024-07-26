@@ -44,7 +44,8 @@ function parseConfig(config) {
 	// Default configuration options
 	var obj = {
 		'blocklist_urls': [
-			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/light.txt'
+			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt',
+			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.mini.txt'
 		],
 		'allowlist_urls': [
 		],
@@ -209,48 +210,54 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 	render: function (arr) {
 		let s, o;
 
-		var status = new form.JSONMap(data, 'AdBlock Lean - Status');
-		s = status.section(form.NamedSection, 'global');
-		s.render = L.bind(async function (view, section_id) {
+		// Wrap status in try..catch, because if no config file exists the call to luci_status will fail
+		var status;
+		try {
 			var json = JSON.parse(arr[0]);
-			
-			var status_label;
-			switch (json.status) {
-				case 0: status_label = 'OK'; break;
-				case 1: status_label = 'ERROR: dnsmasq not started'; break;
-				case 2: status_label = 'ERROR: Test domain lookup failed'; break;
-				case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-				case 4: status_label = 'ERROR: adblock-lean not started'; break;
-				default: status_label = 'Unknown'; break;
-			}
 
-			var update_status_label;
-			switch (json.update_status) {
-				case 0: update_status_label = 'Up to date'; break;
-				case 1: update_status_label = 'Update available'; break;
-				case 2: update_status_label = 'Error checking'; break;
-				default: update_status_label = 'Unknown'; break;
-			}
+			var status = new form.JSONMap(data, 'AdBlock Lean - Status');
+			s = status.section(form.NamedSection, 'global');
+			s.render = L.bind(async function (view, section_id) {
+				var status_label;
+				switch (json.status) {
+					case 0: status_label = 'OK'; break;
+					case 1: status_label = 'ERROR: dnsmasq not started'; break;
+					case 2: status_label = 'ERROR: Test domain lookup failed'; break;
+					case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
+					case 4: status_label = 'ERROR: adblock-lean not started'; break;
+					default: status_label = 'Unknown'; break;
+				}
 
-			return E(
-				"table",
-				{ class: "table", id: "adblock-fast_status_table" },
-				[
-					E("tr", { class: "tr table-titles" }, [
-						E("th", { class: "th" }, _("Status")),
-						E("th", { class: "th" }, _("Blocklist line count")),
-						E("th", { class: "th" }, _("Time since blocklist update")),
-						E("th", { class: "th" }, _("Update status")),
-					]),
-					E("tr", { class: "tr" }, [
-						E("td", { class: "td" }, status_label),
-						E("td", { class: "td" }, json.good_line_count),
-						E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
-						E("td", { class: "td" }, update_status_label),
-					]),
-				]
-			);
-		}, o, this);
+				var update_status_label;
+				switch (json.update_status) {
+					case 0: update_status_label = 'Up to date'; break;
+					case 1: update_status_label = 'Update available'; break;
+					case 2: update_status_label = 'Error checking'; break;
+					default: update_status_label = 'Unknown'; break;
+				}
+
+				return E(
+					"table",
+					{ class: "table", id: "adblock-fast_status_table" },
+					[
+						E("tr", { class: "tr table-titles" }, [
+							E("th", { class: "th" }, _("Status")),
+							E("th", { class: "th" }, _("Blocklist line count")),
+							E("th", { class: "th" }, _("Time since blocklist update")),
+							E("th", { class: "th" }, _("Update status")),
+						]),
+						E("tr", { class: "tr" }, [
+							E("td", { class: "td" }, status_label),
+							E("td", { class: "td" }, json.good_line_count),
+							E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
+							E("td", { class: "td" }, update_status_label),
+						]),
+					]
+				);
+			}, o, this);
+		} catch (err) {
+			console.log(err);
+		}
 
 		// Setup the form inputs for each config option
 		data = parseConfig(arr[1]);
@@ -416,7 +423,11 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o.retain = true;
 		o.rmempty = false;
 
-		return Promise.all([status.render(), m.render()]);
+		if (status) {
+			return Promise.all([status.render(), m.render()]);
+		} else {
+			return m.render();
+		}
 	},
 	handleSaveApply: null,
 	handleReset: null
