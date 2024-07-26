@@ -2,9 +2,21 @@
 "require fs";
 "require baseclass";
 
+var cachedArr = null;
+var cacheSeconds = 0;
+
 return baseclass.extend({
 	title: _("AdBlock Lean"),
 	load: function () {
+		// Check if it's been 5 minutes since the last check
+		// This is because a status check downloads the adblock-lean script to see if an update is avaialble,
+		// and I don't think we need to download that every few seconds when the user is at the main Status -> Overview screen!
+		var currentSeconds = Math.floor(Date.now() / 1000);
+		if (currentSeconds - cacheSeconds < 300) {
+			return Promise.resolve();
+		}
+		cacheSeconds = currentSeconds;
+
 		return Promise.all([
 			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['luci_status']), ''),
 		]);
@@ -12,6 +24,14 @@ return baseclass.extend({
 	render: function (arr) {
 		// Wrap status in try..catch, because if no config file exists the call to luci_status will fail
 		try {
+			// Save arr to cachedArr if we have a new arr (ie first call, or 5 minutes since last call)
+			// Or load the cachedArr into arr if we don't have a new arr (ie not been five minutes since previous call)
+			if (arr) {
+				cachedArr = arr;
+			} else {
+				arr = cachedArr;
+			}
+
 			var json = JSON.parse(arr[0]);
 				
 			var status_label;
