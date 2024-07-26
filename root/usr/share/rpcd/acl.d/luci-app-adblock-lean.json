@@ -12,10 +12,6 @@
 				],
 				"/root/adblock-lean/blocklist": [
 					"write"
-				],
-				"/tmp/adblock-lean-output.luci": [
-					"read",
-					"write"
 				]
 			}
 		},
@@ -34,6 +30,9 @@
 					"exec"
 				],
 				"/etc/init.d/adblock-lean status": [
+					"exec"
+				],
+				"/etc/init.d/adblock-lean luci_status": [
 					"exec"
 				],
 				"/etc/init.d/adblock-lean pause": [
