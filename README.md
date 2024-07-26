@@ -30,4 +30,5 @@ download a modified version here: https://raw.githubusercontent.com/rickparrish/
 
 # Screenshot
 
-![image](https://github.com/user-attachments/assets/6d42ac1a-fd73-4f4c-b6dc-0ad88a15ca41)
+![image](https://github.com/user-attachments/assets/9b84c70d-02c0-4202-85dc-1d1519640d99)
+
