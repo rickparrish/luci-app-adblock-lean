@@ -37,11 +37,13 @@ return baseclass.extend({
 				E("tr", { class: "tr table-titles" }, [
 					E("th", { class: "th" }, _("Status")),
 					E("th", { class: "th" }, _("Blocklist line count")),
+					E("th", { class: "th" }, _("Time since blocklist update")),
 					E("th", { class: "th" }, _("Update status")),
 				]),
 				E("tr", { class: "tr" }, [
 					E("td", { class: "td" }, status_label),
 					E("td", { class: "td" }, json.good_line_count),
+					E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
 					E("td", { class: "td" }, update_status_label),
 				]),
 			]
