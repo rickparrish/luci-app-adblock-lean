@@ -25,6 +25,17 @@ function cleanValue(value) {
 	return value;
 }
 
+async function handleAction(actionName, actionLabel) {
+	ui.showModal(null, [
+		E("p",
+			{ class: "spinning" },
+			_(actionLabel + " AdBlock Lean")
+		),
+	]);
+	await fs.exec_direct('/etc/init.d/adblock-lean', [actionName]);
+	location.reload();
+}
+
 function joinWithSemicolon(text) {
 	var lines = (text ?? '').replace(/\r\n/g, '\n').split('\n');
 	
@@ -234,11 +245,11 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 				s.render = L.bind(async function (view, section_id) {
 					var status_label;
 					switch (json.status) {
-						case 0: status_label = 'OK'; break;
+						case 0: status_label = 'Started'; break;
 						case 1: status_label = 'ERROR: dnsmasq not started'; break;
 						case 2: status_label = 'ERROR: Test domain lookup failed'; break;
 						case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-						case 4: status_label = 'ERROR: adblock-lean not started'; break;
+						case 4: status_label = 'Stopped'; break;
 						default: status_label = 'Unknown'; break;
 					}
 
@@ -249,6 +260,22 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 						case 2: update_status_label = 'Error checking'; break;
 						default: update_status_label = 'Unknown'; break;
 					}
+
+					var startButton = E('button', {
+						'class': 'btn cbi-button cbi-button-apply',
+						'click': ui.createHandlerFn(this, function () {
+							return handleAction('start', 'Starting');
+						})
+					}, _('Start'));
+					startButton.disabled = json.status == 0;
+
+					var stopButton = E('button', {
+						'class': 'btn cbi-button cbi-button-reset',
+						'click': ui.createHandlerFn(this, function () {
+							return handleAction('stop', 'Stopping');
+						})
+					}, _('Stop'));
+					stopButton.disabled = json.status != 0;
 
 					return E(
 						"table",
@@ -265,6 +292,14 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 								E("td", { class: "td" }, json.good_line_count),
 								E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
 								E("td", { class: "td" }, update_status_label),
+							]),
+							E("tr", { class: "tr" }, [
+								E("td", { colspan: "4" }, [
+									startButton,
+									'\xa0',
+									stopButton,
+									'\xa0',
+								]),
 							]),
 						]
 					);

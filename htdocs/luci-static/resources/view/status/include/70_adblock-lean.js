@@ -46,11 +46,11 @@ return baseclass.extend({
 				
 			var status_label;
 			switch (json.status) {
-				case 0: status_label = 'OK'; break;
+				case 0: status_label = 'Started'; break;
 				case 1: status_label = 'ERROR: dnsmasq not running'; break;
 				case 2: status_label = 'ERROR: Test domain lookup failed'; break;
 				case 3: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-				case 4: status_label = 'ERROR: adblock-lean not started'; break;
+				case 4: status_label = 'Stopped'; break;
 				default: status_label = 'Unknown'; break;
 			}
 
