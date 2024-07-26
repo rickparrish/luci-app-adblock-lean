@@ -28,7 +28,8 @@ download a modified version here: https://raw.githubusercontent.com/rickparrish/
 
 - [ ] Start, stop, pause, resume, buttons
 
-# Screenshot
+# Screenshots
 
-![image](https://github.com/user-attachments/assets/9b84c70d-02c0-4202-85dc-1d1519640d99)
+![image](https://github.com/user-attachments/assets/c2c57da9-af64-48c7-a6cc-72d40f49c12b)
 
+![image](https://github.com/user-attachments/assets/418ab06e-6324-463e-8322-613eecc50c2c)
