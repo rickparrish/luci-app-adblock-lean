@@ -8,6 +8,7 @@ let m, data;
 
 function cleanValue(value) {
 	// Remove inline comments
+	// TODO This will break if a string value contains a #
 	var hashPos = value.indexOf('#');
 	if (hashPos == 0) {
 		value = '';
@@ -18,7 +19,7 @@ function cleanValue(value) {
 	// Remove quotation marks surrounding string values
 	// From: https://stackoverflow.com/a/18268011
 	if (value.indexOf('"') >= 0) {
-		value = value.trim().replace(/^"+|"+$/g, '');
+		value = value.trim().replace(/^"?|"?$/g, '');
 	}
 
 	return value;
@@ -57,12 +58,17 @@ function parseConfig(config) {
 			// split the data by line
 			.split("\n")
 			// filter comments
-			.filter(row => (row.trim() != '') && !row.trim().startsWith('#'))
+			.filter(row => (row.trim() != '') && !row.trim().startsWith('#') && (row.indexOf('=') > 0))
 			// split each row into key and property
-			.map(row => row.split("="))
+			.map(row => {
+				var equalsPos = row.indexOf('=');
+				var key = row.substring(0, equalsPos);
+				var value = row.substring(equalsPos + 1);
+				return [key.trim(), cleanValue(value)];
+			})
 			// use reduce to assign key-value pairs to a new object
 			// using Array.prototype.reduce
-			.reduce((acc, [key, value]) => (acc[key] = cleanValue(value), acc), {});
+			.reduce((acc, [key, value]) => (acc[key] = value, acc), {});
 
 		// Ensure the expected keys and parsed keys match
 		// TODO This check probably needs to be more nuanced.  What I want to avoid is a situation where
