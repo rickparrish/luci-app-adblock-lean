@@ -3,18 +3,9 @@
 'require form';
 'require fs';
 'require ui';
+"require rpc";
 
 let m, data;
-
-// Result values used by various adblock-lean functions.
-// Values here must match the values in adblock-lean
-var RESULT_DNSMASQ_LOOKUP_FAILED=1;
-var RESULT_DNSMASQ_LOOKUP_QUADZERO=2;
-var RESULT_DNSMASQ_NOT_RUNNING=3;
-var RESULT_NOT_ACTIVE=4;
-var RESULT_UPDATE_CHECK_ERROR=5;
-var RESULT_UPDATE_CHECK_LATEST=6;
-var RESULT_UPDATE_CHECK_OUTDATED=7;
 
 function cleanValue(value) {
 	// Remove inline comments
@@ -34,6 +25,12 @@ function cleanValue(value) {
 
 	return value;
 }
+
+var getStatus = rpc.declare({
+	object: "luci.adblock-lean",
+	method: "getStatus",
+	params: [],
+});
 
 async function handleAction(actionName, actionLabel) {
 	ui.showModal(null, [
@@ -139,7 +136,7 @@ function parseConfig(config) {
 return view.extend({
 	load: function () {
 		return Promise.all([
-			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['luci_status']), ''),
+			L.resolveDefault(getStatus()),
 			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
 		]);
 	},
@@ -248,27 +245,31 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		} else {
 			// Wrap in try..catch so we can warn the user if the luci_status call failed to return valid json
 			try {
-				var json = JSON.parse(arr[0]);
-
 				var status = new form.JSONMap(data, 'AdBlock Lean - Status');
 				s = status.section(form.NamedSection, 'global');
 				s.render = L.bind(async function (view, section_id) {
-					var status_label;
-					switch (json.status) {
-						case 0: status_label = 'Started'; break;
-						case RESULT_DNSMASQ_LOOKUP_FAILED: status_label = 'ERROR: Test domain lookup failed'; break;
-						case RESULT_DNSMASQ_LOOKUP_QUADZERO: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-						case RESULT_DNSMASQ_NOT_RUNNING: status_label = 'ERROR: dnsmasq not running'; break;
-						case RESULT_NOT_ACTIVE: status_label = 'Stopped'; break;
-						default: status_label = 'Unknown'; break;
+					var active_status_label;
+					switch (arr[0].active_status) {
+						case 0: active_status_label = _('Active'); break;
+						case 1: active_status_label = _('Inactive'); break;
+						default: active_status_label = _('Unknown'); break;
+					}
+
+					var dnsmasq_status_label;
+					switch (arr[0].dnsmasq_status) {
+						case 0: dnsmasq_status_label = _('Started'); break;
+						case 1: dnsmasq_status_label = _('Stopped'); break;
+						case 2: dnsmasq_status_label = _('ERROR: Test domain lookup failed'); break;
+						case 3: dnsmasq_status_label = _('ERROR: Test domain resolved to 0.0.0.0'); break;
+						default: dnsmasq_status_label = 'Unknown'; break;
 					}
 
 					var update_status_label;
-					switch (json.update_status) {
-						case RESULT_UPDATE_CHECK_ERROR: update_status_label = 'Error checking'; break;
-						case RESULT_UPDATE_CHECK_LATEST: update_status_label = 'Up to date'; break;
-						case RESULT_UPDATE_CHECK_OUTDATED: update_status_label = 'Update available'; break;
-						default: update_status_label = 'Unknown'; break;
+					switch (arr[0].update_status) {
+						case 0: update_status_label = _('Up to date'); break;
+						case 1: update_status_label = _('Update available'); break;
+						case 2: update_status_label = _('Error checking'); break;
+						default: update_status_label = _('Unknown'); break;
 					}
 
 					var startButton = E('button', {
@@ -277,7 +278,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('start', 'Starting');
 						})
 					}, _('Start'));
-					startButton.disabled = json.status == 0;
+					startButton.disabled = arr[0].active_status == 0;
 
 					var stopButton = E('button', {
 						'class': 'btn cbi-button cbi-button-reset',
@@ -285,7 +286,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('stop', 'Stopping');
 						})
 					}, _('Stop'));
-					stopButton.disabled = json.status != 0;
+					stopButton.disabled = arr[0].active_status != 0;
 
 					return E(
 						"table",
@@ -293,14 +294,16 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 						[
 							E("tr", { class: "tr table-titles" }, [
 								E("th", { class: "th" }, _("Status")),
+								E("th", { class: "th" }, _("dnsmasq status")),
 								E("th", { class: "th" }, _("Blocklist line count")),
 								E("th", { class: "th" }, _("Time since blocklist update")),
 								E("th", { class: "th" }, _("Update status")),
 							]),
 							E("tr", { class: "tr" }, [
-								E("td", { class: "td" }, status_label),
-								E("td", { class: "td" }, json.good_line_count),
-								E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
+								E("td", { class: "td" }, active_status_label),
+								E("td", { class: "td" }, dnsmasq_status_label),
+								E("td", { class: "td" }, arr[0].blocklist_line_count.toLocaleString()),
+								E("td", { class: "td" }, Math.round(arr[0].blocklist_age_s / 3600, 1) + ' hours'),
 								E("td", { class: "td" }, update_status_label),
 							]),
 							E("tr", { class: "tr" }, [

@@ -29,12 +29,6 @@
 				"/etc/init.d/adblock-lean gen_stats": [
 					"exec"
 				],
-				"/etc/init.d/adblock-lean status": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean luci_status": [
-					"exec"
-				],
 				"/etc/init.d/adblock-lean pause": [
 					"exec"
 				],
@@ -46,6 +40,11 @@
 				],
 				"/etc/init.d/adblock-lean update": [
 					"exec"
+				]
+			},
+			"ubus": {
+				"luci.adblock-lean": [
+					"getStatus"
 				]
 			}
 		}

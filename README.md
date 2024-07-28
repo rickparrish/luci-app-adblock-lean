@@ -6,6 +6,8 @@ I've used OpenWrt for a few years, but this is my first experience doing anythin
 
 Source for [luci-app-banip](https://github.com/openwrt/luci/tree/openwrt-23.05/applications/luci-app-banip) was used as a reference for this app.  And by used as a reference, I mean I straight up copy/pasted entire files out of that tree and into mine, with only minor changes to package names/paths/etc!
 
+Source for [luci-app-adblock-fast](https://github.com/openwrt/luci/tree/master/applications/luci-app-adblock-fast) was also used as a reference for the RPC-portion of this app.
+
 # Installation
 
 In all cases, you'll want to log out of the web interface and back in to force a cache refresh after installing the new package.
@@ -21,12 +23,11 @@ scp -r htdocs/* root@192.168.1.1:/www/
 
 # Required adblock-lean tweaks
 
-Modifications to adblock-lean are needed to enable the status reporting features of this app.  Until the changes are merged into the main repo, you can
-download a modified version here: https://raw.githubusercontent.com/rickparrish/adblock-lean/master/adblock-lean
+Modifications to adblock-lean are needed to enable the status reporting features of this app: https://github.com/rickparrish/adblock-lean/blob/status_updates/adblock-lean
 
 # TODO list
 
-- [ ] Start, stop, pause, resume, buttons
+- [ ] Enable, disable, pause, resume, etc, buttons
 
 # Screenshots
 

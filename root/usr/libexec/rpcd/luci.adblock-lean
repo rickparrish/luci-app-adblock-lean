@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# TechRef: https://openwrt.org/docs/techref/rpcd
+# TESTS
+# ubus -v list luci.adblock-lean
+# ubus -S call luci.adblock-lean getStatus
+
+active_status=-1
+dnsmasq_status=-1
+update_status=-1
+blocklist_age_s=-1
+blocklist_line_count=-1
+
+adblockLeanFilename="/etc/init.d/adblock-lean"
+if [ -s "${adblockLeanFilename}" ]; then
+	. "${adblockLeanFilename}"
+	msgs_dest="/dev/null"
+else
+	msgs_dest="/dev/null"
+
+	msg="${adblockLeanFilename} not found"
+	log_msg -err "${msg}";
+	printf "{ \"error\": \"${msg}\" }\n"
+
+	return 1
+fi
+
+get_status() {
+    # Call the status method from the adblock-lean script, which will populate the other variables we need
+	# The result code of the call indicates whether adblock-lean is active or not
+	status
+	active_status=$?
+
+	# good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", so we just want the line count
+	blocklist_line_count=$(echo "${good_line_count}" | head -n1 | awk '{print $1;}')
+
+	# Return a json response
+	printf "{\n"
+	printf "	\"active_status\": ${active_status},\n";
+	printf "	\"dnsmasq_status\": ${dnsmasq_status},\n";
+	printf "	\"update_status\": ${update_status},\n";
+	printf "	\"blocklist_age_s\": ${blocklist_age_s},\n";
+	printf "	\"blocklist_line_count\": ${blocklist_line_count}\n";
+	printf "}\n"
+}
+
+case "$1" in
+	list)
+		printf '{ "getStatus": { } }\n'
+		;;
+	call)
+		case "$2" in
+			getStatus)
+				get_status
+				;;
+		esac
+	;;
+esac

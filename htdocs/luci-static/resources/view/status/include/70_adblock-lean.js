@@ -1,19 +1,16 @@
 "require ui";
 "require fs";
+"require rpc";
 "require baseclass";
 
 var cachedArr = null;
 var cacheSeconds = 0;
 
-// Result values used by various adblock-lean functions.
-// Values here must match the values in adblock-lean
-var RESULT_DNSMASQ_LOOKUP_FAILED=1;
-var RESULT_DNSMASQ_LOOKUP_QUADZERO=2;
-var RESULT_DNSMASQ_NOT_RUNNING=3;
-var RESULT_NOT_ACTIVE=4;
-var RESULT_UPDATE_CHECK_ERROR=5;
-var RESULT_UPDATE_CHECK_LATEST=6;
-var RESULT_UPDATE_CHECK_OUTDATED=7;
+var getStatus = rpc.declare({
+	object: "luci.adblock-lean",
+	method: "getStatus",
+	params: [],
+});
 
 return baseclass.extend({
 	title: _("AdBlock Lean"),
@@ -28,7 +25,7 @@ return baseclass.extend({
 		cacheSeconds = currentSeconds;
 
 		return Promise.all([
-			L.resolveDefault(fs.exec_direct('/etc/init.d/adblock-lean', ['luci_status']), ''),
+			L.resolveDefault(getStatus()),
 			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
 		]);
 	},
@@ -52,24 +49,28 @@ return baseclass.extend({
 
 		// Wrap in try..catch so we can warn the user if the luci_status call failed to return valid json
 		try {
-			var json = JSON.parse(arr[0]);
-				
-			var status_label;
-			switch (json.status) {
-				case 0: status_label = 'Started'; break;
-				case RESULT_DNSMASQ_LOOKUP_FAILED: status_label = 'ERROR: Test domain lookup failed'; break;
-				case RESULT_DNSMASQ_LOOKUP_QUADZERO: status_label = 'ERROR: Test domain resolved to 0.0.0.0'; break;
-				case RESULT_DNSMASQ_NOT_RUNNING: status_label = 'ERROR: dnsmasq not running'; break;
-				case RESULT_NOT_ACTIVE: status_label = 'Stopped'; break;
-				default: status_label = 'Unknown'; break;
+			var active_status_label;
+			switch (arr[0].active_status) {
+				case 0: active_status_label = _('Active'); break;
+				case 1: active_status_label = _('Inactive'); break;
+				default: active_status_label = _('Unknown'); break;
+			}
+
+			var dnsmasq_status_label;
+			switch (arr[0].dnsmasq_status) {
+				case 0: dnsmasq_status_label = _('Started'); break;
+				case 1: dnsmasq_status_label = _('Stopped'); break;
+				case 2: dnsmasq_status_label = _('ERROR: Test domain lookup failed'); break;
+				case 3: dnsmasq_status_label = _('ERROR: Test domain resolved to 0.0.0.0'); break;
+				default: dnsmasq_status_label = 'Unknown'; break;
 			}
 
 			var update_status_label;
-			switch (json.update_status) {
-				case RESULT_UPDATE_CHECK_ERROR: update_status_label = 'Error checking'; break;
-				case RESULT_UPDATE_CHECK_LATEST: update_status_label = 'Up to date'; break;
-				case RESULT_UPDATE_CHECK_OUTDATED: update_status_label = 'Update available'; break;
-				default: update_status_label = 'Unknown'; break;
+			switch (arr[0].update_status) {
+				case 0: update_status_label = _('Up to date'); break;
+				case 1: update_status_label = _('Update available'); break;
+				case 2: update_status_label = _('Error checking'); break;
+				default: update_status_label = _('Unknown'); break;
 			}
 
 			return E(
@@ -78,14 +79,16 @@ return baseclass.extend({
 				[
 					E("tr", { class: "tr table-titles" }, [
 						E("th", { class: "th" }, _("Status")),
+						E("th", { class: "th" }, _("dnsmasq status")),
 						E("th", { class: "th" }, _("Blocklist line count")),
 						E("th", { class: "th" }, _("Time since blocklist update")),
 						E("th", { class: "th" }, _("Update status")),
 					]),
 					E("tr", { class: "tr" }, [
-						E("td", { class: "td" }, status_label),
-						E("td", { class: "td" }, json.good_line_count),
-						E("td", { class: "td" }, Math.round(json.secs_since_blocklist_update / 3600, 1) + ' hours'),
+						E("td", { class: "td" }, active_status_label),
+						E("td", { class: "td" }, dnsmasq_status_label),
+						E("td", { class: "td" }, arr[0].blocklist_line_count.toLocaleString()),
+						E("td", { class: "td" }, Math.round(arr[0].blocklist_age_s / 3600, 1) + ' hours'),
 						E("td", { class: "td" }, update_status_label),
 					]),
 				]
