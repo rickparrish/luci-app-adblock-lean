@@ -5,6 +5,7 @@
 # ubus -v list luci.adblock-lean
 # ubus -S call luci.adblock-lean getStatus
 
+service_enabled=false
 active_status=-1
 dnsmasq_status=-1
 update_status=-1
@@ -26,7 +27,7 @@ else
 fi
 
 get_status() {
-    # Call the status method from the adblock-lean script, which will populate the other variables we need
+	# Call the status method from the adblock-lean script, which will populate the other variables we need
 	# The result code of the call indicates whether adblock-lean is active or not
 	status
 	active_status=$?
@@ -34,8 +35,16 @@ get_status() {
 	# good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", so we just want the line count
 	blocklist_line_count=$(echo "${good_line_count}" | head -n1 | awk '{print $1;}')
 
+	# get enabled/disabled status
+	case $(service 2>/dev/null | grep "adblock-lean") in 
+		*enabled*)
+			service_enabled=true
+			;;
+		esac
+
 	# Return a json response
 	printf "{\n"
+	printf "	\"service_enabled\": ${service_enabled},\n";
 	printf "	\"active_status\": ${active_status},\n";
 	printf "	\"dnsmasq_status\": ${dnsmasq_status},\n";
 	printf "	\"update_status\": ${update_status},\n";

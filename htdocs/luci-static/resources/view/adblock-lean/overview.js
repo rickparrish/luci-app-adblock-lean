@@ -251,14 +251,14 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 					var active_status_label;
 					switch (arr[0].active_status) {
 						case 0: active_status_label = _('Active'); break;
-						case 1: active_status_label = _('Inactive'); break;
+						case 1: active_status_label = _('Not active'); break;
 						default: active_status_label = _('Unknown'); break;
 					}
 
 					var dnsmasq_status_label;
 					switch (arr[0].dnsmasq_status) {
-						case 0: dnsmasq_status_label = _('Started'); break;
-						case 1: dnsmasq_status_label = _('Stopped'); break;
+						case 0: dnsmasq_status_label = _('Running'); break;
+						case 1: dnsmasq_status_label = _('ERROR: Not running'); break;
 						case 2: dnsmasq_status_label = _('ERROR: Test domain lookup failed'); break;
 						case 3: dnsmasq_status_label = _('ERROR: Test domain resolved to 0.0.0.0'); break;
 						default: dnsmasq_status_label = 'Unknown'; break;
@@ -271,6 +271,22 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 						case 2: update_status_label = _('Error checking'); break;
 						default: update_status_label = _('Unknown'); break;
 					}
+
+					var enableButton = E('button', {
+						'class': 'btn cbi-button cbi-button-apply',
+						'click': ui.createHandlerFn(this, function () {
+							return handleAction('enable', 'Enabling');
+						})
+					}, _('Enable'));
+					enableButton.disabled = arr[0].service_enabled;
+
+					var disableButton = E('button', {
+						'class': 'btn cbi-button cbi-button-reset',
+						'click': ui.createHandlerFn(this, function () {
+							return handleAction('disable', 'Disabling');
+						})
+					}, _('Disable'));
+					disableButton.disabled = !arr[0].service_enabled;
 
 					var startButton = E('button', {
 						'class': 'btn cbi-button cbi-button-apply',
@@ -293,6 +309,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 						{ class: "table", id: "adblock-fast_status_table" },
 						[
 							E("tr", { class: "tr table-titles" }, [
+								E("th", { class: "th" }, _("Autostart")),
 								E("th", { class: "th" }, _("Status")),
 								E("th", { class: "th" }, _("dnsmasq status")),
 								E("th", { class: "th" }, _("Blocklist line count")),
@@ -300,6 +317,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 								E("th", { class: "th" }, _("Update status")),
 							]),
 							E("tr", { class: "tr" }, [
+								E("td", { class: "td" }, arr[0].service_enabled ? _('Enabled') : _('Disabled')),
 								E("td", { class: "td" }, active_status_label),
 								E("td", { class: "td" }, dnsmasq_status_label),
 								E("td", { class: "td" }, arr[0].blocklist_line_count.toLocaleString()),
@@ -308,6 +326,13 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							]),
 							E("tr", { class: "tr" }, [
 								E("td", { colspan: "4" }, [
+									enableButton,
+									'\xa0',
+									disableButton,
+									'\xa0',
+									'\xa0',
+									'\xa0',
+									'\xa0',
 									startButton,
 									'\xa0',
 									stopButton,

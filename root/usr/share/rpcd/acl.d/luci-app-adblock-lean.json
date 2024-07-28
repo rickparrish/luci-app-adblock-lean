@@ -20,25 +20,16 @@
 				"exec"
 			],
 			"file": {
+				"/etc/init.d/adblock-lean enable": [
+					"exec"
+				],
+				"/etc/init.d/adblock-lean disable": [
+					"exec"
+				],
 				"/etc/init.d/adblock-lean start": [
 					"exec"
 				],
 				"/etc/init.d/adblock-lean stop": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean gen_stats": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean pause": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean resume": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean check_for_updates": [
-					"exec"
-				],
-				"/etc/init.d/adblock-lean update": [
 					"exec"
 				]
 			},

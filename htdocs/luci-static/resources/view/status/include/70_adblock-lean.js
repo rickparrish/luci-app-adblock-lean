@@ -52,14 +52,14 @@ return baseclass.extend({
 			var active_status_label;
 			switch (arr[0].active_status) {
 				case 0: active_status_label = _('Active'); break;
-				case 1: active_status_label = _('Inactive'); break;
+				case 1: active_status_label = _('Not active'); break;
 				default: active_status_label = _('Unknown'); break;
 			}
 
 			var dnsmasq_status_label;
 			switch (arr[0].dnsmasq_status) {
-				case 0: dnsmasq_status_label = _('Started'); break;
-				case 1: dnsmasq_status_label = _('Stopped'); break;
+				case 0: dnsmasq_status_label = _('Running'); break;
+				case 1: dnsmasq_status_label = _('ERROR: Not running'); break;
 				case 2: dnsmasq_status_label = _('ERROR: Test domain lookup failed'); break;
 				case 3: dnsmasq_status_label = _('ERROR: Test domain resolved to 0.0.0.0'); break;
 				default: dnsmasq_status_label = 'Unknown'; break;
@@ -78,6 +78,7 @@ return baseclass.extend({
 				{ class: "table", id: "adblock-fast_status_table" },
 				[
 					E("tr", { class: "tr table-titles" }, [
+						E("th", { class: "th" }, _("Autostart")),
 						E("th", { class: "th" }, _("Status")),
 						E("th", { class: "th" }, _("dnsmasq status")),
 						E("th", { class: "th" }, _("Blocklist line count")),
@@ -85,6 +86,7 @@ return baseclass.extend({
 						E("th", { class: "th" }, _("Update status")),
 					]),
 					E("tr", { class: "tr" }, [
+						E("td", { class: "td" }, arr[0].service_enabled ? _('Enabled') : _('Disabled')),
 						E("td", { class: "td" }, active_status_label),
 						E("td", { class: "td" }, dnsmasq_status_label),
 						E("td", { class: "td" }, arr[0].blocklist_line_count.toLocaleString()),
