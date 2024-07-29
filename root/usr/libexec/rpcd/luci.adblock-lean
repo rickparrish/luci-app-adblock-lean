@@ -5,12 +5,12 @@
 # ubus -v list luci.adblock-lean
 # ubus -S call luci.adblock-lean getStatus
 
-service_enabled=false
-active_status=-1
-dnsmasq_status=-1
-update_status=-1
-blocklist_age_s=-1
-blocklist_line_count=-1
+luci_service_enabled=false
+luci_active_status=-1
+luci_dnsmasq_status=-1
+luci_update_status=-1
+luci_blocklist_age_s=-1
+luci_good_line_count=-1
 
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "${adblockLeanFilename}" ]; then
@@ -30,26 +30,33 @@ get_status() {
 	# Call the status method from the adblock-lean script, which will populate the other variables we need
 	# The result code of the call indicates whether adblock-lean is active or not
 	status
-	active_status=$?
+	luci_active_status=$?
 
-	# good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", so we just want the line count
-	blocklist_line_count=$(echo "${good_line_count}" | head -n1 | awk '{print $1;}')
+	# Get additional details if the dnsmasq checks passed
+	if [ "$luci_dnsmasq_status" = 0 ]
+	then
+		# luci_good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", and we just want the line count
+		luci_good_line_count=$(echo "${luci_good_line_count}" | head -n1 | awk '{print $1;}')
+
+		# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
+		luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
+	fi
 
 	# get enabled/disabled status
 	case $(service 2>/dev/null | grep "adblock-lean") in 
 		*enabled*)
-			service_enabled=true
+			luci_service_enabled=true
 			;;
 		esac
 
 	# Return a json response
 	printf "{\n"
-	printf "	\"service_enabled\": ${service_enabled},\n";
-	printf "	\"active_status\": ${active_status},\n";
-	printf "	\"dnsmasq_status\": ${dnsmasq_status},\n";
-	printf "	\"update_status\": ${update_status},\n";
-	printf "	\"blocklist_age_s\": ${blocklist_age_s},\n";
-	printf "	\"blocklist_line_count\": ${blocklist_line_count}\n";
+	printf "	\"service_enabled\": ${luci_service_enabled},\n";
+	printf "	\"active_status\": ${luci_active_status},\n";
+	printf "	\"dnsmasq_status\": ${luci_dnsmasq_status},\n";
+	printf "	\"update_status\": ${luci_update_status},\n";
+	printf "	\"blocklist_age_s\": ${luci_blocklist_age_s},\n";
+	printf "	\"blocklist_line_count\": ${luci_good_line_count}\n";
 	printf "}\n"
 }
 
