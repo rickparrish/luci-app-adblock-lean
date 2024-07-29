@@ -7,6 +7,43 @@
 
 let m, data;
 
+var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/';
+var hageziBlocklists = [
+	{ filename: 'light.txt', name: 'Multi LIGHT' },
+	{ filename: 'multi.txt', name: 'Multi NORMAL' },
+	{ filename: 'pro.txt', name: 'Multi PRO' },
+	{ filename: 'pro.mini.txt', name: 'Multi PRO mini' },
+	{ filename: 'pro.plus.txt', name: 'Multi Multi PRO++' },
+	{ filename: 'pro.plus.mini.txt', name: 'Multi PRO++ mini ' },
+	{ filename: 'ultimate.txt', name: 'Multi ULTIMATE' },
+	{ filename: 'ultimate.mini.txt', name: 'Multi ULTIMATE mini ' },
+	{ filename: 'fake.txt', name: 'Fake' },
+	{ filename: 'popupads.txt', name: 'Pop-Up Ads' },
+	{ filename: 'tif.txt', name: 'Threat Intelligence Feeds' },
+	{ filename: 'tif.medium.txt', name: 'Threat Intelligence Feeds - Medium' },
+	{ filename: 'tif.mini.txt', name: 'Threat Intelligence Feeds - Mini' },
+	{ filename: 'tif-ips.txt', name: 'Threat Intelligence Feeds - IPs' },
+	{ filename: 'doh-vpn-proxy-bypass.txt', name: 'DoH/VPN/TOR/Proxy Bypass' },
+	{ filename: 'doh.txt', name: 'Encrypted DNS Servers' },
+	{ filename: 'nosafesearch.txt', name: 'Safesearch not supported' },
+	{ filename: 'dyndns.txt', name: 'Dynamic DNS' },
+	{ filename: 'hoster.txt', name: 'Badware Hoster' },
+	{ filename: 'anti.piracy.txt', name: 'Anti Piracy' },
+	{ filename: 'gambling.txt', name: 'Gambling' },
+	{ filename: 'gambling.medium.txt', name: 'Gambling - Medium' },
+	{ filename: 'gambling.mini.txt', name: 'Gambling - Mini' },
+	{ filename: 'native.amazon.txt', name: 'Native Tracker - Amazon' },
+	{ filename: 'native.apple.txt', name: 'Native Tracker - Apple' },
+	{ filename: 'native.huawei.txt', name: 'Native Tracker - Huawei' },
+	{ filename: 'native.winoffice.txt', name: 'Native Tracker - Microsoft' },
+	{ filename: 'native.tiktok.txt', name: 'Native Tracker - TikTok' },
+	{ filename: 'native.tiktok.extended.txt', name: 'Native Tracker - TikTok Aggressive' },
+	{ filename: 'native.lgwebos.txt', name: 'Native Tracker - LG webOS' },
+	{ filename: 'native.vivo.txt', name: 'Native Tracker - Vivo' },
+	{ filename: 'native.oppo-realme.txt', name: 'Native Tracker - OPPO/Realme' },
+	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiomi' },
+];
+
 function cleanValue(value) {
 	// Remove inline comments
 	// TODO This will break if a string value contains a #
@@ -62,8 +99,8 @@ function parseConfig(config) {
 	// Default configuration options
 	var obj = {
 		'blocklist_urls': [
-			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt',
-			'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.mini.txt'
+			hageziBaseUrl + 'pro.txt',
+			hageziBaseUrl + 'tif.mini.txt'
 		],
 		'allowlist_urls': [
 		],
@@ -127,6 +164,18 @@ function parseConfig(config) {
 		// *_urls need to be an array, not a space-separated string
 		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
 		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
+
+		// We have a friendly Hagezi Blocklists multi-select, so we need to split those in blocklist_urls into hagezi_blocklists
+		obj.hagezi_blocklists = [];
+		var nonHageziBlocklists = [];
+		for (var i = 0; i < obj.blocklist_urls.length; i++) {
+			if (obj.blocklist_urls[i].startsWith(hageziBaseUrl)) {
+				obj.hagezi_blocklists.push(obj.blocklist_urls[i]);
+			} else {
+				nonHageziBlocklists.push(obj.blocklist_urls[i]);
+			}
+		}
+		obj.blocklist_urls = nonHageziBlocklists;
 	}
 
 	// Set the data variable in the format needed by form.JSONMap()
@@ -151,10 +200,30 @@ return view.extend({
 		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
 		m.save(function() { /* do nothing */ }, true)
 			.then((result) => {
+				// Marge the hagezi blocklist and other blocklist selections into one array
+				var combined_blocklist_urls = [];
+				if (data.config.hagezi_blocklists) {
+					for (var i = 0; i < data.config.hagezi_blocklists.length; i++) {
+						combined_blocklist_urls.push(data.config.hagezi_blocklists[i]);
+					}
+				}
+				if (data.config.blocklist_urls) {
+					for (var i = 0; i < data.config.blocklist_urls.length; i++) {
+						combined_blocklist_urls.push(data.config.blocklist_urls[i]);
+					}
+				}
+
+				// Abort if user did not select or enter at least one blocklist
+				if (combined_blocklist_urls.length == 0) {
+					document.body.scrollTop = document.documentElement.scrollTop = 0;
+					ui.addNotification(null, E('p', _('Unable to save modifications: Must select or provide at least one blocklist')), 'error');
+					return;
+				}
+
 				var config = '# adblock-lean configuration options\n\
 \n\
 # One or more dnsmasq blocklist urls separated by spaces\n\
-blocklist_urls="' + (data.config.blocklist_urls ?? []).join(' ') + '"\n\
+blocklist_urls="' + combined_blocklist_urls.join(' ') + '"\n\
 \n\
 # One or more allowlist urls separated by spaces\n\
 allowlist_urls="' + (data.config.allowlist_urls ?? []).join(' ') + '"\n\
@@ -361,7 +430,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		// Setup the form inputs for each config option
 		data = parseConfig(arr[1]);
 		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
-			For further information please check the <a style="color:#37c;font-weight:bold;" href="https://github.com/lynxthecat/adblock-lean" target="_blank" rel="noreferrer noopener" >online documentation</a>'));
+			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
 		/*
 			tabbed config section
@@ -375,13 +444,30 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 			general tab
 		*/
 		o = s.taboption(
+			'general', 
+			form.MultiValue, 
+			'hagezi_blocklists', 
+			_('Hagezi blocklists'),
+			_('dnsmasq blocklists provided by hagezi. \
+				For blocklist information, please check the <a style="font-weight: bold;" href="https://github.com/hagezi/dns-blocklists/blob/main/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>')
+		);
+		o.optional = true;
+		o.retain = true;
+		o.rmempty = false;
+
+		for (var i = 0; i < hageziBlocklists.length; i++) {
+			var blocklist = hageziBlocklists[i];
+			o.value(hageziBaseUrl + blocklist.filename, blocklist.name);
+		}
+
+		o = s.taboption(
 			'general',
 			form.DynamicList,
 			'blocklist_urls',
-			_('Blocklist Urls'),
-			_('One or more dnsmasq blocklist urls')
+			_('Other blocklist urls'),
+			_('dnsmasq blocklist urls')
 		);
-		o.optional = false;
+		o.optional = true;
 		o.retain = true;
 		o.rmempty = false;
 
@@ -389,8 +475,8 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 			'general',
 			form.DynamicList,
 			'allowlist_urls',
-			_('Allowlist Urls'),
-			_('Zero or more dnsmasq allowlist urls')
+			_('Allowlist urls'),
+			_('dnsmasq allowlist urls')
 		);
 		o.optional = true;
 		o.retain = true;
