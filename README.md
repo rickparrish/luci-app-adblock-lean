@@ -29,8 +29,6 @@ Modifications to adblock-lean are needed to enable the status reporting features
 
 - [ ] Enable, disable, pause, resume, etc, buttons
 
-# Screenshots
+# Screenshot
 
-![image](https://github.com/user-attachments/assets/c2c57da9-af64-48c7-a6cc-72d40f49c12b)
-
-![image](https://github.com/user-attachments/assets/418ab06e-6324-463e-8322-613eecc50c2c)
+![image](https://github.com/user-attachments/assets/307e2a1b-830b-4400-9a7c-6ae0ba0f636b)
