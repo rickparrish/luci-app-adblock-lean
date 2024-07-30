@@ -13,7 +13,7 @@ var hageziBlocklists = [
 	{ filename: 'multi.txt', name: 'Multi NORMAL' },
 	{ filename: 'pro.txt', name: 'Multi PRO' },
 	{ filename: 'pro.mini.txt', name: 'Multi PRO mini' },
-	{ filename: 'pro.plus.txt', name: 'Multi Multi PRO++' },
+	{ filename: 'pro.plus.txt', name: 'Multi PRO++' },
 	{ filename: 'pro.plus.mini.txt', name: 'Multi PRO++ mini ' },
 	{ filename: 'ultimate.txt', name: 'Multi ULTIMATE' },
 	{ filename: 'ultimate.mini.txt', name: 'Multi ULTIMATE mini ' },
