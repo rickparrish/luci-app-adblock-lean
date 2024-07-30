@@ -312,16 +312,17 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 					and click <strong>Save</strong> to configure AdBlock Lean now.')
 			), 'info');
 		} else {
-			// Wrap in try..catch so we can warn the user if the luci_status call failed to return valid json
+			// Wrap in try..catch so we can warn the user if the getStatus call failed to return valid json
 			try {
 				var status = new form.JSONMap(data, 'AdBlock Lean - Status');
 				s = status.section(form.NamedSection, 'global');
 				s.render = L.bind(async function (view, section_id) {
-					var active_status_label;
-					switch (arr[0].active_status) {
-						case 0: active_status_label = _('Active'); break;
-						case 1: active_status_label = _('Not active'); break;
-						default: active_status_label = _('Unknown'); break;
+					var service_status_label;
+					switch (arr[0].service_status) {
+						case 0: service_status_label = _('Enabled'); break;
+						case 1: service_status_label = _('Disabled'); break;
+						case 2: service_status_label = _('Not installed'); break;
+						default: service_status_label = _('Unknown'); break;
 					}
 
 					var dnsmasq_status_label;
@@ -331,6 +332,13 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 						case 2: dnsmasq_status_label = _('ERROR: Test domain lookup failed'); break;
 						case 3: dnsmasq_status_label = _('ERROR: Test domain resolved to 0.0.0.0'); break;
 						default: dnsmasq_status_label = 'Unknown'; break;
+					}
+
+					var blocklist_status_label;
+					switch (arr[0].blocklist_status) {
+						case 0: blocklist_status_label = _('Active'); break;
+						case 1: blocklist_status_label = _('Not active'); break;
+						default: blocklist_status_label = _('Unknown'); break;
 					}
 
 					var update_status_label;
@@ -347,7 +355,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('enable', 'Enabling');
 						})
 					}, _('Enable'));
-					enableButton.disabled = arr[0].service_enabled;
+					enableButton.disabled = arr[0].service_status == 2 || arr[0].service_status == 0; // 2 = Not installed, 0 = Enabled
 
 					var disableButton = E('button', {
 						'class': 'btn cbi-button cbi-button-reset',
@@ -355,7 +363,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('disable', 'Disabling');
 						})
 					}, _('Disable'));
-					disableButton.disabled = !arr[0].service_enabled;
+					disableButton.disabled = arr[0].service_status == 2 || arr[0].service_status == 1; // 2 = Not installed, 1 = Disabled
 
 					var startButton = E('button', {
 						'class': 'btn cbi-button cbi-button-apply',
@@ -363,7 +371,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('start', 'Starting');
 						})
 					}, _('Start'));
-					startButton.disabled = arr[0].active_status == 0;
+					startButton.disabled = arr[0].service_status == 2 || arr[0].blocklist_status == 0; // 2 = Not installed, 0 = Active
 
 					var stopButton = E('button', {
 						'class': 'btn cbi-button cbi-button-reset',
@@ -371,24 +379,24 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 							return handleAction('stop', 'Stopping');
 						})
 					}, _('Stop'));
-					stopButton.disabled = arr[0].active_status != 0;
+					stopButton.disabled = arr[0].service_status == 2 || arr[0].blocklist_status == 1; // 2 = Not installed, 1 = Not active
 
 					return E(
 						"table",
 						{ class: "table", id: "adblock-fast_status_table" },
 						[
 							E("tr", { class: "tr table-titles" }, [
-								E("th", { class: "th" }, _("Autostart")),
-								E("th", { class: "th" }, _("Status")),
+								E("th", { class: "th" }, _("Service status")),
 								E("th", { class: "th" }, _("dnsmasq status")),
+								E("th", { class: "th" }, _("Blocklist status")),
 								E("th", { class: "th" }, _("Blocklist line count")),
 								E("th", { class: "th" }, _("Time since blocklist update")),
 								E("th", { class: "th" }, _("Update status")),
 							]),
 							E("tr", { class: "tr" }, [
-								E("td", { class: "td" }, arr[0].service_enabled ? _('Enabled') : _('Disabled')),
-								E("td", { class: "td" }, active_status_label),
+								E("td", { class: "td" }, service_status_label),
 								E("td", { class: "td" }, dnsmasq_status_label),
+								E("td", { class: "td" }, blocklist_status_label),
 								E("td", { class: "td" }, arr[0].blocklist_line_count.toLocaleString()),
 								E("td", { class: "td" }, Math.round(arr[0].blocklist_age_s / 3600, 1) + ' hours'),
 								E("td", { class: "td" }, update_status_label),
@@ -414,7 +422,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 			} catch (err) {
 				console.log({arr, err});
 
-				// The most likely cause for entering this catch is that luci_status failed to run, and the most likely reason
+				// The most likely cause for entering this catch is that getStatus failed to run, and the most likely reason
 				// for that is because the config file is malformed.  One such cause is the user entering a report_failure
 				// or report_success without escaping special character correctly, so we'll tell them to go take a look at
 				// the raw config file and fix as needed.

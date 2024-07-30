@@ -5,58 +5,60 @@
 # ubus -v list luci.adblock-lean
 # ubus -S call luci.adblock-lean getStatus
 
-luci_service_enabled=false
-luci_active_status=-1
-luci_dnsmasq_status=-1
-luci_update_status=-1
-luci_blocklist_age_s=-1
+luci_service_status=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
+luci_dnsmasq_status=-1		# 0 = Running, 1 = Not running, 2 = Test lookup failed, 3 = Test lookup returned 0.0.0.0
+luci_blocklist_status=-1	# 0 = Active, 1 = Not active
 luci_good_line_count=-1
+luci_blocklist_age_s=-1
+luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
 
 adblockLeanFilename="/etc/init.d/adblock-lean"
-if [ -s "${adblockLeanFilename}" ]; then
-	. "${adblockLeanFilename}"
+if [ -s "$adblockLeanFilename" ]; then
+	. "$adblockLeanFilename"
 	msgs_dest="/dev/null"
 else
 	msgs_dest="/dev/null"
-
-	msg="${adblockLeanFilename} not found"
-	log_msg -err "${msg}";
-	printf "{ \"error\": \"${msg}\" }\n"
-
-	return 1
+	luci_service_status=2
 fi
 
 get_status() {
-	# Call the status method from the adblock-lean script, which will populate the other variables we need
-	# The result code of the call indicates whether adblock-lean is active or not
-	status
-	luci_active_status=$?
-
-	# Get additional details if the dnsmasq checks passed
-	if [ "$luci_dnsmasq_status" = 0 ]
+	# Skip status processing if the adblock-lean service is not installed (ie /etc/init.d/adblock-lean does not exist)
+	if [ "$luci_service_status" != 2 ]
 	then
-		# luci_good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", and we just want the line count
-		luci_good_line_count=$(echo "${luci_good_line_count}" | head -n1 | awk '{print $1;}')
+		# Call the status method from the adblock-lean script, which will populate the other variables we need
+		# The result code of the call indicates whether adblock-lean is active or not
+		status
+		luci_blocklist_status=$?
 
-		# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
-		luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
-	fi
+		# Get additional details if the dnsmasq checks passed
+		if [ "$luci_dnsmasq_status" = 0 ]
+		then
+			# luci_good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", and we just want the line count
+			luci_good_line_count=$(echo "${luci_good_line_count}" | head -n1 | awk '{print $1;}')
 
-	# get enabled/disabled status
-	case $(service 2>/dev/null | grep "adblock-lean") in 
-		*enabled*)
-			luci_service_enabled=true
-			;;
+			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
+			luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
+		fi
+
+		# get enabled/disabled status
+		case $(service 2>/dev/null | grep "adblock-lean") in 
+			*disabled*)
+				luci_service_status=1
+				;;
+			*enabled*)
+				luci_service_status=0
+				;;
 		esac
+	fi
 
 	# Return a json response
 	printf "{\n"
-	printf "	\"service_enabled\": ${luci_service_enabled},\n";
-	printf "	\"active_status\": ${luci_active_status},\n";
+	printf "	\"service_status\": ${luci_service_status},\n";
 	printf "	\"dnsmasq_status\": ${luci_dnsmasq_status},\n";
-	printf "	\"update_status\": ${luci_update_status},\n";
+	printf "	\"blocklist_status\": ${luci_blocklist_status},\n";
+	printf "	\"blocklist_line_count\": ${luci_good_line_count},\n";
 	printf "	\"blocklist_age_s\": ${luci_blocklist_age_s},\n";
-	printf "	\"blocklist_line_count\": ${luci_good_line_count}\n";
+	printf "	\"update_status\": ${luci_update_status}\n";
 	printf "}\n"
 }
 

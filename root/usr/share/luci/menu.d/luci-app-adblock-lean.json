@@ -8,10 +8,7 @@
 		"depends": {
 			"acl": [
 				"luci-app-adblock-lean"
-			],
-			"fs": {
-				"/etc/init.d/adblock-lean": "executable"
-			}
+			]
 		}
 	},
 	"admin/services/adblock-lean/overview": {
