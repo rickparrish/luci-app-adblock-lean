@@ -300,13 +300,6 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 
 		if (arr[1] == '') {
 			// Display a message saying config doesn't exist yet
-			// var status = new form.JSONMap(data, 'AdBlock Lean - Status');
-			// s = status.section(form.NamedSection, 'global');
-			// s.render = L.bind(async function (view, section_id) {
-			// 	E('p', { style: "color: red;" },
-			// 		_('Your AdBlock Lean configuration file does not exist.  Review the options below \
-			// 			and click <strong>Save</strong> to configure AdBlock Lean now.'))
-			// }, o, this);
 			ui.addNotification(null, E('p', 
 				_('Your AdBlock Lean configuration file does not exist.  Review the options below \
 					and click <strong>Save</strong> to configure AdBlock Lean now.')
