@@ -183,11 +183,10 @@ function parseConfig(config) {
 }
 
 return view.extend({
-	load: function () {
-		return Promise.all([
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
-		]);
-	},
+	handleReset: null,
+
+	handleSaveApply: null,
+
 	handleSave: function (ev) {
 		// Remove any existing notifications
 		var notifications = document.getElementsByClassName("alert-message");
@@ -293,6 +292,13 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(error.message)), 'error');
 			});
 	},
+
+	load: function () {
+		return Promise.all([
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
+		]);
+	},
+
 	render: function (arr) {
 		let s, o;
 		var status;
@@ -648,6 +654,4 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 			return m.render();
 		}
 	},
-	handleSaveApply: null,
-	handleReset: null
 });

@@ -14,6 +14,7 @@ var getStatus = rpc.declare({
 
 return baseclass.extend({
 	title: _("AdBlock Lean"),
+
 	load: function () {
 		// Check if it's been 5 minutes since the last check
 		// This is because a status check downloads the adblock-lean script to see if an update is avaialble,
@@ -29,6 +30,7 @@ return baseclass.extend({
 			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
 		]);
 	},
+	
 	render: function (arr) {
 		// Save arr to cachedArr if we have a new arr (ie first call, or 5 minutes since last call)
 		// Or load the cachedArr into arr if we don't have a new arr (ie not been five minutes since previous call)

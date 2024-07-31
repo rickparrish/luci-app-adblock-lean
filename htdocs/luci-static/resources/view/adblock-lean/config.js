@@ -4,12 +4,10 @@
 'require ui';
 
 return view.extend({
-	load: function () {
-		return Promise.all([
-			L.resolveDefault(fs.stat('/root/adblock-lean/config'), {}),
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
-		]);
-	},
+	handleReset: null,
+
+	handleSaveApply: null,
+
 	handleSave: function (ev) {
 		// Remove any existing notifications
 		var notifications = document.getElementsByClassName("alert-message");
@@ -28,6 +26,14 @@ return view.extend({
 				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
 			});
 	},
+
+	load: function () {
+		return Promise.all([
+			L.resolveDefault(fs.stat('/root/adblock-lean/config'), {}),
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
+		]);
+	},
+
 	render: function (arr) {
 		return E([
 			E('p', {},
@@ -44,6 +50,4 @@ return view.extend({
 			)
 		]);
 	},
-	handleSaveApply: null,
-	handleReset: null
 });

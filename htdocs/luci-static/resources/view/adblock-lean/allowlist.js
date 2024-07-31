@@ -4,12 +4,8 @@
 'require ui';
 
 return view.extend({
-	load: function () {
-		return Promise.all([
-			L.resolveDefault(fs.stat('/root/adblock-lean/allowlist'), {}),
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/allowlist'), '')
-		]);
-	},
+	handleReset: null,
+
 	handleSave: function (ev) {
 		// Remove any existing notifications
 		var notifications = document.getElementsByClassName("alert-message");
@@ -28,6 +24,16 @@ return view.extend({
 				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
 			});
 	},
+
+	handleSaveApply: null,
+
+	load: function () {
+		return Promise.all([
+			L.resolveDefault(fs.stat('/root/adblock-lean/allowlist'), {}),
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/allowlist'), '')
+		]);
+	},
+	
 	render: function (allowlist) {
 		if (allowlist[0].size >= 100000) {
 			document.body.scrollTop = document.documentElement.scrollTop = 0;
@@ -47,6 +53,4 @@ return view.extend({
 			)
 		]);
 	},
-	handleSaveApply: null,
-	handleReset: null
 });
