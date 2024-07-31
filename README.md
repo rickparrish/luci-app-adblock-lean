@@ -23,11 +23,7 @@ scp -r htdocs/* root@192.168.1.1:/www/
 
 # Required adblock-lean tweaks
 
-Modifications to adblock-lean are needed to enable the status reporting features of this app: https://github.com/rickparrish/adblock-lean/blob/status_updates/adblock-lean
-
-# TODO list
-
-- [ ] Enable, disable, pause, resume, etc, buttons
+As of July 30, 2024, luci-app-adblock-lean is compatable with the stock adblock-lean and does not require any modifications.
 
 # Screenshot
 
