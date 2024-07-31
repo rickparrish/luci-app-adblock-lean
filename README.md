@@ -27,4 +27,4 @@ As of July 30, 2024, luci-app-adblock-lean is compatable with the stock adblock-
 
 # Screenshot
 
-![image](https://github.com/user-attachments/assets/307e2a1b-830b-4400-9a7c-6ae0ba0f636b)
+![image](https://github.com/user-attachments/assets/a296519b-69f6-4ded-bc99-9f3bf9ad787e)
