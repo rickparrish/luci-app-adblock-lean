@@ -1,6 +1,5 @@
 'require baseclass';
 'require fs';
-'require ui';
 'require adblock-lean.status as abls';
 
 var lastLoad = 0;

@@ -1,9 +1,8 @@
 'use strict';
-'require view';
 'require form';
 'require fs';
 'require ui';
-'require rpc';
+'require view';
 'require adblock-lean.status as abls';
 
 let m, data;

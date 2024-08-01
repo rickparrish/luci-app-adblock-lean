@@ -1,7 +1,7 @@
 'use strict';
-'require view';
 'require fs';
 'require ui';
+'require view';
 
 return view.extend({
 	handleReset: null,
