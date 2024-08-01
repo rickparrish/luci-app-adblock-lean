@@ -1,56 +1,11 @@
 'use strict';
-'require fs';
-'require ui';
-'require view';
+'require adblock-lean.fileeditor as ablfe';
 
-return view.extend({
-	handleReset: null,
+return ablfe.fileEditor.extend({
+	doLowercase: true,
+	
+	filename: 'blocklist',
 
-	handleSave: function (ev) {
-		// Remove any existing notifications
-		var notifications = document.getElementsByClassName("alert-message");
-		for (var i = 0; i < notifications.length; i++) {
-			notifications[i].style.display = 'none';
-		}
-
-		let value = ((document.querySelector('textarea').value || '').trim().toLowerCase().replace(/\r\n/g, '\n')) + '\n';
-		return fs.write('/root/adblock-lean/blocklist', value)
-			.then(function () {
-				document.querySelector('textarea').value = value;
-				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				ui.addNotification(null, E('p', _('Blocklist modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
-			}).catch(function (e) {
-				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
-			});
-	},
-
-	handleSaveApply: null,
-
-	load: function () {
-		return Promise.all([
-			L.resolveDefault(fs.stat('/root/adblock-lean/blocklist'), {}),
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/blocklist'), '')
-		]);
-	},
-
-	render: function (loadData) {
-		if (loadData[0].size >= 100000) {
-			document.body.scrollTop = document.documentElement.scrollTop = 0;
-			ui.addNotification(null, E('p', _('The blocklist is too big, unable to save modifications.')), 'error');
-		}
-		return E([
-			E('p', {},
-				_('This is the local adblock-lean blocklist that will prevent certain domain names.<br /> \
-				<em><b>Please note:</b></em> add only exactly one domain name per line.')),
-			E('p', {},
-				E('textarea', {
-					'style': 'width: 100% !important; padding: 5px; font-family: monospace',
-					'spellcheck': 'false',
-					'wrap': 'off',
-					'rows': 25
-				}, [loadData[1] ?? ''])
-			)
-		]);
-	},
+	instructions: _('This is the local adblock-lean blocklist that will reject certain domain names.<br /> \
+		<em><b>Please note:</b></em> add only exactly one domain name per line.'),
 });
