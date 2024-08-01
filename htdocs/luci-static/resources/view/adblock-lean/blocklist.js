@@ -34,8 +34,8 @@ return view.extend({
 		]);
 	},
 
-	render: function (blocklist) {
-		if (blocklist[0].size >= 100000) {
+	render: function (loadData) {
+		if (loadData[0].size >= 100000) {
 			document.body.scrollTop = document.documentElement.scrollTop = 0;
 			ui.addNotification(null, E('p', _('The blocklist is too big, unable to save modifications.')), 'error');
 		}
@@ -49,7 +49,7 @@ return view.extend({
 					'spellcheck': 'false',
 					'wrap': 'off',
 					'rows': 25
-				}, [blocklist[1] ?? ''])
+				}, [loadData[1] ?? ''])
 			)
 		]);
 	},

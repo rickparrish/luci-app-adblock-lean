@@ -34,7 +34,7 @@ return view.extend({
 		]);
 	},
 
-	render: function (arr) {
+	render: function (loadData) {
 		return E([
 			E('p', {},
 				_('This is the local adblock-lean config file, /root/adblock-lean/config<br /> \
@@ -46,7 +46,7 @@ return view.extend({
 					'spellcheck': 'false',
 					'wrap': 'off',
 					'rows': 25
-				}, [arr[1] ?? ''])
+				}, [loadData[1] ?? ''])
 			)
 		]);
 	},
