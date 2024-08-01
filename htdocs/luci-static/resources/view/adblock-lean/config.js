@@ -6,8 +6,6 @@
 return view.extend({
 	handleReset: null,
 
-	handleSaveApply: null,
-
 	handleSave: function (ev) {
 		// Remove any existing notifications
 		var notifications = document.getElementsByClassName("alert-message");
@@ -26,6 +24,8 @@ return view.extend({
 				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
 			});
 	},
+
+	handleSaveApply: null,
 
 	load: function () {
 		return Promise.all([
