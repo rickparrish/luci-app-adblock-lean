@@ -3,7 +3,8 @@
 'require form';
 'require fs';
 'require ui';
-"require rpc";
+'require rpc';
+'require adblock-lean.status as abls';
 
 let m, data;
 
@@ -61,23 +62,6 @@ function cleanValue(value) {
 	}
 
 	return value;
-}
-
-var getStatus = rpc.declare({
-	object: "luci.adblock-lean",
-	method: "getStatus",
-	params: [],
-});
-
-async function handleAction(actionName, actionLabel) {
-	ui.showModal(null, [
-		E("p",
-			{ class: "spinning" },
-			_(actionLabel + " AdBlock Lean")
-		),
-	]);
-	await fs.exec_direct('/etc/init.d/adblock-lean', [actionName]);
-	location.reload();
 }
 
 function joinWithSemicolon(text) {
@@ -299,157 +283,24 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		]);
 	},
 
-	render: function (arr) {
+	render: function (loadData) {
 		let s, o;
 		var status;
 
-		if (arr[0] == '') {
+		if (loadData[0] == '') {
 			// Display a message saying config doesn't exist yet
-			ui.addNotification(null, E('p', 
+			ui.addNotification(null, E('p',
 				_('Your AdBlock Lean configuration file does not exist.  Review the options below \
 					and click <strong>Save</strong> to configure AdBlock Lean now.')
 			), 'info');
 		} else {
-			// Wrap in try..catch so we can warn the user if the getStatus call failed to return valid json
-			try {
-				status = new form.JSONMap(data, 'AdBlock Lean - Status');
-				s = status.section(form.NamedSection, 'global');
-				s.render = L.bind(async function (view, section_id) {
-					return E('div', { 'class': 'cbi-section' }, [
-						E('div', { 'class': 'cbi-value' }, [
-							E('label', { 'class': 'cbi-value-title', 'style': 'margin-bottom:-5px;font-weight:bold;padding-top:0rem;' }, _('Service Status')),
-							E('div', { 'class': 'cbi-value-field spinning', 'id': 'service-status', 'style': 'margin-bottom:-5px;color:#37c;font-weight:bold;' }, '\xa0')
-						]),
-						E('div', { 'class': 'cbi-value' }, [
-							E('label', { 'class': 'cbi-value-title', 'style': 'margin-bottom:-5px;font-weight:bold;padding-top:0rem;' }, _('Blocklist Status')),
-							E('div', { 'class': 'cbi-value-field', 'id': 'blocklist-status', 'style': 'margin-bottom:-5px;color:#37c;font-weight:bold;' }, '-')
-						]),
-						E('div', { 'class': 'cbi-value' }, [
-							E('label', { 'class': 'cbi-value-title', 'style': 'margin-bottom:-5px;font-weight:bold;padding-top:0rem;' }, _('dnsmasq Status')),
-							E('div', { 'class': 'cbi-value-field', 'id': 'dnsmasq-status', 'style': 'margin-bottom:-5px;color:#37c;font-weight:bold;' }, '-')
-						]),
-						E('div', { 'class': 'cbi-value' }, [
-							E('label', { 'class': 'cbi-value-title', 'style': 'margin-bottom:-5px;font-weight:bold;padding-top:0rem;' }, _('Update Status')),
-							E('div', { 'class': 'cbi-value-field', 'id': 'update-status', 'style': 'margin-bottom:-5px;color:#37c;font-weight:bold;' }, '-')
-						]),
-						E('div', { class: 'right' }, [
-							E('button', {
-								'id': 'enable-button',
-								'class': 'btn cbi-button cbi-button-positive',
-								'disabled': 'disabled',
-								'click': ui.createHandlerFn(this, function () {
-									return handleAction('enable', 'Enabling');
-								})
-							}, [_('Enable Service')]),
-							'\xa0',
-							E('button', {
-								'id': 'disable-button',
-								'class': 'btn cbi-button cbi-button-negative',
-								'disabled': 'disabled',
-								'click': ui.createHandlerFn(this, function () {
-									return handleAction('disable', 'Disabling');
-								})
-							}, [_('Disable Service')]),
-							'\xa0',
-							'\xa0',
-							'\xa0',
-							'\xa0',
-							E('button', {
-								'id': 'start-button',
-								'class': 'btn cbi-button cbi-button-positive',
-								'disabled': 'disabled',
-								'click': ui.createHandlerFn(this, function () {
-									return handleAction('start', 'Activating');
-								})
-							}, [_('Activate Blocklist')]),
-							'\xa0',
-							E('button', {
-								'id': 'stop-button',
-								'class': 'btn cbi-button cbi-button-negative',
-								'disabled': 'disabled',
-								'click': ui.createHandlerFn(this, function () {
-									return handleAction('stop', 'Deactivating');
-								})
-							}, [_('Deactivate Blocklist')]),
-							'\xa0'
-						])
-					]);
-				}, o, this);
-
-				L.resolveDefault(getStatus())
-					.then(function (result) {
-						var service_status_label = document.getElementById('service-status');
-						switch (result.service_status) {
-							case 0: 
-								service_status_label.textContent = _('AdBlock Lean will autostart on boot'); 
-								document.getElementById('disable-button').removeAttribute('disabled');
-								break;
-							case 1: 
-								service_status_label.textContent = _('AdBlock Lean will NOT autostart on boot'); 
-								document.getElementById('enable-button').removeAttribute('disabled');
-								break;
-							case 2: 
-								service_status_label.textContent = _('AdBlock Lean is not installed'); 
-								break;
-							default: 
-								service_status_label.textContent = _('Unknown'); 
-								break;
-						}
-						service_status_label.classList.remove('spinning');
-
-						if (result.service_status !== 2) {
-							var dnsmasq_status_label = document.getElementById('dnsmasq-status');
-							switch (result.dnsmasq_status) {
-								case 0: dnsmasq_status_label.textContent = _('dnsmasq is running'); break;
-								case 1: dnsmasq_status_label.textContent = _('dnsmasq is NOT running'); break;
-								case 2: dnsmasq_status_label.textContent = _('ERROR: Test domain lookup failed'); break;
-								case 3: dnsmasq_status_label.textContent = _('ERROR: Test domain resolved to 0.0.0.0'); break;
-								default: dnsmasq_status_label.textContent = 'Unknown'; break;
-							}
-
-							var blocklist_status_label = document.getElementById('blocklist-status');
-							switch (result.blocklist_status) {
-								case 0: 
-									blocklist_status_label.textContent = _('Blocklist is active.  Good line count: %s.  Last updated %d hour(s) ago.').format(result.blocklist_line_count.toLocaleString(), Math.round(result.blocklist_age_s / 3600.0, 1)); 
-									document.getElementById('stop-button').removeAttribute('disabled');
-									break;
-								case 1: 
-									blocklist_status_label.textContent = _('Blocklist is NOT active'); 
-									document.getElementById('start-button').removeAttribute('disabled');
-									break;
-								default: 
-									blocklist_status_label.textContent= _('Unknown'); 
-									break;
-							}
-
-							var update_status_label = document.getElementById('update-status');
-							switch (result.update_status) {
-								case 0: update_status_label.textContent = _('AdBlock Lean is up to date'); break;
-								case 1: update_status_label.textContent = _('An AdBlock Lean update available'); break;
-								case 2: update_status_label.textContent = _('ERROR: An error occurred while checking for an AdBlock Lean update'); break;
-								default: update_status_label.textContent = _('Unknown'); break;
-							}
-						}
-					}
-				);
-			} catch (err) {
-				console.log({arr, err});
-
-				// The most likely cause for entering this catch is that getStatus failed to run, and the most likely reason
-				// for that is because the config file is malformed.  One such cause is the user entering a report_failure
-				// or report_success without escaping special character correctly, so we'll tell them to go take a look at
-				// the raw config file and fix as needed.
-				ui.addNotification(null, E('p', 
-					_('ERROR: Failed to get status, which may be because the AdBlock Lean conf gile is malformed. \
-					One known cause is entering a <strong>Report failure</strong> or <strong>Report success</strong> \
-					command that fails to escape special characters correctly.  Click the <strong>Config</strong> tab \
-					at the top of this page to view your raw config file, and fix as necessary.')
-				), 'danger');
-			}
+			status = new abls.status();
+			status.showButtons = true;
+			status.showTitle = true;
 		}
 
 		// Setup the form inputs for each config option
-		data = parseConfig(arr[0]);
+		data = parseConfig(loadData[0]);
 		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
 			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
@@ -465,9 +316,9 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 			general tab
 		*/
 		o = s.taboption(
-			'general', 
-			form.MultiValue, 
-			'hagezi_blocklists', 
+			'general',
+			form.MultiValue,
+			'hagezi_blocklists',
 			_('Hagezi blocklists'),
 			_('dnsmasq blocklists provided by hagezi. \
 				For blocklist information, please check the <a style="font-weight: bold;" href="https://github.com/hagezi/dns-blocklists/blob/main/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>')
