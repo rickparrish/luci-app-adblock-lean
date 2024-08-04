@@ -7,10 +7,11 @@
 
 luci_service_status=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 luci_dnsmasq_status=-1		# 0 = Running, 1 = Not running, 2 = Test lookup failed, 3 = Test lookup returned 0.0.0.0
-luci_blocklist_status=-1	# 0 = Active, 1 = Not active
+luci_blocklist_status=-1	# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Not active
 luci_good_line_count=-1
 luci_blocklist_age_s=-1
 luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
+luci_pid_action=''			# Indicates which other action is being performed, if luci_blocklist_status=2
 
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
@@ -58,7 +59,8 @@ get_status() {
 	printf "	\"blocklist_status\": ${luci_blocklist_status},\n";
 	printf "	\"blocklist_line_count\": ${luci_good_line_count},\n";
 	printf "	\"blocklist_age_s\": ${luci_blocklist_age_s},\n";
-	printf "	\"update_status\": ${luci_update_status}\n";
+	printf "	\"update_status\": ${luci_update_status},\n";
+	printf "	\"pid_action\": \"${luci_pid_action}\"\n";
 	printf "}\n"
 }
 

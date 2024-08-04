@@ -152,6 +152,12 @@ var statusClass = baseclass.extend({
 							}
 							break;
 						case 1:
+							blocklistStatus.textContent = _('Error checking blocklist status, try again in a minute');
+							break;
+						case 2:
+							blocklistStatus.textContent = _('AdBlock Lean is performing an action: %s').format(result.pid_action);
+							break;
+						case 3:
 							blocklistStatus.textContent = _('Blocklist is NOT active');
 							if (that.showButtons) {
 								document.getElementById('start-button').removeAttribute('disabled');
@@ -168,7 +174,7 @@ var statusClass = baseclass.extend({
 							updateStatus.textContent = _('AdBlock Lean is up to date');
 							break;
 						case 1:
-							updateStatus.textContent = _('An AdBlock Lean update available');
+							updateStatus.textContent = _('An AdBlock Lean update is available');
 							break;
 						case 2:
 							updateStatus.textContent = _('ERROR: An error occurred while checking for an AdBlock Lean update');
