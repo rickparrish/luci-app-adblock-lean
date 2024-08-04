@@ -23,9 +23,9 @@ scp -r htdocs/* root@192.168.1.1:/www/
 
 # Required adblock-lean tweaks
 
-An updated adblock-lean that adds new return values to status() and sets luci_pid_action when an action is being performed is required.
-[It can be downloaded here](https://github.com/friendly-bits/adblock-lean/blob/320eb809f5cd3ce0eb348362efc59827b9909d95/adblock-lean)
-<!--luci-app-adblock-lean is compatable with the stock adblock-lean and does not require any modifications.-->
+<!--An updated adblock-lean that adds new return values to status() and sets luci_pid_action when an action is being performed is required.
+[It can be downloaded here](url)-->
+luci-app-adblock-lean is compatable with the stock adblock-lean and does not require any modifications.
 
 # Screenshot
 
