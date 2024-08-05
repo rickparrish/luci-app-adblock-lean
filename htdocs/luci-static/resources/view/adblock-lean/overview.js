@@ -41,7 +41,7 @@ var hageziBlocklists = [
 	{ filename: 'native.lgwebos.txt', name: 'Native Tracker - LG webOS' },
 	{ filename: 'native.vivo.txt', name: 'Native Tracker - Vivo' },
 	{ filename: 'native.oppo-realme.txt', name: 'Native Tracker - OPPO/Realme' },
-	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiomi' },
+	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiaomi' },
 ];
 
 function cleanValue(value) {
