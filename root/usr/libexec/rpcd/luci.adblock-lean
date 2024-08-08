@@ -105,8 +105,6 @@ print_status_rpc() {
 	fi
 
 	# Return a json response
-	# TODO Use jshn, which will ensure the pid_action and errors strings get escaped:
-	#      https://openwrt.org/docs/guide-developer/jshn
 	json_init
 	json_add_int "service_status" "$luci_service_status"
 	json_add_int "dnsmasq_status" "$luci_dnsmasq_status"
