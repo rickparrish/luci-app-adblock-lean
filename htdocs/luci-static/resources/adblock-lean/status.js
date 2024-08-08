@@ -84,7 +84,14 @@ var statusClass = baseclass.extend({
 					'disabled': 'disabled',
 					'id': 'stop-button',
 				}, [_('Deactivate Blocklist')]),
-				'\xa0'
+				'\xa0',
+				E('button', {
+					'class': 'btn cbi-button cbi-button-positive',
+					'click': ui.createHandlerFn(this, function () { return handleAction('start', 'Reloading'); }),
+					'disabled': 'disabled',
+					'id': 'reload-button',
+				}, [_('Reload Blocklist')]),
+				'\xa0',
 			]);
 		}
 		
@@ -149,6 +156,7 @@ var statusClass = baseclass.extend({
 								.format(result.blocklist_line_count.toLocaleString(), Math.round(result.blocklist_age_s / 3600.0, 1));
 							if (that.showButtons) {
 								document.getElementById('stop-button').removeAttribute('disabled');
+								document.getElementById('reload-button').removeAttribute('disabled');
 							}
 							break;
 						case 1:
