@@ -3,7 +3,8 @@
 # TechRef: https://openwrt.org/docs/techref/rpcd
 # TESTS
 # ubus -v list luci.adblock-lean
-# ubus -S call luci.adblock-lean getStatus
+# ubus -v call luci.adblock-lean getStatus
+# ubus -v call luci.adblock-lean install
 
 # Initialize the various variables to default Unknown/blank values
 luci_service_status=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
@@ -22,6 +23,9 @@ if [ -s "$adblockLeanFilename" ]; then
 else
 	luci_service_status=2
 fi
+
+# source jshn shell library
+. /usr/share/libubox/jshn.sh
 
 # RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (AdBlock Lean will do this for actual
 # RPC calls, but it won't do it when testing the RPC script via the CLI, hence why we set it here)
@@ -83,7 +87,7 @@ print_status_rpc() {
 		if [ "$luci_dnsmasq_status" = 0 ]
 		then
 			# luci_good_line_count will be something like "774775 /tmp/dnsmasq.d/blocklist," and we just want the line count
-			luci_good_line_count=$(echo "${luci_good_line_count}" | awk '{print $1;}')
+			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
 
 			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
 			luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
@@ -103,22 +107,25 @@ print_status_rpc() {
 	# Return a json response
 	# TODO Use jshn, which will ensure the pid_action and errors strings get escaped:
 	#      https://openwrt.org/docs/guide-developer/jshn
-	printf "{\n"
-	printf "	\"service_status\": ${luci_service_status},\n";
-	printf "	\"dnsmasq_status\": ${luci_dnsmasq_status},\n";
-	printf "	\"blocklist_status\": ${luci_blocklist_status},\n";
-	printf "	\"blocklist_line_count\": ${luci_good_line_count},\n";
-	printf "	\"blocklist_age_s\": ${luci_blocklist_age_s},\n";
-	printf "	\"update_status\": ${luci_update_status},\n";
-	printf "	\"pid_action\": \"${luci_pid_action}\",\n";
-	printf "	\"errors\": \"${luci_errors}\"\n";
-	printf "}\n"
+	json_init
+	json_add_int "service_status" "$luci_service_status"
+	json_add_int "dnsmasq_status" "$luci_dnsmasq_status"
+	json_add_int "blocklist_status" "$luci_blocklist_status"
+	json_add_int "blocklist_line_count" "$luci_good_line_count"
+	json_add_int "blocklist_age_s" "$luci_blocklist_age_s"
+	json_add_int "update_status" "$luci_update_status"
+	json_add_string "pid_action" "$luci_pid_action"
+	json_add_string "errors" "$luci_errors"
+	json_dump
 }
 
 # Check whether this is a "list" or "call" request
 case "$1" in
 	list)
-		printf '{ "getStatus": { }, "install": { } }\n'
+		printf '{\n'
+		printf '	"getStatus": { },\n'
+		printf '	"install": { }\n'
+		printf '}\n'
 		;;
 	call)
 		# Store the call target for use in abl_luci_exit(), then check which
