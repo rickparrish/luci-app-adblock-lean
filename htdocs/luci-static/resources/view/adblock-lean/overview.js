@@ -1,6 +1,7 @@
 'use strict';
 'require form';
 'require fs';
+'require rpc';
 'require ui';
 'require view';
 'require adblock-lean.status as abls';
@@ -43,6 +44,12 @@ var hageziBlocklists = [
 	{ filename: 'native.oppo-realme.txt', name: 'Native Tracker - OPPO/Realme' },
 	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiaomi' },
 ];
+
+var install = rpc.declare({
+	object: 'luci.adblock-lean',
+	method: 'install',
+	params: [],
+});
 
 function cleanValue(value) {
 	// Remove inline comments
@@ -147,19 +154,19 @@ function parseConfig(config) {
 		// *_urls need to be an array, not a space-separated string
 		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
 		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
-
-		// We have a friendly Hagezi Blocklists multi-select, so we need to split those in blocklist_urls into hagezi_blocklists
-		obj.hagezi_blocklists = [];
-		var nonHageziBlocklists = [];
-		for (var i = 0; i < obj.blocklist_urls.length; i++) {
-			if (obj.blocklist_urls[i].startsWith(hageziBaseUrl)) {
-				obj.hagezi_blocklists.push(obj.blocklist_urls[i]);
-			} else {
-				nonHageziBlocklists.push(obj.blocklist_urls[i]);
-			}
-		}
-		obj.blocklist_urls = nonHageziBlocklists;
 	}
+
+	// We have a friendly Hagezi Blocklists multi-select, so we need to split those in blocklist_urls into hagezi_blocklists
+	obj.hagezi_blocklists = [];
+	var nonHageziBlocklists = [];
+	for (var i = 0; i < obj.blocklist_urls.length; i++) {
+		if (obj.blocklist_urls[i].startsWith(hageziBaseUrl)) {
+			obj.hagezi_blocklists.push(obj.blocklist_urls[i]);
+		} else {
+			nonHageziBlocklists.push(obj.blocklist_urls[i]);
+		}
+	}
+	obj.blocklist_urls = nonHageziBlocklists;
 
 	// Set the data variable in the format needed by form.JSONMap()
 	return { 'config': obj };
@@ -278,13 +285,52 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 
 	load: function () {
 		return Promise.all([
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
+			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), ''),
+			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), '')
 		]);
 	},
 
 	render: function (loadData) {
 		let s, o;
 		var status;
+
+		// Check if AdBlock Lean is installed, and if not, display a button to automatically install as well as
+		// a link in case they want to manually install
+		if (loadData[1] == '') {
+			// Disable the save button
+			this.handleSave = null;
+
+			// Build the title element
+			var titleElement = E('h2', {}, _('AdBlock Lean - Not Installed'));
+
+			// Build the instruction element
+			var instructionElement = E('p', {}, _('AdBlock Lean is not currently installed on your system.<br /><br />\
+				To automatically install it now, click the Install button below.  Or to install it manually,\
+				<a href="https://github.com/lynxthecat/adblock-lean" target="_blank">follow the instructions here</a>.<br /><br />\
+				NOTE: The Install button will also install the <strong>gawk</strong> and <strong>coreutils-sort</strong> packages,\
+				which will improve performance.<br /><br />'));
+
+			var buttonElement = E('button', {
+				'class': 'btn cbi-button cbi-button-positive',
+				'click': ui.createHandlerFn(this, function () { 
+					ui.showModal(null, [
+						E('p',
+							{ class: 'spinning' },
+							_('Installing AdBlock Lean (this may take a minute or two)')
+						),
+					]);
+					L.resolveDefault(install())
+						.then(function (result) { location.reload() });
+				}),
+			}, [_('Install AdBlock Lean')]);
+
+			// Combine the various elements into our result variable
+			return E([
+				titleElement,
+				instructionElement,
+				buttonElement
+			]);
+		}
 
 		if (loadData[0] == '') {
 			// Display a message saying config doesn't exist yet

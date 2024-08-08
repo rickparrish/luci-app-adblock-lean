@@ -5,37 +5,85 @@
 # ubus -v list luci.adblock-lean
 # ubus -S call luci.adblock-lean getStatus
 
+# Initialize the various variables to default Unknown/blank values
 luci_service_status=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 luci_dnsmasq_status=-1		# 0 = Running, 1 = Not running, 2 = Test lookup failed, 3 = Test lookup returned 0.0.0.0
 luci_blocklist_status=-1	# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Not active
 luci_good_line_count=-1
 luci_blocklist_age_s=-1
 luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
-luci_pid_action=''			# Indicates which other action is being performed, if luci_blocklist_status=2
+luci_pid_action=""			# Indicates which other action is being performed, if luci_blocklist_status=2
+luci_errors=""				# Set with an error message when something goes wrong with AdBlock Lean
 
+# Source the AdBlock Lean script if it exists, or set luci_service_status to 2=Not installed if it doesn't exist
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
 	. "$adblockLeanFilename"
-	msgs_dest="/dev/null"
 else
-	msgs_dest="/dev/null"
 	luci_service_status=2
 fi
 
-get_status() {
-	# Skip status processing if the adblock-lean service is not installed (ie /etc/init.d/adblock-lean does not exist)
+# RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (AdBlock Lean will do this for actual
+# RPC calls, but it won't do it when testing the RPC script via the CLI, hence why we set it here)
+msgs_dest="/dev/null"
+
+# AdBlock Lean will call this function before exiting, so for example the flow for a getStatus call looks like:
+# RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> ??? -> exit
+# This means get_status_rpc() can only initiate the call to status(), but not actually output anything because the call
+# from get_status_rpc() to status() never returns to get_status_rpc()
+# And this means abl_luci_exit() needs to determine which print method to call to return the correct JSON payload
+# (ie what to do in the ??? above), so we use a previously-set $exit_action variable to determine this
+abl_luci_exit() {
+	case "$exit_action" in
+		getStatus)
+			print_status_rpc "$1"
+			;;
+	esac
+}
+
+# Call AdBlock Lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
+# correctly, etc.
+get_status_rpc() {
+	# If AdBlock Lean is installed, then we want to call its status method
 	if [ "$luci_service_status" != 2 ]
 	then
-		# Call the status method from the adblock-lean script, which will populate the other variables we need
-		# The result code of the call indicates whether adblock-lean is active or not
 		status
-		luci_blocklist_status=$?
+	fi
+
+	# AdBlock Lean exits at the end of all functions, so if status is called above then we won't get here
+	# BUT if AdBlock Lean is not installed, then we will get here, and we need to manually call print_status_rpc()
+	print_status_rpc
+}
+
+install_rpc() {
+	# Whilst AdBlock Lean does not require any dependencies to run, its performance can be improved by installing gawk and coreutils-sort
+	opkg update
+	opkg install gawk coreutils-sort
+
+	# Example installation steps:
+	# TODOX Needs error checking
+	wget https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean -O /etc/init.d/adblock-lean
+	chmod +x /etc/init.d/adblock-lean
+	service adblock-lean gen_config # generates default config in /root/adblock-lean/config
+	#vi /root/adblock-lean/config # modify default config as required
+	uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit # to enable use of compressed blocklist
+	service adblock-lean enable
+}
+
+# Perform some additional status-related checks, and then output the JSON response payload
+print_status_rpc() {
+	# Only perform the additional checks if AdBlock Lean is installed
+	if [ "$luci_service_status" != 2 ]
+	then
+		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
+		# in as an arg to the print_status_rpc() function
+		luci_blocklist_status="$1"
 
 		# Get additional details if the dnsmasq checks passed
 		if [ "$luci_dnsmasq_status" = 0 ]
 		then
-			# luci_good_line_count will be something like "838873 /tmp/dnsmasq.d/blocklist", and we just want the line count
-			luci_good_line_count=$(echo "${luci_good_line_count}" | head -n1 | awk '{print $1;}')
+			# luci_good_line_count will be something like "774775 /tmp/dnsmasq.d/blocklist," and we just want the line count
+			luci_good_line_count=$(echo "${luci_good_line_count}" | awk '{print $1;}')
 
 			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
 			luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
@@ -53,6 +101,8 @@ get_status() {
 	fi
 
 	# Return a json response
+	# TODO Use jshn, which will ensure the pid_action and errors strings get escaped:
+	#      https://openwrt.org/docs/guide-developer/jshn
 	printf "{\n"
 	printf "	\"service_status\": ${luci_service_status},\n";
 	printf "	\"dnsmasq_status\": ${luci_dnsmasq_status},\n";
@@ -60,18 +110,26 @@ get_status() {
 	printf "	\"blocklist_line_count\": ${luci_good_line_count},\n";
 	printf "	\"blocklist_age_s\": ${luci_blocklist_age_s},\n";
 	printf "	\"update_status\": ${luci_update_status},\n";
-	printf "	\"pid_action\": \"${luci_pid_action}\"\n";
+	printf "	\"pid_action\": \"${luci_pid_action}\",\n";
+	printf "	\"errors\": \"${luci_errors}\"\n";
 	printf "}\n"
 }
 
+# Check whether this is a "list" or "call" request
 case "$1" in
 	list)
-		printf '{ "getStatus": { } }\n'
+		printf '{ "getStatus": { }, "install": { } }\n'
 		;;
 	call)
+		# Store the call target for use in abl_luci_exit(), then check which
+		# function to call, and call it
+		exit_action="$2"
 		case "$2" in
 			getStatus)
-				get_status
+				get_status_rpc
+				;;
+			install)
+				install_rpc
 				;;
 		esac
 	;;

@@ -20,6 +20,9 @@
 				"exec"
 			],
 			"file": {
+				"/etc/init.d/adblock-lean": [
+					"read"
+				],
 				"/etc/init.d/adblock-lean enable": [
 					"exec"
 				],
@@ -35,7 +38,8 @@
 			},
 			"ubus": {
 				"luci.adblock-lean": [
-					"getStatus"
+					"getStatus",
+					"install"
 				]
 			}
 		}
