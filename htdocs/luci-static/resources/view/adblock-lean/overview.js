@@ -52,21 +52,27 @@ var install = rpc.declare({
 });
 
 function cleanValue(value) {
-	// Remove inline comments
-	// TODO This will break if a string value contains a #
-	var hashPos = value.indexOf('#');
-	if (hashPos == 0) {
-		value = '';
-	} else if (hashPos >= 1) {
-		value = value.substring(0, hashPos).trim();
+	// Trim the value
+	value = value.trim();
+
+	// Check for string-quoted value
+	// From: https://stackoverflow.com/a/249937
+	var m = value.match(/"(?:[^"\\]|\\.)*"/);
+	if (m === null) {
+		// Not a string-quoted value, remove inline comments
+		var hashPos = value.indexOf('#');
+		if (hashPos == 0) {
+			value = '';
+		} else if (hashPos >= 1) {
+			value = value.substring(0, hashPos).trim();
+		}
+	} else {
+		// Is a string-quoted value, remove the surrounding quotes
+		// From: https://stackoverflow.com/a/18268011
+		value = m[0].trim().replace(/^"?|"?$/g, '');
 	}
 
-	// Remove quotation marks surrounding string values
-	// From: https://stackoverflow.com/a/18268011
-	if (value.indexOf('"') >= 0) {
-		value = value.trim().replace(/^"?|"?$/g, '');
-	}
-
+	// Return the now-cleaned value
 	return value;
 }
 
