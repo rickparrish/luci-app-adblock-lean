@@ -72,6 +72,9 @@ install_rpc() {
 	#vi /root/adblock-lean/config # modify default config as required
 	uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit # to enable use of compressed blocklist
 	service adblock-lean enable
+
+	# RPC calls abort after 30 seconds, so can't do a 'service adblock-lean start' here.  Which is probably a good thing,
+	# user should be presented with the Overview page where they can change the settings they want to change first anyway.
 }
 
 # Perform some additional status-related checks, and then output the JSON response payload

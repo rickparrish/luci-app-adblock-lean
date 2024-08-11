@@ -19,17 +19,9 @@
 			"path": "adblock-lean/overview"
 		}
 	},
-	"admin/services/adblock-lean/config": {
-		"title": "Config",
-		"order": 20,
-		"action": {
-			"type": "view",
-			"path": "adblock-lean/config"
-		}
-	},
 	"admin/services/adblock-lean/allowlist": {
 		"title": "Allowlist",
-		"order": 30,
+		"order": 20,
 		"action": {
 			"type": "view",
 			"path": "adblock-lean/allowlist"
@@ -37,10 +29,18 @@
 	},
 	"admin/services/adblock-lean/blocklist": {
 		"title": "Blocklist",
-		"order": 40,
+		"order": 30,
 		"action": {
 			"type": "view",
 			"path": "adblock-lean/blocklist"
+		}
+	},
+	"admin/services/adblock-lean/config": {
+		"title": "Config",
+		"order": 40,
+		"action": {
+			"type": "view",
+			"path": "adblock-lean/config"
 		}
 	}
 }
