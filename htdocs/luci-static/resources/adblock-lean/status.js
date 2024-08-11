@@ -166,7 +166,13 @@ var statusClass = baseclass.extend({
 							blocklistStatus.textContent = _('AdBlock Lean is performing an action: %s').format(result.pid_action);
 							break;
 						case 3:
-							blocklistStatus.textContent = _('Blocklist is NOT active');
+							blocklistStatus.textContent = _('Blocklist is NOT active (paused)');
+							if (that.showButtons) {
+								// TODOX If we had Pause and Resume buttons then Resume could be enabled here
+							}
+							break;
+						case 4:
+							blocklistStatus.textContent = _('Blocklist is NOT active (stopped)');
 							if (that.showButtons) {
 								document.getElementById('start-button').removeAttribute('disabled');
 							}

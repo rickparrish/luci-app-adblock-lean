@@ -24,7 +24,7 @@ scp -r htdocs/* root@192.168.1.1:/www/
 # Required adblock-lean tweaks
 
 A modified adblock-lean is required.
-[It can be downloaded here](https://raw.githubusercontent.com/friendly-bits/adblock-lean/improve_error_checking/adblock-lean)
+[It can be downloaded here](https://raw.githubusercontent.com/friendly-bits/adblock-lean/improve-processing-logic/adblock-lean)
 <!-- luci-app-adblock-lean is compatable with the stock adblock-lean and does not require any modifications. -->
 
 # Screenshot

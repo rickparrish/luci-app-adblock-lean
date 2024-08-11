@@ -96,16 +96,14 @@ function parseConfig(config) {
 		],
 		'local_allowlist_path': '',
 		'local_blocklist_path': '',
-		'min_blocklist_file_part_line_count': 1,
-		'max_blocklist_file_part_size_KB': 20000,
+		'min_blocklist_part_line_count': 1,
+		'max_file_part_size_KB': 20000,
 		'max_blocklist_file_size_KB': 30000,
 		'min_good_line_count': 100000,
 		'compress_blocklist': 1,
 		'initial_dnsmasq_restart': 0,
 		'max_download_retries': 3,
-		'download_failed_action': 'SKIP_PARTIAL',
-		'rogue_element_action': 'SKIP_PARTIAL',
-		'dnsmasq_test_failed_action': 'SKIP_PARTIAL',
+		'list_part_failed_action': 'SKIP',
 		'report_failure': '',
 		'report_success': '',
 		'boot_start_delay_s': 120,
@@ -131,24 +129,30 @@ function parseConfig(config) {
 			// using Array.prototype.reduce
 			.reduce((acc, [key, value]) => (acc[key] = value, acc), {});
 
-		// Ensure the expected keys and parsed keys match
-		// TODO This check probably needs to be more nuanced.  What I want to avoid is a situation where
-		//      adblock-lean adds a new config option that this app doesn't know about yet, to ensure this
-		//      app doesn't rewrite an outdated config file format and lose some options in the process.
-		//      But the current check would also error out in the situation where adblock-lean is updated
-		//      with a new config option, and this app does know about it, but the user's config file doesn't
-		//      have an entry for that new option yet.  That shouldn't be considered an error scenario, that
-		//      should just prepopulate the form with a sane default for the new config option.
-		//      That also means we can't do obj = config.split().filter().map().reduce() above, because that
-		//      would clobber the sane default previously set in the var obj = { ... } code.  Instead we'd
-		//      have to use a temp object, then loop through its keys to update the values in obj.
+		// Check if the expected keys and parsed keys match.  If they don't, then it could either be:
+		// 1) User has old config file format, and this app was updated to support a newer format.
+		//    We'll remap old settings to new settings for cases where key was renamed, and we'll provide
+		//    default values for cases where new setting was added.  User just needs to review changes
+		//    and click Save to update their configuration file.
+		// 2) User has new config file format, and this app is still using an older format.
+		//    Can we detect this scenario?  Because ideally we would disable this app for this case,
+		//    because we're only going to mangle the user's new config file by saving in the older format.
 		var parsedKeys = Object.keys(obj).sort().join(';');
 		if (expectedKeys != parsedKeys) {
 			console.log({expectedKeys, parsedKeys});
 
-			// TODO Only going to warn via alert for now, since as mentioned above, the check needs to be improved
-			// throw new Error('Did not parse expected keys from config file, see console log for details');
-			alert('Warning: Did not parse expected keys from config file, see console log for details');
+			// Tell the user to review the settings and click Save to update their config file
+			ui.addNotification(null, E('p',
+				_('Warning: The AdBlock Lean configuration format has been updated.  Please review your settings below,\
+					and click <strong>Save</strong> to update your configuration file now.')
+			), 'info');
+
+			// Remap old settings to new settings
+			if (!obj.min_blocklist_part_line_count) { obj.min_blocklist_part_line_count = obj.min_blocklist_file_part_line_count; }
+			if (!obj.max_file_part_size_KB) { obj.max_file_part_size_KB = obj.max_blocklist_file_part_size_KB; }
+
+			// Add new settings
+			if (!obj.list_part_failed_action) { obj.list_part_failed_action = 'SKIP'; }
 		}
 
 		// *_urls need to be an array, not a space-separated string
@@ -223,9 +227,9 @@ local_allowlist_path="' + data.config.local_allowlist_path + '"\n\
 local_blocklist_path="' + data.config.local_blocklist_path + '"\n\
 \n\
 # Mininum number of lines of any individual downloaded blocklist part\n\
-min_blocklist_file_part_line_count=' + data.config.min_blocklist_file_part_line_count + '\n\
+min_blocklist_part_line_count=' + data.config.min_blocklist_part_line_count + '\n\
 # Maximum size of any individual downloaded blocklist part\n\
-max_blocklist_file_part_size_KB=' + data.config.max_blocklist_file_part_size_KB + '\n\
+max_file_part_size_KB=' + data.config.max_file_part_size_KB + '\n\
 # Maximum total size of combined, processed blocklist\n\
 max_blocklist_file_size_KB=' + data.config.max_blocklist_file_size_KB + '\n\
 # Minimum number of good lines in final postprocessed blocklist\n\
@@ -241,21 +245,11 @@ initial_dnsmasq_restart=' + ((data.config.initial_dnsmasq_restart ?? false) ? '1
 # Maximum number of download retries\n\
 max_download_retries=' + data.config.max_download_retries + '\n\
 \n\
-# Download failed action:\n\
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
-download_failed_action="' + data.config.download_failed_action + '"\n\
-\n\
-# Rogue element action:\n\
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
-# IGNORE - ignore any rogue elements (warning: use with caution)\n\
-rogue_element_action="' + data.config.rogue_element_action + '"\n\
-\n\
-# dnsmasq --test failed action:\n\
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation\n\
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)\n\
-dnsmasq_test_failed_action="' + data.config.dnsmasq_test_failed_action + '"\n\
+# List part failed action:\n\
+# This option applies to blocklist/allowlist parts which failed to download or couldn\'t pass validation checks\n\
+# SKIP - skip failed blocklist file part and continue blocklist generation\n\
+# STOP - stop blocklist generation (and fall back to previous blocklist if available)\n\
+list_part_failed_action="' + data.config.list_part_failed_action + '"\n\
 \n\
 # The following shell variables are invoked using:\n\
 # \'eval \${report_failure}\' and \'eval \${report_success}\'\n\
@@ -265,7 +259,7 @@ report_failure="' + joinWithSemicolon(data.config.report_failure) + '"\n\
 report_success="' + joinWithSemicolon(data.config.report_success) + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
-boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
+boot_start_delay_s=' + data.config.boot_start_delay_s + '\n';
 
 				// Save config file
 				return fs.write('/root/adblock-lean/config', config)
@@ -402,7 +396,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o = s.taboption(
 			'general',
 			form.Value,
-			'max_blocklist_file_part_size_KB',
+			'max_file_part_size_KB',
 			_('Max file size (KB)'),
 			_('Maximum size of any individual downloaded blocklist part (1000-100000)') // TODO range
 		);
@@ -457,34 +451,15 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o = s.taboption(
 			'advanced',
 			form.ListValue,
-			'download_failed_action',
-			_('Download failed action'),
+			'list_part_failed_action',
+			_('List part failed action'),
+			_('This option applies to blocklist/allowlist parts which failed to download or couldn\'t pass validation checks<br />\
+				SKIP - skip failed blocklist file part and continue blocklist generation<br />\
+				STOP - stop blocklist generation (and fall back to previous blocklist if available)'),
 		);
-		o.value('SKIP_PARTIAL');
+		o.value('SKIP');
 		o.value('STOP');
 
-		o = s.taboption(
-			'advanced',
-			form.ListValue,
-			'rogue_element_action',
-			_('Rogue element action'),
-		);
-		o.value('SKIP_PARTIAL');
-		o.value('STOP');
-		o.value('IGNORE');
-
-		o = s.taboption(
-			'advanced',
-			form.ListValue,
-			'dnsmasq_test_failed_action',
-			_('"dnsmasq --test" failed action'),
-			_('SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation<br /> \
-				STOP - stop blocklist generation (and fallback to previous blocklist if available)<br /> \
-				IGNORE - ignore any rogue elements (warning: use with caution)'),
-		 );
-		o.value('SKIP_PARTIAL');
-		o.value('STOP');
-		
 		o = s.taboption(
 			'advanced',
 			form.Value,
@@ -500,7 +475,7 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\r\n';
 		o = s.taboption(
 			'advanced',
 			form.Value,
-			'min_blocklist_file_part_line_count',
+			'min_blocklist_part_line_count',
 			_('Min line count'),
 			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
 		);
