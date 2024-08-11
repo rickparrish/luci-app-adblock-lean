@@ -29,4 +29,4 @@ A modified adblock-lean is required.
 
 # Screenshot
 
-![image](https://github.com/user-attachments/assets/a296519b-69f6-4ded-bc99-9f3bf9ad787e)
+![image](https://github.com/user-attachments/assets/a3477e02-8cd7-4578-b9be-ac5e6d7c3971)
