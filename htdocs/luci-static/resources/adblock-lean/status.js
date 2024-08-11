@@ -57,14 +57,13 @@ var statusClass = baseclass.extend({
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
 					'click': ui.createHandlerFn(this, function () { return handleAction('enable', 'Enabling'); }),
-					'disabled': 'disabled',
+					'style': 'display: none',
 					'id': 'enable-button',
 				}, [_('Enable Service')]),
-				'\xa0',
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
 					'click': ui.createHandlerFn(this, function () { return handleAction('disable', 'Disabling'); }),
-					'disabled': 'disabled',
+					'style': 'display: none',
 					'id': 'disable-button',
 				}, [_('Disable Service')]),
 				'\xa0',
@@ -74,24 +73,33 @@ var statusClass = baseclass.extend({
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
 					'click': ui.createHandlerFn(this, function () { return handleAction('start', 'Activating'); }),
-					'disabled': 'disabled',
+					'style': 'display: none',
 					'id': 'start-button',
 				}, [_('Activate Blocklist')]),
-				'\xa0',
+				E('button', {
+					'class': 'btn cbi-button cbi-button-positive',
+					'click': ui.createHandlerFn(this, function () { return handleAction('resume', 'Resuming'); }),
+					'style': 'display: none',
+					'id': 'resume-button',
+				}, [_('Resume Blocklist')]),
+				E('button', {
+					'class': 'btn cbi-button cbi-button-action',
+					'click': ui.createHandlerFn(this, function () { return handleAction('pause', 'Pausing'); }),
+					'style': 'display: none',
+					'id': 'pause-button',
+				}, [_('Pause Blocklist')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
 					'click': ui.createHandlerFn(this, function () { return handleAction('stop', 'Deactivating'); }),
-					'disabled': 'disabled',
+					'style': 'display: none',
 					'id': 'stop-button',
 				}, [_('Deactivate Blocklist')]),
-				'\xa0',
 				E('button', {
-					'class': 'btn cbi-button cbi-button-positive',
-					'click': ui.createHandlerFn(this, function () { return handleAction('start', 'Reloading'); }),
-					'disabled': 'disabled',
+					'class': 'btn cbi-button cbi-button-reload',
+					'click': ui.createHandlerFn(this, function () { return handleAction('reload', 'Reloading'); }),
+					'style': 'display: none',
 					'id': 'reload-button',
 				}, [_('Reload Blocklist')]),
-				'\xa0',
 			]);
 		}
 		
@@ -112,13 +120,13 @@ var statusClass = baseclass.extend({
 					case 0:
 						serviceStatus.textContent = _('AdBlock Lean will autostart on boot');
 						if (that.showButtons) {
-							document.getElementById('disable-button').removeAttribute('disabled');
+							document.getElementById('disable-button').style.display = 'inline-block';
 						}
 						break;
 					case 1:
 						serviceStatus.textContent = _('AdBlock Lean will NOT autostart on boot');
 						if (that.showButtons) {
-							document.getElementById('enable-button').removeAttribute('disabled');
+							document.getElementById('enable-button').style.display = 'inline-block';
 						}
 						break;
 					case 2:
@@ -155,8 +163,9 @@ var statusClass = baseclass.extend({
 							blocklistStatus.textContent = _('Blocklist is active.  Good line count: %s.  Last updated %d hour(s) ago.')
 								.format(result.blocklist_line_count.toLocaleString(), Math.round(result.blocklist_age_s / 3600.0, 1));
 							if (that.showButtons) {
-								document.getElementById('stop-button').removeAttribute('disabled');
-								document.getElementById('reload-button').removeAttribute('disabled');
+								document.getElementById('pause-button').style.display = 'inline-block';
+								document.getElementById('stop-button').style.display = 'inline-block';
+								document.getElementById('reload-button').style.display = 'inline-block';
 							}
 							break;
 						case 1:
@@ -168,13 +177,14 @@ var statusClass = baseclass.extend({
 						case 3:
 							blocklistStatus.textContent = _('Blocklist is NOT active (paused)');
 							if (that.showButtons) {
-								// TODOX If we had Pause and Resume buttons then Resume could be enabled here
+								document.getElementById('resume-button').style.display = 'inline-block';
+								document.getElementById('stop-button').style.display = 'inline-block';
 							}
 							break;
 						case 4:
 							blocklistStatus.textContent = _('Blocklist is NOT active (stopped)');
 							if (that.showButtons) {
-								document.getElementById('start-button').removeAttribute('disabled');
+								document.getElementById('start-button').style.display = 'inline-block';
 							}
 							break;
 						default:

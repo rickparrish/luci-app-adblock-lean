@@ -23,10 +23,19 @@
 				"/etc/init.d/adblock-lean": [
 					"read"
 				],
+				"/etc/init.d/adblock-lean disable": [
+					"exec"
+				],
 				"/etc/init.d/adblock-lean enable": [
 					"exec"
 				],
-				"/etc/init.d/adblock-lean disable": [
+				"/etc/init.d/adblock-lean pause": [
+					"exec"
+				],
+				"/etc/init.d/adblock-lean reload": [
+					"exec"
+				],
+				"/etc/init.d/adblock-lean resume": [
 					"exec"
 				],
 				"/etc/init.d/adblock-lean start": [
