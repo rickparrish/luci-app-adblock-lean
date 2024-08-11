@@ -35,9 +35,17 @@
 			"path": "adblock-lean/blocklist"
 		}
 	},
+	"admin/services/adblock-lean/custom_script": {
+		"title": "Custom Script",
+		"order": 40,
+		"action": {
+			"type": "view",
+			"path": "adblock-lean/custom_script"
+		}
+	},
 	"admin/services/adblock-lean/config": {
 		"title": "Config",
-		"order": 40,
+		"order": 50,
 		"action": {
 			"type": "view",
 			"path": "adblock-lean/config"

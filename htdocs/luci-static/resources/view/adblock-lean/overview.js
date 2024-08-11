@@ -93,16 +93,17 @@ function joinWithSemicolon(text) {
 
 function parseConfig(config) {
 	// Default configuration options
-	var obj = {
+	var defaultOptions = {
 		'blocklist_urls': [
 			hageziBaseUrl + 'pro.txt',
 			hageziBaseUrl + 'tif.mini.txt'
 		],
 		'allowlist_urls': [
 		],
-		'local_allowlist_path': '',
-		'local_blocklist_path': '',
+		'local_allowlist_path': '/root/adblock-lean/allowlist',
+		'local_blocklist_path': '/root/adblock-lean/blocklist',
 		'min_blocklist_part_line_count': 1,
+		'min_allowlist_part_line_count': 1,
 		'max_file_part_size_KB': 20000,
 		'max_blocklist_file_size_KB': 30000,
 		'min_good_line_count': 100000,
@@ -110,12 +111,12 @@ function parseConfig(config) {
 		'initial_dnsmasq_restart': 0,
 		'max_download_retries': 3,
 		'list_part_failed_action': 'SKIP',
-		'report_failure': '',
-		'report_success': '',
+		'custom_script': '/root/adblock-lean/custom_script',
 		'boot_start_delay_s': 120,
 	};
-	var expectedKeys = Object.keys(obj).sort().join(';');
+	var expectedKeys = Object.keys(defaultOptions).sort().join(';');
 
+	var obj;
 	if (config) {
 		// Parse the config file format, converting the key=value lines into an object
 		// From: https://stackoverflow.com/a/52043870
@@ -158,12 +159,16 @@ function parseConfig(config) {
 			if (!obj.max_file_part_size_KB) { obj.max_file_part_size_KB = obj.max_blocklist_file_part_size_KB; }
 
 			// Add new settings
-			if (!obj.list_part_failed_action) { obj.list_part_failed_action = 'SKIP'; }
+			if (!obj.list_part_failed_action) { obj.list_part_failed_action = defaultOptions.list_part_failed_action; }
+			if (!obj.min_allowlist_part_line_count) { obj.min_allowlist_part_line_count = defaultOptions.min_allowlist_part_line_count; }
+			if (!obj.custom_script) { obj.custom_script = defaultOptions.custom_script; }
 		}
 
 		// *_urls need to be an array, not a space-separated string
 		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
 		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
+	} else {
+		obj = defaultOptions;
 	}
 
 	// We have a friendly Hagezi Blocklists multi-select, so we need to split those in blocklist_urls into hagezi_blocklists
@@ -219,6 +224,8 @@ return view.extend({
 				}
 
 				var config = '# adblock-lean configuration options\n\
+# values must be enclosed in double-quotes\n\
+# comments must start at newline or inline after the closing double-quote\n\
 \n\
 # One or more dnsmasq blocklist urls separated by spaces\n\
 blocklist_urls="' + combined_blocklist_urls.join(' ') + '"\n\
@@ -232,24 +239,25 @@ allowlist_urls="' + (data.config.allowlist_urls ?? []).join(' ') + '"\n\
 local_allowlist_path="' + data.config.local_allowlist_path + '"\n\
 local_blocklist_path="' + data.config.local_blocklist_path + '"\n\
 \n\
-# Mininum number of lines of any individual downloaded blocklist part\n\
-min_blocklist_part_line_count=' + data.config.min_blocklist_part_line_count + '\n\
+# Mininum number of lines of any individual downloaded part\n\
+min_blocklist_part_line_count="' + data.config.min_blocklist_part_line_count + '"\n\
+min_allowlist_part_line_count="' + data.config.min_allowlist_part_line_count + '"\n\
 # Maximum size of any individual downloaded blocklist part\n\
-max_file_part_size_KB=' + data.config.max_file_part_size_KB + '\n\
+max_file_part_size_KB="' + data.config.max_file_part_size_KB + '"\n\
 # Maximum total size of combined, processed blocklist\n\
-max_blocklist_file_size_KB=' + data.config.max_blocklist_file_size_KB + '\n\
+max_blocklist_file_size_KB="' + data.config.max_blocklist_file_size_KB + '"\n\
 # Minimum number of good lines in final postprocessed blocklist\n\
-min_good_line_count=' + data.config.min_good_line_count + '\n\
+min_good_line_count="' + data.config.min_good_line_count + '"\n\
 \n\
-# compress blocklist to save memory once blocklist has been loaded\n\
-compress_blocklist=' + ((data.config.compress_blocklist ?? false) ? '1' : '0') + ' # enable (1) or disable (0) blocklist compression\n\
+# compress blocklist to save memory once blocklist has been loaded - enable (1) or disable (0)\n\
+compress_blocklist="' + ((data.config.compress_blocklist ?? false) ? '1' : '0') + '"\n\
 \n\
 # restart dnsmasq if previous blocklist was extracted and before generation of\n\
-# new blocklist thereby to free up memory during generaiton of new blocklist\n\
-initial_dnsmasq_restart=' + ((data.config.initial_dnsmasq_restart ?? false) ? '1' : '0') + ' # enable (1) or disable (0) initial dnsmasq restart\n\
+# new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)\n\
+initial_dnsmasq_restart="' + ((data.config.initial_dnsmasq_restart ?? false) ? '1' : '0') + '"\n\
 \n\
 # Maximum number of download retries\n\
-max_download_retries=' + data.config.max_download_retries + '\n\
+max_download_retries="' + data.config.max_download_retries + '"\n\
 \n\
 # List part failed action:\n\
 # This option applies to blocklist/allowlist parts which failed to download or couldn\'t pass validation checks\n\
@@ -257,15 +265,14 @@ max_download_retries=' + data.config.max_download_retries + '\n\
 # STOP - stop blocklist generation (and fall back to previous blocklist if available)\n\
 list_part_failed_action="' + data.config.list_part_failed_action + '"\n\
 \n\
-# The following shell variables are invoked using:\n\
-# \'eval \${report_failure}\' and \'eval \${report_success}\'\n\
-# thereby to facilitate sending e.g. mailsend/sms notifications\n\
-# The variables \'\${failure_msg}\' and \'\${success_msg}\' can be employed\n\
-report_failure="' + joinWithSemicolon(data.config.report_failure) + '"\n\
-report_success="' + joinWithSemicolon(data.config.report_success) + '"\n\
+# If a path to custom script is specified and that script defines functions \'report_success()\' and \'report_failure()\',\n\
+# one of these functions will be executed when adblock-lean completes the execution of some commands,\n\
+# with the success or failure message passed in first argument\n\
+# report_success() is only executed upon completion of the \'start\' command\n\
+custom_script="' + data.config.custom_script + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
-boot_start_delay_s=' + data.config.boot_start_delay_s + '\n';
+boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n';
 
 				// Save config file
 				return fs.write('/root/adblock-lean/config', config)
@@ -482,8 +489,20 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\n';
 			'advanced',
 			form.Value,
 			'min_blocklist_part_line_count',
-			_('Min line count'),
-			_('Mininum number of lines of any individual downloaded blocklist part (1-100000)') // TODO range
+			_('Min blocklist part line count'),
+			_('Mininum number of lines of any individual downloaded part (1-100000)') // TODO range
+		);
+		o.datatype = 'range(1,100000)'; // TODO range
+		o.optional = false;
+		o.retain = true;
+		o.rmempty = false;
+
+		o = s.taboption(
+			'advanced',
+			form.Value,
+			'min_allowlist_part_line_count',
+			_('Min allowlist part line count'),
+			_('Mininum number of lines of any individual downloaded part (1-100000)') // TODO range
 		);
 		o.datatype = 'range(1,100000)'; // TODO range
 		o.optional = false;
@@ -501,29 +520,6 @@ boot_start_delay_s=' + data.config.boot_start_delay_s + '\n';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
-
-		o = s.taboption(
-			'advanced',
-			form.TextValue,
-			'report_failure',
-			_('Report failure'),
-		);
-		o.datatype = 'string';
-		o.rows = 5;
-
-		o = s.taboption(
-			'advanced',
-			form.TextValue,
-			'report_success',
-			_('Report success'),
-			_("The following shell variables are invoked using: \
-			   'eval \${report_failure}' and 'eval \${report_success}' \
-			   thereby to facilitate sending e.g. mailsend/sms notifications. \
-			   The variables '\${failure_msg}' and '\${success_msg}' can be employed<br /> \
-			   <strong>NB: Don't forget to escape special chars like \" and $ as necessary.</strong>")
-		);
-		o.datatype = 'string';
-		o.rows = 5;
 
 		if (status) {
 			return Promise.all([status.render(), m.render()]);
