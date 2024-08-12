@@ -111,7 +111,7 @@ function parseConfig(config) {
 		'initial_dnsmasq_restart': 0,
 		'max_download_retries': 3,
 		'list_part_failed_action': 'SKIP',
-		'custom_script': '/root/adblock-lean/custom_script',
+		'custom_script': '',
 		'boot_start_delay_s': 120,
 	};
 	var expectedKeys = Object.keys(defaultOptions).sort().join(';');
@@ -167,6 +167,11 @@ function parseConfig(config) {
 		// *_urls need to be an array, not a space-separated string
 		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
 		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
+
+		// custom_script needs to be mapped to enable_custom_script
+		if (obj.custom_script) {
+			obj.enable_custom_script = 1;
+		}
 	} else {
 		obj = defaultOptions;
 	}
@@ -223,6 +228,17 @@ return view.extend({
 					return;
 				}
 
+				// enable_custom_script needs to be mapped to custom_script
+				if (data.config.enable_custom_script) {
+					// User wants to use a custom script, so assign custom_script the default value if it doesn't already have one
+					if (!data.config.custom_script) {
+						data.config.custom_script = '/usr/libexec/abl_custom-script.sh';
+					}
+				} else {
+					// User doesn't want to use a custom script, so clear the custom_script value
+					data.config.custom_script = '';
+				}
+				
 				var config = '# adblock-lean configuration options\n\
 # values must be enclosed in double-quotes\n\
 # comments must start at newline or inline after the closing double-quote\n\
@@ -279,6 +295,37 @@ boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n';
 					.then(function () {
 						document.body.scrollTop = document.documentElement.scrollTop = 0;
 						ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
+
+						// Check if we should save the starter file.  We only do this if custom_script is set
+						// to the default path, which we have read/write access to
+						if (data.config.custom_script == '/usr/libexec/abl_custom-script.sh') {
+							fs.stat('/usr/libexec/abl_custom-script.sh')
+								.then(function(result) {
+									// Do nothing, file exists so we don't want to create it
+								})
+								.catch(function (e) {
+									if (e.name == 'NotFoundError') {
+										// File not found, so we can create the starter file
+										fs.write('/usr/libexec/abl_custom-script.sh', '# AdBlock Lean custom script for reporting success/failure conditions\n\
+\n\
+report_failure() {\n\
+	# Example to send an email:\n\
+	# mailsend -port 587 -smtp smtp-relay.sendinblue.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user SENDINBLUE@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Failure Report" -M "$1"\n\
+\n\
+	# Example to request an http(s) url:\n\
+	# curl -fsS -m 10 --retry 5 --data-raw "$1" https://hc-ping.com/<uuid>/fail\n\
+}\n\
+\n\
+report_success() {\n\
+	# Example to send an email:\n\
+	# mailsend -port 587 -smtp smtp-relay.sendinblue.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user SENDINBLUE@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Success Report" -M "$1"\n\
+\n\
+	# Example to request an http(s) url:\n\
+	# curl -fsS -m 10 --retry 5 --data-raw "$1" https://hc-ping.com/<uuid>\n\
+}\n');
+									}
+								});
+						}
 					}).catch(function (e) {
 						document.body.scrollTop = document.documentElement.scrollTop = 0;
 						ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
@@ -456,6 +503,14 @@ boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n';
 			'initial_dnsmasq_restart',
 			_('Restart dnsmasq'),
 			_('Restart dnsmasq if previous blocklist was extracted and before generation of new blocklist thereby to free up memory during generaiton of new blocklist')
+		);
+
+		o = s.taboption(
+			'general',
+			form.Flag,
+			'enable_custom_script',
+			_('Enable custom script'),
+			_('Call custom resport_success() and report_failure() functions when certain commands complete.<br />See <b>Custom Script</b> tab for more details.')
 		);
 
 		/*

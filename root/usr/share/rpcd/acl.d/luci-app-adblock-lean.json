@@ -7,10 +7,8 @@
 					"read",
 					"write"
 				],
-				"/root/adblock-lean/allowlist": [
-					"write"
-				],
-				"/root/adblock-lean/blocklist": [
+				"/usr/libexec/abl_custom-script.sh": [
+					"read",
 					"write"
 				]
 			}

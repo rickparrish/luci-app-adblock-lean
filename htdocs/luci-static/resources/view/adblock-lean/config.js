@@ -4,7 +4,7 @@
 return ablfe.fileEditor.extend({
 	doLowercase: false,
 	
-	filename: 'config',
+	filename: '/root/adblock-lean/config',
 
 	instructions: _('<p>This is the local AdBlock Lean config file, stored at <b>/root/adblock-lean/config</b></p>\
 		<p>In most cases you should make configuration changes via the <b>Overview</b> page, but if for some reason\

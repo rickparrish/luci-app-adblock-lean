@@ -28,7 +28,7 @@ var fileEditorClass = view.extend({
 
 		// Save the file
 		var that = this;
-		return fs.write('/root/adblock-lean/' + this.filename, value)
+		return fs.write(this.filename, value)
 			.then(function () {
 				document.querySelector('textarea').value = value;
 				document.body.scrollTop = document.documentElement.scrollTop = 0;
@@ -43,7 +43,7 @@ var fileEditorClass = view.extend({
 
 	load: function () {
 		return Promise.all([
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/' + this.filename), '')
+			L.resolveDefault(fs.read_direct(this.filename), '')
 		]);
 	},
 	
