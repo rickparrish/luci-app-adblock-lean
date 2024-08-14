@@ -45,8 +45,11 @@
 			},
 			"ubus": {
 				"luci.adblock-lean": [
+					"checkConfig",
 					"getStatus",
-					"install"
+					"install",
+					"resetConfig",
+					"updateConfig"
 				]
 			}
 		}

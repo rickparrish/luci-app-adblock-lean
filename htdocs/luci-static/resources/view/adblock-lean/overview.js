@@ -6,6 +6,8 @@
 'require view';
 'require adblock-lean.status as abls';
 
+const supportedConfigFormat = 'v2';
+
 let m, data;
 
 var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/';
@@ -45,9 +47,27 @@ var hageziBlocklists = [
 	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiaomi' },
 ];
 
+var checkConfig = rpc.declare({
+	object: 'luci.adblock-lean',
+	method: 'checkConfig',
+	params: [],
+});
+
 var install = rpc.declare({
 	object: 'luci.adblock-lean',
 	method: 'install',
+	params: [],
+});
+
+var resetConfig = rpc.declare({
+	object: 'luci.adblock-lean',
+	method: 'resetConfig',
+	params: [],
+});
+
+var updateConfig = rpc.declare({
+	object: 'luci.adblock-lean',
+	method: 'updateConfig',
 	params: [],
 });
 
@@ -92,35 +112,11 @@ function joinWithSemicolon(text) {
 }
 
 function parseConfig(config) {
-	// Default configuration options
-	var defaultOptions = {
-		'blocklist_urls': [
-			hageziBaseUrl + 'pro.txt',
-			hageziBaseUrl + 'tif.mini.txt'
-		],
-		'allowlist_urls': [
-		],
-		'local_allowlist_path': '/root/adblock-lean/allowlist',
-		'local_blocklist_path': '/root/adblock-lean/blocklist',
-		'min_blocklist_part_line_count': 1,
-		'min_allowlist_part_line_count': 1,
-		'max_file_part_size_KB': 20000,
-		'max_blocklist_file_size_KB': 30000,
-		'min_good_line_count': 100000,
-		'compress_blocklist': 1,
-		'initial_dnsmasq_restart': 0,
-		'max_download_retries': 3,
-		'list_part_failed_action': 'SKIP',
-		'custom_script': '',
-		'boot_start_delay_s': 120,
-	};
-	var expectedKeys = Object.keys(defaultOptions).sort().join(';');
-
-	var obj;
+	var result = null
 	if (config) {
 		// Parse the config file format, converting the key=value lines into an object
 		// From: https://stackoverflow.com/a/52043870
-		obj = config
+		result = config
 			// split the data by line
 			.split("\n")
 			// filter comments
@@ -136,60 +132,53 @@ function parseConfig(config) {
 			// using Array.prototype.reduce
 			.reduce((acc, [key, value]) => (acc[key] = value, acc), {});
 
-		// Check if the expected keys and parsed keys match.  If they don't, then it could either be:
-		// 1) User has old config file format, and this app was updated to support a newer format.
-		//    We'll remap old settings to new settings for cases where key was renamed, and we'll provide
-		//    default values for cases where new setting was added.  User just needs to review changes
-		//    and click Save to update their configuration file.
-		// 2) User has new config file format, and this app is still using an older format.
-		//    Can we detect this scenario?  Because ideally we would disable this app for this case,
-		//    because we're only going to mangle the user's new config file by saving in the older format.
-		var parsedKeys = Object.keys(obj).sort().join(';');
-		if (expectedKeys != parsedKeys) {
-			console.log({expectedKeys, parsedKeys});
-
-			// Tell the user to review the settings and click Save to update their config file
-			ui.addNotification(null, E('p',
-				_('Warning: The AdBlock Lean configuration format has been updated.  Please review your settings below,\
-					and click <strong>Save</strong> to update your configuration file now.')
-			), 'info');
-
-			// Remap old settings to new settings
-			if (!obj.min_blocklist_part_line_count) { obj.min_blocklist_part_line_count = obj.min_blocklist_file_part_line_count; }
-			if (!obj.max_file_part_size_KB) { obj.max_file_part_size_KB = obj.max_blocklist_file_part_size_KB; }
-
-			// Add new settings
-			if (!obj.list_part_failed_action) { obj.list_part_failed_action = defaultOptions.list_part_failed_action; }
-			if (!obj.min_allowlist_part_line_count) { obj.min_allowlist_part_line_count = defaultOptions.min_allowlist_part_line_count; }
-			if (!obj.custom_script) { obj.custom_script = defaultOptions.custom_script; }
-		}
-
 		// *_urls need to be an array, not a space-separated string
-		obj.allowlist_urls = obj.allowlist_urls ? obj.allowlist_urls.split(' ') : [];
-		obj.blocklist_urls = obj.blocklist_urls ? obj.blocklist_urls.split(' ') : [];
-
-		// custom_script needs to be mapped to enable_custom_script
-		if (obj.custom_script) {
-			obj.enable_custom_script = 1;
-		}
+		result.allowlist_urls = result.allowlist_urls ? result.allowlist_urls.split(' ') : [];
+		result.blocklist_urls = result.blocklist_urls ? result.blocklist_urls.split(' ') : [];
 	} else {
-		obj = defaultOptions;
+		// No existing config file, so set defaults
+		result = {
+			'blocklist_urls': [
+				hageziBaseUrl + 'pro.txt',
+				hageziBaseUrl + 'tif.mini.txt'
+			],
+			'allowlist_urls': [
+			],
+			'local_allowlist_path': '/root/adblock-lean/allowlist',
+			'local_blocklist_path': '/root/adblock-lean/blocklist',
+			'min_blocklist_part_line_count': 1,
+			'min_allowlist_part_line_count': 1,
+			'max_file_part_size_KB': 20000,
+			'max_blocklist_file_size_KB': 30000,
+			'min_good_line_count': 100000,
+			'compress_blocklist': 1,
+			'initial_dnsmasq_restart': 0,
+			'max_download_retries': 3,
+			'list_part_failed_action': 'SKIP',
+			'custom_script': '',
+			'boot_start_delay_s': 120,
+		};
 	}
 
 	// We have a friendly Hagezi Blocklists multi-select, so we need to split those in blocklist_urls into hagezi_blocklists
-	obj.hagezi_blocklists = [];
+	result.hagezi_blocklists = [];
 	var nonHageziBlocklists = [];
-	for (var i = 0; i < obj.blocklist_urls.length; i++) {
-		if (obj.blocklist_urls[i].startsWith(hageziBaseUrl)) {
-			obj.hagezi_blocklists.push(obj.blocklist_urls[i]);
+	for (var i = 0; i < result.blocklist_urls.length; i++) {
+		if (result.blocklist_urls[i].startsWith(hageziBaseUrl)) {
+			result.hagezi_blocklists.push(result.blocklist_urls[i]);
 		} else {
-			nonHageziBlocklists.push(obj.blocklist_urls[i]);
+			nonHageziBlocklists.push(result.blocklist_urls[i]);
 		}
 	}
-	obj.blocklist_urls = nonHageziBlocklists;
+	result.blocklist_urls = nonHageziBlocklists;
 
+	// custom_script needs to be mapped to enable_custom_script
+	if (result.custom_script) {
+		result.enable_custom_script = 1;
+	}
+	
 	// Set the data variable in the format needed by form.JSONMap()
-	return { 'config': obj };
+	return { 'config': result };
 }
 
 return view.extend({
@@ -240,6 +229,8 @@ return view.extend({
 				}
 				
 				var config = '# adblock-lean configuration options\n\
+# config_format=' + supportedConfigFormat + '\n\
+#\n\
 # values must be enclosed in double-quotes\n\
 # comments must start at newline or inline after the closing double-quote\n\
 \n\
@@ -285,6 +276,7 @@ list_part_failed_action="' + data.config.list_part_failed_action + '"\n\
 # one of these functions will be executed when adblock-lean completes the execution of some commands,\n\
 # with the success or failure message passed in first argument\n\
 # report_success() is only executed upon completion of the \'start\' command\n\
+# Recommended path is \'/usr/libexec/abl_custom-script.sh\' which the luci app has permission to access\n\
 custom_script="' + data.config.custom_script + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
@@ -340,7 +332,8 @@ report_success() {\n\
 	load: function () {
 		return Promise.all([
 			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), ''),
-			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), '')
+			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
+			L.resolveDefault(checkConfig(), '')
 		]);
 	},
 
@@ -386,6 +379,74 @@ report_success() {\n\
 			]);
 		}
 
+		// Check if a configuration update is needed, and if so, display a button to automatically update it as well as
+		// instructions for if they want to manually update
+		if (loadData[2].config_status == 2) {
+			// Disable the save button
+			this.handleSave = null;
+
+			// Build the title element
+			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Update Needed'));
+
+			// Build the instruction element
+			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
+				To automatically update it now, click the Update button below.  Or to update it manually,\
+				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
+
+			var buttonElement = E('button', {
+				'class': 'btn cbi-button cbi-button-positive',
+				'click': ui.createHandlerFn(this, function () { 
+					ui.showModal(null, [
+						E('p',
+							{ class: 'spinning' },
+							_('Updating AdBlock Lean configuration file')
+						),
+					]);
+					L.resolveDefault(updateConfig())
+						.then(function (result) { location.reload() });
+				}),
+			}, [_('Update Configuration File')]);
+
+			// Combine the various elements into our result variable
+			return E([
+				titleElement,
+				instructionElement,
+				buttonElement
+			]);
+		} else if (loadData[2].config_status == 1) {
+			// Disable the save button
+			this.handleSave = null;
+
+			// Build the title element
+			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
+
+			// Build the instruction element
+			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
+				To automatically reset it now, click the Reset button below.  Or to fix it manually,\
+				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
+
+			var buttonElement = E('button', {
+				'class': 'btn cbi-button cbi-button-positive',
+				'click': ui.createHandlerFn(this, function () { 
+					ui.showModal(null, [
+						E('p',
+							{ class: 'spinning' },
+							_('Resetting AdBlock Lean configuration file')
+						),
+					]);
+					L.resolveDefault(resetConfig())
+						.then(function (result) { location.reload() });
+				}),
+			}, [_('Reset Configuration File')]);
+
+			// Combine the various elements into our result variable
+			return E([
+				titleElement,
+				instructionElement,
+				buttonElement
+			]);
+		}
+
 		if (loadData[0] == '') {
 			// Display a message saying config doesn't exist yet
 			ui.addNotification(null, E('p',
@@ -393,6 +454,27 @@ report_success() {\n\
 					and click <strong>Save</strong> to configure AdBlock Lean now.')
 			), 'info');
 		} else {
+			// Ensure the config format matches the format we can support
+			if (loadData[0].indexOf('config_format=' + supportedConfigFormat) == -1) {
+				// Disable the save button
+				this.handleSave = null;
+
+				// Build the title element
+				var titleElement = E('h2', {}, _('AdBlock Lean - Unsupported Configuration'));
+
+				// Build the instruction element
+				var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file is using a newer format than this app supports.<br /><br />\
+					Check for a newer version of luci-app-adblock-lean that supports the newer format.  If one is not yet available,\
+					then you\'ll need to manually configure AdBlock Lean in the meantime.<br /><br />'));
+
+				// Combine the various elements into our result variable
+				return E([
+					titleElement,
+					instructionElement
+				]);
+			}
+
+			// Show the status panel
 			status = new abls.status();
 			status.showButtons = true;
 			status.showTitle = true;
