@@ -426,11 +426,16 @@ report_success() {\n\
 			}, [_('Update Configuration File')]);
 
 			// Build the manual instruction element
+			var config_format_message = ''
+			if (loadData[2].curr_config_format != loadData[2].def_config_format) {
+				config_format_message = '# config_format=v' + loadData[2].def_config_format
+			}
 			var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
 				these are the changes that are needed:<br /><br />\
 				' + getUnorderedListWithHeader('Remove old entries:', loadData[2].unexp_entries) + '\
 				' + getUnorderedListWithHeader('Add new entries:', loadData[2].missing_entries) + '\
-				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', loadData[2].legacy_entries)));
+				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', loadData[2].legacy_entries) + '\
+				' + getUnorderedListWithHeader('Add/update the config_format comment:', config_format_message)));
 
 			// Combine the various elements into our result variable
 			return E([
