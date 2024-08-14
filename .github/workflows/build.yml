@@ -1,4 +1,4 @@
-name: Build
+name: Pre-Release
 
 # Controls when the workflow will run
 on:
@@ -57,3 +57,12 @@ jobs:
         with:
           name: ${{ matrix.arch}}-logs
           path: logs/
+
+      - name: Update pre-release
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
