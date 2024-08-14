@@ -6,23 +6,34 @@
 # ubus -v call luci.adblock-lean getStatus
 # ubus -v call luci.adblock-lean install
 
-# Initialize the various variables to default Unknown/blank values
-luci_service_status=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
+# Global variables coming from adblock-lean
+luci_bad_conf_format=-1		# 1 = Current config format is older than default config version
+luci_conf_fixes=""			# \n separated list of necessary config fixes
+luci_curr_config_format=-1	# Config format read from the config file
+luci_def_config_format=-1	# Config format supported by adblock-lean
 luci_dnsmasq_status=-1		# 0 = Running, 1 = Not running, 2 = Test lookup failed, 3 = Test lookup returned 0.0.0.0
-luci_blocklist_status=-1	# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
-luci_good_line_count=-1
-luci_blocklist_age_s=-1
+luci_errors=""				# Error messages passed in call to reg_failure()
+luci_good_line_count=-1		# Total number of unique lines in the merged blocklist
+luci_legacy_entries=""		# \n separated list of config entries that aren't double-quoted
+luci_missing_entries=""		# \n separated list of entries that aren't in the config file (and should be added)
+luci_missing_keys=""		# \n separated list of keys that aren't in the config file (and should be added)
+luci_pid_action=""			# Other (locking) action currently being performed (blocklist_status_rpc should be 2 for this to have a value)
+luci_unexp_entries=""		# \n separated list of config entries that are no longer used (and should be removed)
+luci_unexp_keys=""			# \n separated list of config keys that are no longer used (and should be removed)
 luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
-luci_config_status=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update needed (auto or manual)
-luci_pid_action=""			# Indicates which other action is being performed, if luci_blocklist_status=2
-luci_errors=""				# Set with an error message when something goes wrong with AdBlock Lean
 
-# Source the AdBlock Lean script if it exists, or set luci_service_status to 2=Not installed if it doesn't exist
+# Global variables set in this RPC script
+blocklist_age_s_rpc=-1		# Number of seconds since the blocklist was last modified
+blocklist_status_rpc=-1		# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
+config_status_rpc=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update needed (auto or manual)
+service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
+
+# Source the AdBlock Lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
 	. "$adblockLeanFilename"
 else
-	luci_service_status=2
+	service_status_rpc=2
 fi
 
 # source jshn shell library
@@ -46,20 +57,28 @@ abl_luci_exit() {
 	esac
 }
 
-# Call AdBlock Lean's parse_config() function to determine whether the configuration file needs updating
+# Call AdBlock Lean's parse_config() function to determine whether the config file needs updating
 check_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its parse_config method
-	if [ "$luci_service_status" != 2 ]
+	if [ "$service_status_rpc" != 2 ]
 	then
 		parse_config "/root/adblock-lean/config"
-		luci_config_status="$?"
+		config_status_rpc="$?"
 	fi
 
 	# Unlike status(), parse_config() does not exit at the end, so we can return our json payload from here
 	# Return a json response
 	json_init
-	json_add_int "config_status" "$luci_config_status"
-	json_add_string "config_fixes" "$luci_conf_needs_fix"
+	json_add_string "bad_conf_format" "$luci_bad_conf_format"
+	json_add_string "conf_fixes" "$luci_conf_fixes"
+	json_add_string "curr_config_format" "$luci_curr_config_format"
+	json_add_string "def_config_format" "$luci_def_config_format"
+	json_add_string "legacy_entries" "$luci_legacy_entries"
+	json_add_string "missing_entries" "$luci_missing_entries"
+	json_add_string "missing_keys" "$luci_missing_keys"
+	json_add_string "unexp_entries" "$luci_unexp_entries"
+	json_add_string "unexp_keys" "$luci_unexp_keys"
+	json_add_string "config_status" "$config_status_rpc"
 	json_dump
 }
 
@@ -67,7 +86,7 @@ check_config_rpc() {
 # correctly, etc.
 get_status_rpc() {
 	# If AdBlock Lean is installed, then we want to call its status method
-	if [ "$luci_service_status" != 2 ]
+	if [ "$service_status_rpc" != 2 ]
 	then
 		status
 	fi
@@ -98,11 +117,11 @@ install_rpc() {
 # Perform some additional status-related checks, and then output the JSON response payload
 print_status_rpc() {
 	# Only perform the additional checks if AdBlock Lean is installed
-	if [ "$luci_service_status" != 2 ]
+	if [ "$service_status_rpc" != 2 ]
 	then
 		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
 		# in as an arg to the print_status_rpc() function
-		luci_blocklist_status="$1"
+		blocklist_status_rpc="$1"
 
 		# Get additional details if the dnsmasq checks passed
 		if [ "$luci_dnsmasq_status" = 0 ]
@@ -111,27 +130,27 @@ print_status_rpc() {
 			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
 
 			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
-			luci_blocklist_age_s=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
+			blocklist_age_s_rpc=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
 		fi
 
 		# get enabled/disabled status
 		case $(service 2>/dev/null | grep "adblock-lean") in 
 			*disabled*)
-				luci_service_status=1
+				service_status_rpc=1
 				;;
 			*enabled*)
-				luci_service_status=0
+				service_status_rpc=0
 				;;
 		esac
 	fi
 
 	# Return a json response
 	json_init
-	json_add_int "service_status" "$luci_service_status"
+	json_add_int "service_status" "$service_status_rpc"
 	json_add_int "dnsmasq_status" "$luci_dnsmasq_status"
-	json_add_int "blocklist_status" "$luci_blocklist_status"
+	json_add_int "blocklist_status" "$blocklist_status_rpc"
 	json_add_int "blocklist_line_count" "$luci_good_line_count"
-	json_add_int "blocklist_age_s" "$luci_blocklist_age_s"
+	json_add_int "blocklist_age_s" "$blocklist_age_s_rpc"
 	json_add_int "update_status" "$luci_update_status"
 	json_add_string "pid_action" "$luci_pid_action"
 	json_add_string "errors" "$luci_errors"
@@ -141,7 +160,7 @@ print_status_rpc() {
 # Call AdBlock Lean's gen_config() function to reset the broken config file
 reset_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its gen_config method
-	if [ "$luci_service_status" != 2 ]
+	if [ "$service_status_rpc" != 2 ]
 	then
 		gen_config
 	fi
@@ -153,7 +172,7 @@ reset_config_rpc() {
 # Call AdBlock Lean's load_config() function to update the outdated config file
 update_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its load_config method
-	if [ "$luci_service_status" != 2 ]
+	if [ "$service_status_rpc" != 2 ]
 	then
 		load_config "-f"
 	fi

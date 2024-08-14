@@ -96,6 +96,24 @@ function cleanValue(value) {
 	return value;
 }
 
+function getUnorderedList(text) {
+	if (!text) { return ''; }
+
+	var result = '';
+
+	var lines = text.split('\n');
+	for (var i = 0; i < lines.length; i++) {
+		result += '<li>' + lines[i].replace(/[<]/g, '&lt;') + '</li>';
+	}
+
+	return '<ol style="list-style: decimal;">' + result + '</ol>';
+}
+
+function getUnorderedListWithHeader(header, text) {
+	if (!text) { return ''; }
+	return '<div><strong>' + header + '</strong></div>' + getUnorderedList(text);
+}
+
 function joinWithSemicolon(text) {
 	var lines = (text ?? '').replace(/\r\n/g, '\n').split('\n');
 	
@@ -388,10 +406,10 @@ report_success() {\n\
 			// Build the title element
 			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Update Needed'));
 
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
-				To automatically update it now, click the Update button below.  Or to update it manually,\
-				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
+			// Build the automatic instruction element
+			var autoInstructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
+				Click the Update button below the make the following automatic changes:\
+				' + getUnorderedList(loadData[2].conf_fixes)));
 
 			var buttonElement = E('button', {
 				'class': 'btn cbi-button cbi-button-positive',
@@ -407,11 +425,19 @@ report_success() {\n\
 				}),
 			}, [_('Update Configuration File')]);
 
+			// Build the manual instruction element
+			var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
+				these are the changes that are needed:<br /><br />\
+				' + getUnorderedListWithHeader('Remove old entries:', loadData[2].unexp_entries) + '\
+				' + getUnorderedListWithHeader('Add new entries:', loadData[2].missing_entries) + '\
+				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', loadData[2].legacy_entries)));
+
 			// Combine the various elements into our result variable
 			return E([
 				titleElement,
-				instructionElement,
-				buttonElement
+				autoInstructionElement,
+				buttonElement,
+				manualInstructionElement
 			]);
 		} else if (loadData[2].config_status == 1) {
 			// Disable the save button
