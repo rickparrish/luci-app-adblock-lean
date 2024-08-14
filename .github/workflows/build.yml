@@ -1,0 +1,59 @@
+name: Build
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            target: x86-64
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Determine branch name
+        run: |
+          BRANCH="main"
+          echo "Building for $BRANCH"
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+
+      - name: Determine changed packages
+        run: |
+          PACKAGES="luci-app-adblock-lean"
+
+          echo "Building $PACKAGES"
+          echo "PACKAGES=$PACKAGES" >> $GITHUB_ENV
+
+      - name: Download luci.mk
+        run: wget https://raw.githubusercontent.com/openwrt/luci/openwrt-23.05/luci.mk
+
+      - name: Build
+        uses: openwrt/gh-action-sdk@v5
+        env:
+          ARCH: ${{ matrix.arch }}-${{ env.BRANCH }}
+          FEEDNAME: packages_ci
+
+      - name: Move created packages to project dir
+        run: cp bin/packages/${{ matrix.arch }}/packages_ci/*.ipk . || true
+
+      - name: Store packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.arch}}-packages
+          path: "*.ipk"
+
+      - name: Store logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.arch}}-logs
+          path: logs/
