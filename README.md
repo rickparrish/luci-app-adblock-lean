@@ -12,20 +12,26 @@ Source for [luci-app-adblock-fast](https://github.com/openwrt/luci/tree/master/a
 
 In all cases, you'll want to log out of the web interface and back in to force a cache refresh after installing the new package.
 
+## From package
+
+The latest package can be downloaded from GitHub: [https://github.com/rickparrish/luci-app-adblock-lean/releases/tag/latest](https://github.com/rickparrish/luci-app-adblock-lean/releases/tag/latest).  
+
+Download the .ipk file, then go to System -> Software on your OpenWrt admin console, click Upload Package, Browse for the file you just downloaded, click Upload, and finally click Install.
+
 ## From git
 
-To install the luci-app-adblock-lean to your OpenWrt instance (assuming your OpenWRT instance is on 192.168.1.1):
+Clone the repo, and issue these commands to scp the files to your OpenWrt router (assuming OpenWrt.lan is how you connect to it):
 
 ```
-scp -r root/* root@192.168.1.1:/
-scp -r htdocs/* root@192.168.1.1:/www/
+scp -r applications/luci-app-adblock-lean/root/* root@OpenWrt.lan:/
+scp -r applications/luci-app-adblock-lean/htdocs/* root@OpenWrt.lan:/www/
 ```
 
 # Required adblock-lean tweaks
 
-A modified adblock-lean is required.
-[It can be downloaded here](https://raw.githubusercontent.com/friendly-bits/adblock-lean/improve-processing-logic/adblock-lean)
-<!-- luci-app-adblock-lean is compatable with the stock adblock-lean and does not require any modifications. -->
+<!-- A modified adblock-lean is required.
+[It can be downloaded here](https://raw.githubusercontent.com/friendly-bits/adblock-lean/improve-processing-logic/adblock-lean) -->
+luci-app-adblock-lean was tested with [this version of adblock-lean](https://raw.githubusercontent.com/lynxthecat/adblock-lean/f5588240dd409148d5be7bb778b1674106577c68/adblock-lean).  It may also be compatable with newer versions of adblock-lean, but if you run into problems, then that is the version I would recommend trying.
 
 # Screenshot
 
