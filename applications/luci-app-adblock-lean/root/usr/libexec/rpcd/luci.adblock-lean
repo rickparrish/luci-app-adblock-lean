@@ -20,12 +20,14 @@ luci_missing_keys=""		# \n separated list of keys that aren't in the config file
 luci_pid_action=""			# Other (locking) action currently being performed (blocklist_status_rpc should be 2 for this to have a value)
 luci_unexp_entries=""		# \n separated list of config entries that are no longer used (and should be removed)
 luci_unexp_keys=""			# \n separated list of config keys that are no longer used (and should be removed)
+luci_upd_config_format=-1   # Config format supported by adblock-lean update (when luci_update_status=1)
 luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
 
 # Global variables set in this RPC script
 blocklist_age_s_rpc=-1		# Number of seconds since the blocklist was last modified
 blocklist_status_rpc=-1		# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
 config_status_rpc=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update needed (auto or manual)
+laabl_package_info=""		# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
 service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 
 # Source the AdBlock Lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
@@ -144,6 +146,9 @@ print_status_rpc() {
 		esac
 	fi
 
+	# Get luci-app-adblock-lean info
+	laabl_package_info=$(opkg info luci-app-adblock-lean)
+
 	# Return a json response
 	json_init
 	json_add_int "service_status" "$service_status_rpc"
@@ -152,8 +157,10 @@ print_status_rpc() {
 	json_add_int "blocklist_line_count" "$luci_good_line_count"
 	json_add_int "blocklist_age_s" "$blocklist_age_s_rpc"
 	json_add_int "update_status" "$luci_update_status"
+	json_add_int "update_config_format" "$luci_upd_config_format"
 	json_add_string "pid_action" "$luci_pid_action"
 	json_add_string "errors" "$luci_errors"
+	json_add_string "laabl_package_info" "$laabl_package_info"
 	json_dump
 }
 

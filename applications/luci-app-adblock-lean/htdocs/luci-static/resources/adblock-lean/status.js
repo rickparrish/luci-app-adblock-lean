@@ -10,6 +10,9 @@ var getStatus = rpc.declare({
 	params: [],
 });
 
+var statusResult = null;
+var laablLatestResult = null;
+
 async function handleAction(actionName, actionLabel) {
 	ui.showModal(null, [
 		E('p',
@@ -19,6 +22,48 @@ async function handleAction(actionName, actionLabel) {
 	]);
 	await fs.exec_direct('/etc/init.d/adblock-lean', [actionName]);
 	location.reload();
+}
+
+function setLaablUpdateStatus() {
+	if (statusResult && laablLatestResult) {
+		var updateStatus = document.getElementById('laabl-update-status');
+
+		/*
+		statusResult.laabl_package_info will look like this:
+			Package: luci-app-adblock-lean
+			Version: git-24.229.78998-f9aed0d
+			Depends: libc, luci-base
+			Status: install user installed
+			Architecture: all
+			Installed-Time: 1723846085
+		So we need to parse the Version: line
+		*/
+		var currentVersion = statusResult.laabl_package_info.match(/Version[:]\s?(.*?)\s/)[1];
+		console.log({statusResult, currentVersion, laablLatestResult});
+
+		if (!currentVersion) {
+			updateStatus.textContent = _('An error occurred while checking update status');
+			return;
+		}
+
+		/*
+		laablLatestResult will contain this (snipped irrelevant bits):
+			{
+				"assets": [
+					{
+						"name": "luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk",
+						"browser_download_url": "https://github.com/rickparrish/luci-app-adblock-lean/releases/download/latest/luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk"
+					}
+				],
+			}
+		So we need to check assets[0].name to see if it contains currentVersion.  If it does, we're up to date.  If it doesn't, we can update using assets[0].browser_download_url
+		*/
+		if (laablLatestResult.assets[0].name.indexOf(currentVersion) == -1) {
+			updateStatus.textContent = _('An update is available');
+		} else {
+			updateStatus.textContent = _('Up to date');
+		}
+	}
 }
 
 var statusClass = baseclass.extend({
@@ -45,8 +90,12 @@ var statusClass = baseclass.extend({
 				E('td', { 'class': 'td left', 'id': 'dnsmasq-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('Update Status')),
-				E('td', { 'class': 'td left', 'id': 'update-status' }, '-')
+				E('td', { 'class': 'td left', 'width': '33%' }, _('AdBlock Lean Update Status')),
+				E('td', { 'class': 'td left', 'id': 'abl-update-status' }, '-')
+			]),
+			E('tr', { 'class': 'tr' }, [
+				E('td', { 'class': 'td left', 'width': '33%' }, _('LuCI App Update Status')),
+				E('td', { 'class': 'td left', 'id': 'laabl-update-status' }, '-')
 			]),
 		]);
 
@@ -192,24 +241,39 @@ var statusClass = baseclass.extend({
 							break;
 					}
 
-					var updateStatus = document.getElementById('update-status');
+					// TODO Take result.update_config_format into account
+					var updateStatus = document.getElementById('abl-update-status');
 					switch (result.update_status) {
 						case 0:
-							updateStatus.textContent = _('AdBlock Lean is up to date');
+							updateStatus.textContent = _('Up to date');
 							break;
 						case 1:
-							updateStatus.textContent = _('An AdBlock Lean update is available');
+							updateStatus.textContent = _('An update is available');
 							break;
 						case 2:
-							updateStatus.textContent = _('ERROR: An error occurred while checking for an AdBlock Lean update');
+							updateStatus.textContent = _('An error occurred while checking update status');
 							break;
 						default:
 							updateStatus.textContent = _('Unknown');
 							break;
 					}
 				}
+
+				statusResult = result;
+				setLaablUpdateStatus();
 			}
 		);
+
+		// Get the latest luci-app-adblock-lean release details
+		L.get('https://api.github.com/repos/rickparrish/luci-app-adblock-lean/releases/tags/latest', '', function(xhr, data) {
+			if (data) {
+				laablLatestResult = data;
+				setLaablUpdateStatus();
+			} else {
+				var updateStatus = document.getElementById('laabl-update-status');
+				updateStatus.textContent = _('An error occurred while checking update status');
+			}
+		});
 
 		return result;
 	},
