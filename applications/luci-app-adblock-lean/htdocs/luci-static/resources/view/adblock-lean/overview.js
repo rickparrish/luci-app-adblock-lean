@@ -485,6 +485,11 @@ report_success() {\n\
 					and click <strong>Save</strong> to configure AdBlock Lean now.')
 			), 'info');
 		} else {
+			// Show the status panel
+			status = new abls.status();
+			status.showButtons = true;
+			status.showTitle = true;
+
 			// Ensure the config format matches the format we can support
 			if (loadData[0].indexOf('config_format=' + supportedConfigFormat) == -1) {
 				// Disable the save button
@@ -494,21 +499,21 @@ report_success() {\n\
 				var titleElement = E('h2', {}, _('AdBlock Lean - Unsupported Configuration'));
 
 				// Build the instruction element
-				var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file is using a newer format than this app supports.<br /><br />\
-					Check for a newer version of luci-app-adblock-lean that supports the newer format.  If one is not yet available,\
-					then you\'ll need to manually configure AdBlock Lean in the meantime.<br /><br />'));
+				var instructionElement = E('p', {}, _('The currently installed versions of adblock-lean and luci-app-adblock-lean\
+					are not compatable with each other (they do not support the same config format).<br /><br />\
+					Check the status panel above to see whether there are updates for one (or both) packages, and update as necessary.<br /><br />\
+					NOTE: adblock-lean will continue to function as expected while this incompatability exists, the only functionality\
+					you are missing out on is the configuration form.'));
 
 				// Combine the various elements into our result variable
-				return E([
+				var result = E([
+					E('p', {}, '&nbsp;'),
 					titleElement,
 					instructionElement
 				]);
-			}
 
-			// Show the status panel
-			status = new abls.status();
-			status.showButtons = true;
-			status.showTitle = true;
+				return Promise.all([status.render(), result]);
+			}
 		}
 
 		// Setup the form inputs for each config option
