@@ -27,12 +27,6 @@ scp -r applications/luci-app-adblock-lean/root/* root@OpenWrt.lan:/
 scp -r applications/luci-app-adblock-lean/htdocs/* root@OpenWrt.lan:/www/
 ```
 
-# Required adblock-lean tweaks
-
-<!-- A modified adblock-lean is required.
-[It can be downloaded here](https://raw.githubusercontent.com/friendly-bits/adblock-lean/improve-processing-logic/adblock-lean) -->
-luci-app-adblock-lean was tested with [this version of adblock-lean](https://raw.githubusercontent.com/lynxthecat/adblock-lean/f5588240dd409148d5be7bb778b1674106577c68/adblock-lean).  It may also be compatable with newer versions of adblock-lean, but if you run into problems, then that is the version I would recommend trying.
-
 # Screenshot
 
 ![image](https://github.com/user-attachments/assets/a3477e02-8cd7-4578-b9be-ac5e6d7c3971)
