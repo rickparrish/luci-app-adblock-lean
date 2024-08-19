@@ -574,9 +574,9 @@ report_success() {\n\
 			form.Value,
 			'max_file_part_size_KB',
 			_('Max file size (KB)'),
-			_('Maximum size of any individual downloaded blocklist part (1000-100000)') // TODO range
+			_('Maximum size of any individual downloaded blocklist part')
 		);
-		o.datatype = 'range(1000,100000)'; // TODO range
+		o.datatype = 'min(1)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -586,9 +586,9 @@ report_success() {\n\
 			form.Value,
 			'max_blocklist_file_size_KB',
 			_('Max total size (KB)'),
-			_('Maximum total size of combined, processed blocklist (1000-100000)') // TODO range
+			_('Maximum total size of combined, processed blocklist')
 		);
-		o.datatype = 'range(1000,100000)'; // TODO range
+		o.datatype = 'min(1)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -598,9 +598,9 @@ report_success() {\n\
 			form.Value,
 			'min_good_line_count',
 			_('Min good lines'),
-			_('Minimum number of good lines in final postprocessed blocklist (1-1000000)') // TODO range
+			_('Minimum number of good lines in final postprocessed blocklist')
 		);
-		o.datatype = 'range(1,1000000)'; // TODO range
+		o.datatype = 'min(1)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -649,9 +649,9 @@ report_success() {\n\
 			form.Value,
 			'max_download_retries',
 			_('Max download retries'),
-			_('Maximum number of download retries (1-5)') // TODO range
+			_('Maximum number of download retries')
 		);
-		o.datatype = 'range(1,5)'; // TODO range
+		o.datatype = 'min(0)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -661,9 +661,9 @@ report_success() {\n\
 			form.Value,
 			'min_blocklist_part_line_count',
 			_('Min blocklist part line count'),
-			_('Mininum number of lines of any individual downloaded part (1-100000)') // TODO range
+			_('Mininum number of lines of any individual downloaded part')
 		);
-		o.datatype = 'range(1,100000)'; // TODO range
+		o.datatype = 'min(1)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -673,9 +673,9 @@ report_success() {\n\
 			form.Value,
 			'min_allowlist_part_line_count',
 			_('Min allowlist part line count'),
-			_('Mininum number of lines of any individual downloaded part (1-100000)') // TODO range
+			_('Mininum number of lines of any individual downloaded part')
 		);
-		o.datatype = 'range(1,100000)'; // TODO range
+		o.datatype = 'min(1)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
@@ -685,9 +685,9 @@ report_success() {\n\
 			form.Value,
 			'boot_start_delay_s',
 			_('Boot start delay (seconds)'),
-			_('Start delay in seconds when service is started from system boot (0-300)') // TODO range
+			_('Start delay in seconds when service is started from system boot')
 		);
-		o.datatype = 'range(0,300)'; // TODO range		
+		o.datatype = 'min(0)';
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
