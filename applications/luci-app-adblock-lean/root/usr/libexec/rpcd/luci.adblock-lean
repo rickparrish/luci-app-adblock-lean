@@ -176,6 +176,18 @@ reset_config_rpc() {
 	# because luci will reload after resetConfig returns
 }
 
+# Call AdBlock Lean's update() function to update to the latest version
+update_abl_rpc() {
+	# If AdBlock Lean is installed, then we want to call its update method
+	if [ "$service_status_rpc" != 2 ]
+	then
+		update
+	fi
+
+	# Not sure if update exits, but it doesn't really matter either way 
+	# because luci will reload after updateConfig returns
+}
+
 # Call AdBlock Lean's load_config() function to update the outdated config file
 update_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its load_config method
@@ -188,6 +200,30 @@ update_config_rpc() {
 	# because luci will reload after updateConfig returns
 }
 
+# Install the luci-app-adblock-lean package from the given url
+update_laabl_rpc() {
+	local url="$1"
+
+	uclient-fetch "$url" -O "/tmp/luci-app-adblock-lean-latest.ipk" 1> /dev/null 2> "/tmp/luci-app-adblock-lean-fetch.err"
+	if grep -q "Download completed" "/tmp/luci-app-adblock-lean-fetch.err"
+	then
+		$(opkg install "/tmp/luci-app-adblock-lean-latest.ipk")
+		update_result="$?"
+	else
+		update_result=1
+	fi
+	rm -f "/tmp/luci-app-adblock-lean-latest.ipk" "/tmp/luci-app-adblock-lean-fetch.err"
+	
+	# Return a json response
+	# TODOX This response is never received by the luci app.  Maybe it's because installing the package reloads/restarts rpcd,
+	#       which then interferes with the active rpc call to this function.  Worth looking into, just to see if it's workaroundable,
+	#       but the important thing is the package installs, and after 20 seconds the rpc call aborts and the page reloads, so
+	#       things take a little longer than they should, but they ultimately work.
+	json_init
+	json_add_int "update_result" "$update_result"
+	json_dump
+}
+
 # Check whether this is a "list" or "call" request
 case "$1" in
 	list)
@@ -196,7 +232,9 @@ case "$1" in
 		printf '	"getStatus": { },\n'
 		printf '	"install": { },\n'
 		printf '	"resetConfig": { },\n'
-		printf '	"updateConfig": { }\n'
+		printf '	"updateAdBlockLean": { },\n'
+		printf '	"updateConfig": { },\n'
+		printf '	"updateLuciApp": { "url": "url" }\n'
 		printf '}\n'
 		;;
 	call)
@@ -216,8 +254,18 @@ case "$1" in
 			resetConfig)
 				reset_config_rpc
 				;;
+			updateAdBlockLean)
+				update_abl_rpc
+				;;
 			updateConfig)
 				update_config_rpc
+				;;
+			updateLuciApp)
+				read -r input
+				json_load "$input"
+				json_get_var url 'url'
+				json_cleanup
+				update_laabl_rpc "$url"
 				;;
 		esac
 	;;

@@ -49,7 +49,9 @@
 					"getStatus",
 					"install",
 					"resetConfig",
-					"updateConfig"
+					"updateAdBlockLean",
+					"updateConfig",
+					"updateLuciApp"
 				]
 			}
 		}

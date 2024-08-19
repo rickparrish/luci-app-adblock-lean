@@ -6,8 +6,6 @@
 'require view';
 'require adblock-lean.status as abls';
 
-const supportedConfigFormat = 'v2';
-
 let m, data;
 
 var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/';
@@ -247,7 +245,7 @@ return view.extend({
 				}
 				
 				var config = '# adblock-lean configuration options\n\
-# config_format=' + supportedConfigFormat + '\n\
+# config_format=v' + abls.supportedConfigFormat + '\n\
 #\n\
 # values must be enclosed in double-quotes\n\
 # comments must start at newline or inline after the closing double-quote\n\
@@ -491,7 +489,7 @@ report_success() {\n\
 			status.showTitle = true;
 
 			// Ensure the config format matches the format we can support
-			if (loadData[0].indexOf('config_format=' + supportedConfigFormat) == -1) {
+			if (loadData[0].indexOf('config_format=v' + abls.supportedConfigFormat) == -1) {
 				// Disable the save button
 				this.handleSave = null;
 
