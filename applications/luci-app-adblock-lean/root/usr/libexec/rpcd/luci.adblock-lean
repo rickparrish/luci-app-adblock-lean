@@ -103,17 +103,28 @@ install_rpc() {
 	opkg update
 	opkg install gawk coreutils-sort
 
-	# Example installation steps:
-	# TODOX Needs error checking
-	wget https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean -O /etc/init.d/adblock-lean
-	chmod +x /etc/init.d/adblock-lean
-	service adblock-lean gen_config # generates default config in /root/adblock-lean/config
-	#vi /root/adblock-lean/config # modify default config as required
-	uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit # to enable use of compressed blocklist
-	service adblock-lean enable
+	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean -O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
+	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err"
+	then
+		mv /tmp/adblock-lean-latest /etc/init.d/adblock-lean
+		chmod +x /etc/init.d/adblock-lean
+		service adblock-lean gen_config   # generates default config in /root/adblock-lean/config
+		uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit   # Optional/recommended.  Enables blocklist compression to reduce RAM usage
+		service adblock-lean enable   # this will allow the script to automatically run on boot
 
-	# RPC calls abort after 30 seconds, so can't do a 'service adblock-lean start' here.  Which is probably a good thing,
-	# user should be presented with the Overview page where they can change the settings they want to change first anyway.
+		# RPC calls abort after 30 seconds, so can't do a 'service adblock-lean start' here.  Which is probably a good thing,
+		# user should be presented with the Overview page where they can change the settings they want to change first anyway.
+
+		install_result=0
+	else
+		install_result=1
+	fi
+	rm -f /tmp/adblock-lean-latest /tmp/adblock-lean-fetch.err
+
+	# Return a json response
+	json_init
+	json_add_int "install_result" "$install_result"
+	json_dump
 }
 
 # Perform some additional status-related checks, and then output the JSON response payload
