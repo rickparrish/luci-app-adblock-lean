@@ -5,6 +5,7 @@ SET HOME=%USERPROFILE%
 SET CWOLDPATH=%PATH%
 SET PATH=%CYGWINHOME%\BIN;%PATH%
 
+ssh root@OpenWrt.lan opkg remove luci-app-adblock-lean
 ssh root@OpenWrt.lan rm -rf /www/luci-static/resources/adblock-lean
 ssh root@OpenWrt.lan rm -rf /www/luci-static/resources/view/adblock-lean
 ssh root@OpenWrt.lan rm /www/luci-static/resources/view/status/include/70_adblock-lean.js
