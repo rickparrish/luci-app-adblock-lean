@@ -1,0 +1,53 @@
+# adblock-lean configuration options
+# config_format=v2
+#
+# values must be enclosed in double-quotes
+# comments must start at newline or inline after the closing double-quote
+
+# One or more dnsmasq blocklist urls separated by spaces
+blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.mini.txt"
+
+# One or more allowlist urls separated by spaces
+allowlist_urls=""
+
+# Path to optional local allowlist/blocklist files in the form:
+# site1.com
+# site2.com
+local_allowlist_path="/root/adblock-lean/allowlist"
+local_blocklist_path="/root/adblock-lean/blocklist"
+
+# Mininum number of lines of any individual downloaded part
+min_blocklist_part_line_count="1"
+min_allowlist_part_line_count="1"
+# Maximum size of any individual downloaded blocklist part
+max_file_part_size_KB="20000"
+# Maximum total size of combined, processed blocklist
+max_blocklist_file_size_KB="30000"
+# Minimum number of good lines in final postprocessed blocklist
+min_good_line_count="100000"
+
+# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
+use_compression="1"
+
+# restart dnsmasq if previous blocklist was extracted and before generation of
+# new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)
+initial_dnsmasq_restart="0"
+
+# Maximum number of download retries
+max_download_retries="3"
+
+# List part failed action:
+# This option applies to blocklist/allowlist parts which failed to download or couldn't pass validation checks
+# SKIP - skip failed blocklist file part and continue blocklist generation
+# STOP - stop blocklist generation (and fall back to previous blocklist if available)
+list_part_failed_action="SKIP"
+
+# If a path to custom script is specified and that script defines functions 'report_success()' and 'report_failure()'',
+# one of these functions will be executed when adblock-lean completes the execution of some commands,
+# with the success or failure message passed in first argument
+# report_success() is only executed upon completion of the 'start' command
+# Recommended path is '/usr/libexec/abl_custom-script.sh' which the luci app has permission to access
+custom_script=""
+
+# Start delay in seconds when service is started from system boot
+boot_start_delay_s="120"

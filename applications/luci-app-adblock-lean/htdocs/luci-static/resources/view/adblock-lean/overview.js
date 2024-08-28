@@ -167,7 +167,7 @@ function parseConfig(config) {
 			'max_file_part_size_KB': 20000,
 			'max_blocklist_file_size_KB': 30000,
 			'min_good_line_count': 100000,
-			'compress_blocklist': 1,
+			'use_compression': 1,
 			'initial_dnsmasq_restart': 0,
 			'max_download_retries': 3,
 			'list_part_failed_action': 'SKIP',
@@ -272,8 +272,8 @@ max_blocklist_file_size_KB="' + data.config.max_blocklist_file_size_KB + '"\n\
 # Minimum number of good lines in final postprocessed blocklist\n\
 min_good_line_count="' + data.config.min_good_line_count + '"\n\
 \n\
-# compress blocklist to save memory once blocklist has been loaded - enable (1) or disable (0)\n\
-compress_blocklist="' + ((data.config.compress_blocklist ?? false) ? '1' : '0') + '"\n\
+# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)\n\
+use_compression="' + ((data.config.use_compression ?? false) ? '1' : '0') + '"\n\
 \n\
 # restart dnsmasq if previous blocklist was extracted and before generation of\n\
 # new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)\n\
@@ -608,9 +608,9 @@ report_success() {\n\
 		o = s.taboption(
 			'general',
 			form.Flag,
-			'compress_blocklist',
-			_('Compress blocklist'),
-			_('Compress blocklist to save memory once blocklist has been loaded')
+			'use_compression',
+			_('Use compression'),
+			_('Compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory')
 		);
 
 		o = s.taboption(
