@@ -370,7 +370,7 @@ report_success() {\n\
 			var instructionElement = E('p', {}, _('AdBlock Lean is not currently installed on your system.<br /><br />\
 				To automatically install it now, click the Install button below.  Or to install it manually,\
 				<a href="https://github.com/lynxthecat/adblock-lean" target="_blank">follow the instructions here</a>.<br /><br />\
-				NOTE: The Install button will also install the <strong>gawk</strong> and <strong>coreutils-sort</strong> packages,\
+				NOTE: The Install button will also install the <strong>gawk, coreutils-sort,</strong> and <strong>sed</strong> packages,\
 				which will improve performance.<br /><br />'));
 
 			var buttonElement = E('button', {
