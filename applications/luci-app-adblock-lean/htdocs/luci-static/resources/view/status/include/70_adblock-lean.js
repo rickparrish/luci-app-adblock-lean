@@ -18,7 +18,7 @@ return baseclass.extend({
 		lastLoad = currentSeconds;
 
 		return Promise.all([
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), '')
+			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), '')
 		]);
 	},
 

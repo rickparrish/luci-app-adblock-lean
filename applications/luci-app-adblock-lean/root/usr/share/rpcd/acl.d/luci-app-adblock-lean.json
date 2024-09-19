@@ -3,7 +3,7 @@
 		"description": "Grant access to LuCI app AdBlock Lean",
 		"write": {
 			"file": {
-				"/root/adblock-lean/*": [
+				"/etc/adblock-lean/*": [
 					"read",
 					"write"
 				],

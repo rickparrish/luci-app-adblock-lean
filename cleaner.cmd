@@ -12,7 +12,7 @@ ssh root@OpenWrt.lan service adblock-lean disable
 ssh root@OpenWrt.lan rm /etc/rc.d/K4adblock-lean
 ssh root@OpenWrt.lan rm /etc/rc.d/S99adblock-lean
 ssh root@OpenWrt.lan rm /etc/init.d/adblock-lean
-ssh root@OpenWrt.lan rm -rf /root/adblock-lean
+ssh root@OpenWrt.lan rm -rf /etc/adblock-lean
 ssh root@OpenWrt.lan rm -rf /tmp/adblock-lean
 ssh root@OpenWrt.lan rm -rf /tmp/run/adblock-lean
 ssh root@OpenWrt.lan rm /usr/libexec/abl_custom-script.sh

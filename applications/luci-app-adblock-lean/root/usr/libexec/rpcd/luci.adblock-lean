@@ -64,7 +64,7 @@ check_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its parse_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
-		parse_config "/root/adblock-lean/config"
+		parse_config "/etc/adblock-lean/config"
 		config_status_rpc="$?"
 	fi
 
@@ -108,7 +108,7 @@ install_rpc() {
 	then
 		mv /tmp/adblock-lean-latest /etc/init.d/adblock-lean
 		chmod +x /etc/init.d/adblock-lean
-		service adblock-lean gen_config   # generates default config in /root/adblock-lean/config
+		service adblock-lean gen_config   # generates default config in /etc/adblock-lean/config
 		uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit   # Optional/recommended.  Enables blocklist compression to reduce RAM usage
 		service adblock-lean enable   # this will allow the script to automatically run on boot
 

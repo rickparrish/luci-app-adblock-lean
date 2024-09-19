@@ -8,41 +8,40 @@
 
 let m, data;
 
-var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/';
+var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/';
 var hageziBlocklists = [
-	{ filename: 'light.txt', name: 'Multi LIGHT' },
-	{ filename: 'multi.txt', name: 'Multi NORMAL' },
-	{ filename: 'pro.txt', name: 'Multi PRO' },
-	{ filename: 'pro.mini.txt', name: 'Multi PRO mini' },
-	{ filename: 'pro.plus.txt', name: 'Multi PRO++' },
-	{ filename: 'pro.plus.mini.txt', name: 'Multi PRO++ mini ' },
-	{ filename: 'ultimate.txt', name: 'Multi ULTIMATE' },
-	{ filename: 'ultimate.mini.txt', name: 'Multi ULTIMATE mini ' },
-	{ filename: 'fake.txt', name: 'Fake' },
-	{ filename: 'popupads.txt', name: 'Pop-Up Ads' },
-	{ filename: 'tif.txt', name: 'Threat Intelligence Feeds' },
-	{ filename: 'tif.medium.txt', name: 'Threat Intelligence Feeds - Medium' },
-	{ filename: 'tif.mini.txt', name: 'Threat Intelligence Feeds - Mini' },
-	{ filename: 'tif-ips.txt', name: 'Threat Intelligence Feeds - IPs' },
-	{ filename: 'doh-vpn-proxy-bypass.txt', name: 'DoH/VPN/TOR/Proxy Bypass' },
-	{ filename: 'doh.txt', name: 'Encrypted DNS Servers' },
-	{ filename: 'nosafesearch.txt', name: 'Safesearch not supported' },
-	{ filename: 'dyndns.txt', name: 'Dynamic DNS' },
-	{ filename: 'hoster.txt', name: 'Badware Hoster' },
-	{ filename: 'anti.piracy.txt', name: 'Anti Piracy' },
-	{ filename: 'gambling.txt', name: 'Gambling' },
-	{ filename: 'gambling.medium.txt', name: 'Gambling - Medium' },
-	{ filename: 'gambling.mini.txt', name: 'Gambling - Mini' },
-	{ filename: 'native.amazon.txt', name: 'Native Tracker - Amazon' },
-	{ filename: 'native.apple.txt', name: 'Native Tracker - Apple' },
-	{ filename: 'native.huawei.txt', name: 'Native Tracker - Huawei' },
-	{ filename: 'native.winoffice.txt', name: 'Native Tracker - Microsoft' },
-	{ filename: 'native.tiktok.txt', name: 'Native Tracker - TikTok' },
-	{ filename: 'native.tiktok.extended.txt', name: 'Native Tracker - TikTok Aggressive' },
-	{ filename: 'native.lgwebos.txt', name: 'Native Tracker - LG webOS' },
-	{ filename: 'native.vivo.txt', name: 'Native Tracker - Vivo' },
-	{ filename: 'native.oppo-realme.txt', name: 'Native Tracker - OPPO/Realme' },
-	{ filename: 'native.xiaomi.txt', name: 'Native Tracker - Xiaomi' },
+	{ filename: 'light', name: 'Multi LIGHT' },
+	{ filename: 'multi', name: 'Multi NORMAL' },
+	{ filename: 'pro', name: 'Multi PRO' },
+	{ filename: 'pro.mini', name: 'Multi PRO mini' },
+	{ filename: 'pro.plus', name: 'Multi PRO++' },
+	{ filename: 'pro.plus.mini', name: 'Multi PRO++ mini ' },
+	{ filename: 'ultimate', name: 'Multi ULTIMATE' },
+	{ filename: 'ultimate.mini', name: 'Multi ULTIMATE mini ' },
+	{ filename: 'fake', name: 'Fake' },
+	{ filename: 'popupads', name: 'Pop-Up Ads' },
+	{ filename: 'tif', name: 'Threat Intelligence Feeds' },
+	{ filename: 'tif.medium', name: 'Threat Intelligence Feeds - Medium' },
+	{ filename: 'tif.mini', name: 'Threat Intelligence Feeds - Mini' },
+	{ filename: 'doh-vpn-proxy-bypass', name: 'DoH/VPN/TOR/Proxy Bypass' },
+	{ filename: 'doh', name: 'Encrypted DNS Servers' },
+	{ filename: 'nosafesearch', name: 'Safesearch not supported' },
+	{ filename: 'dyndns', name: 'Dynamic DNS' },
+	{ filename: 'hoster', name: 'Badware Hoster' },
+	{ filename: 'anti.piracy', name: 'Anti Piracy' },
+	{ filename: 'gambling', name: 'Gambling' },
+	{ filename: 'gambling.medium', name: 'Gambling - Medium' },
+	{ filename: 'gambling.mini', name: 'Gambling - Mini' },
+	{ filename: 'native.amazon', name: 'Native Tracker - Amazon' },
+	{ filename: 'native.apple', name: 'Native Tracker - Apple' },
+	{ filename: 'native.huawei', name: 'Native Tracker - Huawei' },
+	{ filename: 'native.winoffice', name: 'Native Tracker - Microsoft' },
+	{ filename: 'native.tiktok', name: 'Native Tracker - TikTok' },
+	{ filename: 'native.tiktok.extended', name: 'Native Tracker - TikTok Aggressive' },
+	{ filename: 'native.lgwebos', name: 'Native Tracker - LG webOS' },
+	{ filename: 'native.vivo', name: 'Native Tracker - Vivo' },
+	{ filename: 'native.oppo-realme', name: 'Native Tracker - OPPO/Realme' },
+	{ filename: 'native.xiaomi', name: 'Native Tracker - Xiaomi' },
 ];
 
 var checkConfig = rpc.declare({
@@ -149,20 +148,29 @@ function parseConfig(config) {
 			.reduce((acc, [key, value]) => (acc[key] = value, acc), {});
 
 		// *_urls need to be an array, not a space-separated string
-		result.allowlist_urls = result.allowlist_urls ? result.allowlist_urls.split(' ') : [];
 		result.blocklist_urls = result.blocklist_urls ? result.blocklist_urls.split(' ') : [];
+		result.blocklist_ipv4_urls = result.blocklist_ipv4_urls ? result.blocklist_ipv4_urls.split(' ') : [];
+		result.allowlist_urls = result.allowlist_urls ? result.allowlist_urls.split(' ') : [];
+		result.dnsmasq_blocklist_urls = result.dnsmasq_blocklist_urls ? result.dnsmasq_blocklist_urls.split(' ') : [];
+		result.dnsmasq_blocklist_ipv4_urls = result.dnsmasq_blocklist_ipv4_urls ? result.dnsmasq_blocklist_ipv4_urls.split(' ') : [];
+		result.dnsmasq_allowlist_urls = result.dnsmasq_allowlist_urls ? result.dnsmasq_allowlist_urls.split(' ') : [];
 	} else {
 		// No existing config file, so set defaults
 		result = {
 			'blocklist_urls': [
-				hageziBaseUrl + 'pro.txt',
-				hageziBaseUrl + 'tif.mini.txt'
+				hageziBaseUrl + 'pro',
+				hageziBaseUrl + 'tif.mini'
 			],
-			'allowlist_urls': [
-			],
-			'local_allowlist_path': '/root/adblock-lean/allowlist',
-			'local_blocklist_path': '/root/adblock-lean/blocklist',
+			'blocklist_ipv4_urls': [],
+			'allowlist_urls': [],
+			'dnsmasq_blocklist_urls': [],
+			'dnsmasq_blocklist_ipv4_urls': [],
+			'dnsmasq_allowlist_urls': [],
+			'local_allowlist_path': '/etc/adblock-lean/allowlist',
+			'local_blocklist_path': '/etc/adblock-lean/blocklist',
+			'deduplication': 1,
 			'min_blocklist_part_line_count': 1,
+			'min_blocklist_ipv4_part_line_count': 1,
 			'min_allowlist_part_line_count': 1,
 			'max_file_part_size_KB': 20000,
 			'max_blocklist_file_size_KB': 30000,
@@ -244,31 +252,43 @@ return view.extend({
 					data.config.custom_script = '';
 				}
 				
-				var config = '# adblock-lean configuration options\n\
+				var config = '\n\
+# adblock-lean configuration options\n\
 # config_format=v' + abls.supportedConfigFormat + '\n\
 #\n\
 # values must be enclosed in double-quotes\n\
 # comments must start at newline or inline after the closing double-quote\n\
 \n\
-# One or more dnsmasq blocklist urls separated by spaces\n\
+# One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
 blocklist_urls="' + combined_blocklist_urls.join(' ') + '"\n\
-\n\
-# One or more allowlist urls separated by spaces\n\
+blocklist_ipv4_urls="' + (data.config.blocklist_ipv4_urls ?? []).join(' ') + '"\n\
 allowlist_urls="' + (data.config.allowlist_urls ?? []).join(' ') + '"\n\
 \n\
-# Path to optional local allowlist/blocklist files in the form:\n\
+# One or more *dnsmasq format* domain blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
+dnsmasq_blocklist_urls="' + (data.config.dnsmasq_blocklist_urls ?? []).join(' ') + '"\n\
+dnsmasq_blocklist_ipv4_urls="' + (data.config.dnsmasq_blocklist_ipv4_urls ?? []).join(' ') + '"\n\
+dnsmasq_allowlist_urls="' + (data.config.dnsmasq_allowlist_urls ?? []).join(' ') + '"\n\
+\n\
+# Path to optional local raw allowlist/blocklist domain files in the form:\n\
 # site1.com\n\
 # site2.com\n\
 local_allowlist_path="' + data.config.local_allowlist_path + '"\n\
 local_blocklist_path="' + data.config.local_blocklist_path + '"\n\
 \n\
+# Whether to perform sorting and deduplication of entries (usually doesn\'t cause much slowdown, uses a bit more memory) - enable (1) or disable (0)\n\
+deduplication="' + ((data.config.deduplication ?? false) ? '1' : '0') + '"\n\
+\n\
 # Mininum number of lines of any individual downloaded part\n\
 min_blocklist_part_line_count="' + data.config.min_blocklist_part_line_count + '"\n\
+min_blocklist_ipv4_part_line_count="' + data.config.min_blocklist_ipv4_part_line_count + '"\n\
 min_allowlist_part_line_count="' + data.config.min_allowlist_part_line_count + '"\n\
+\n\
 # Maximum size of any individual downloaded blocklist part\n\
 max_file_part_size_KB="' + data.config.max_file_part_size_KB + '"\n\
+\n\
 # Maximum total size of combined, processed blocklist\n\
 max_blocklist_file_size_KB="' + data.config.max_blocklist_file_size_KB + '"\n\
+\n\
 # Minimum number of good lines in final postprocessed blocklist\n\
 min_good_line_count="' + data.config.min_good_line_count + '"\n\
 \n\
@@ -299,7 +319,7 @@ custom_script="' + data.config.custom_script + '"\n\
 boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n';
 
 				// Save config file
-				return fs.write('/root/adblock-lean/config', config)
+				return fs.write('/etc/adblock-lean/config', config)
 					.then(function () {
 						document.body.scrollTop = document.documentElement.scrollTop = 0;
 						ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
@@ -321,7 +341,9 @@ report_failure() {\n\
 	# mailsend -port 587 -smtp smtp-relay.sendinblue.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user SENDINBLUE@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Failure Report" -M "$1"\n\
 \n\
 	# Example to request an http(s) url:\n\
-	# curl -fsS -m 10 --retry 5 --data-raw "$1" https://hc-ping.com/<uuid>/fail\n\
+	# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>/fail\n\
+\n\
+	:\n\
 }\n\
 \n\
 report_success() {\n\
@@ -329,7 +351,9 @@ report_success() {\n\
 	# mailsend -port 587 -smtp smtp-relay.sendinblue.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user SENDINBLUE@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Success Report" -M "$1"\n\
 \n\
 	# Example to request an http(s) url:\n\
-	# curl -fsS -m 10 --retry 5 --data-raw "$1" https://hc-ping.com/<uuid>\n\
+	# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>\n\
+\n\
+	:\n\
 }\n');
 									}
 								});
@@ -347,7 +371,7 @@ report_success() {\n\
 
 	load: function () {
 		return Promise.all([
-			L.resolveDefault(fs.read_direct('/root/adblock-lean/config'), ''),
+			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), ''),
 			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
 			L.resolveDefault(checkConfig(), '')
 		]);
@@ -544,7 +568,7 @@ report_success() {\n\
 
 		for (var i = 0; i < hageziBlocklists.length; i++) {
 			var blocklist = hageziBlocklists[i];
-			o.value(hageziBaseUrl + blocklist.filename, blocklist.name);
+			o.value(hageziBaseUrl + blocklist.filename + '-onlydomains.txt', blocklist.name);
 		}
 
 		o = s.taboption(
@@ -604,6 +628,14 @@ report_success() {\n\
 		o.optional = false;
 		o.retain = true;
 		o.rmempty = false;
+
+		o = s.taboption(
+			'general',
+			form.Flag,
+			'deduplication',
+			_('Deduplication'),
+			_('Whether to perform sorting and deduplication of entries (usually doesn\'t cause much slowdown, uses a bit more memory)')
+		);
 
 		o = s.taboption(
 			'general',

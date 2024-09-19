@@ -4,7 +4,7 @@
 'require rpc';
 'require ui';
 
-const supportedConfigFormat = 2;
+const supportedConfigFormat = 3;
 
 var getStatus = rpc.declare({
 	object: 'luci.adblock-lean',
@@ -52,6 +52,15 @@ async function handleRpc(actionFunc, actionLabel) {
 function setLaablUpdateStatus(showButtons) {
 	if (statusResult && laablLatestResult) {
 		var updateStatus = document.getElementById('laabl-update-status');
+
+		/*
+		If the luci app is not installed, then statusResult.laabl_package_info will be blank.
+		This shouldn't ever happen to anyone but me, so we'll report it as an error condition.
+		*/
+		if (!statusResult.laabl_package_info) {
+			updateStatus.textContent = _('An error occurred while checking update status');
+			return;
+		}
 
 		/*
 		statusResult.laabl_package_info will look like this:
