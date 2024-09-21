@@ -6,6 +6,10 @@
 # ubus -v call luci.adblock-lean getStatus
 # ubus -v call luci.adblock-lean install
 
+# Exported variables for when adblock-lean is called via a service command isntead of sourced (eg during install)
+export luci_preset=auto		# When gen_config is called, use the recommended preset
+export luci_skip_dialogs=1	# Ensure adblock-lean never shows a dialog/prompt for the user
+
 # Global variables coming from adblock-lean
 luci_bad_conf_format=-1		# 1 = Current config format is older than default config version
 luci_conf_fixes=""			# \n separated list of necessary config fixes
