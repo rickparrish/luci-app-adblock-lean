@@ -4,7 +4,7 @@
 'require rpc';
 'require ui';
 
-const supportedConfigFormat = 3;
+const supportedConfigFormat = 4;
 
 var getStatus = rpc.declare({
 	object: 'luci.adblock-lean',

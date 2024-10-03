@@ -181,6 +181,7 @@ function parseConfig(config) {
 			'list_part_failed_action': 'SKIP',
 			'custom_script': '',
 			'boot_start_delay_s': 120,
+			'cron_schedule': 'disable',
 		};
 	}
 
@@ -316,7 +317,11 @@ list_part_failed_action="' + data.config.list_part_failed_action + '"\n\
 custom_script="' + data.config.custom_script + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
-boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n';
+boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n\
+\n\
+# Crontab schedule expression for periodic list updates\n\
+cron_schedule="' + data.config.cron_schedule + '"\n\
+';
 
 				// Save config file
 				return fs.write('/etc/adblock-lean/config', config)
