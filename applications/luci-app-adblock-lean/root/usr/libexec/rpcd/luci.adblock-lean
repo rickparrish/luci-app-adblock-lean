@@ -224,6 +224,7 @@ update_laabl_rpc() {
 	then
 		$(opkg install "/tmp/luci-app-adblock-lean-latest.ipk")
 		update_result="$?"
+		service rpcd reload
 	else
 		update_result=1
 	fi
