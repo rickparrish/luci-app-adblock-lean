@@ -1,33 +1,45 @@
+
 # adblock-lean configuration options
-# config_format=v2
+# config_format=v4
 #
 # values must be enclosed in double-quotes
 # comments must start at newline or inline after the closing double-quote
 
-# One or more dnsmasq blocklist urls separated by spaces
-blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.mini.txt"
-
-# One or more allowlist urls separated by spaces
+# One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces
+blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif-onlydomains.txt"
+blocklist_ipv4_urls=""
 allowlist_urls=""
 
-# Path to optional local allowlist/blocklist files in the form:
+# One or more *dnsmasq format* domain blocklist/ipv4 blocklist/allowlist urls separated by spaces
+dnsmasq_blocklist_urls=""
+dnsmasq_blocklist_ipv4_urls=""
+dnsmasq_allowlist_urls=""
+
+# Path to optional local raw allowlist/blocklist domain files in the form:
 # site1.com
 # site2.com
-local_allowlist_path="/root/adblock-lean/allowlist"
-local_blocklist_path="/root/adblock-lean/blocklist"
+local_allowlist_path="/etc/adblock-lean/allowlist"
+local_blocklist_path="/etc/adblock-lean/blocklist"
+
+# Whether to perform sorting and deduplication of entries (usually doesn't cause much slowdown, uses a bit more memory) - enable (1) or disable (0)
+deduplication="1"
 
 # Mininum number of lines of any individual downloaded part
 min_blocklist_part_line_count="1"
+min_blocklist_ipv4_part_line_count="1"
 min_allowlist_part_line_count="1"
-# Maximum size of any individual downloaded blocklist part
-max_file_part_size_KB="20000"
-# Maximum total size of combined, processed blocklist
-max_blocklist_file_size_KB="30000"
-# Minimum number of good lines in final postprocessed blocklist
-min_good_line_count="100000"
 
-# compress blocklist to save memory once blocklist has been loaded - enable (1) or disable (0)
-compress_blocklist="1"
+# Maximum size of any individual downloaded blocklist part
+max_file_part_size_KB="30000"
+
+# Maximum total size of combined, processed blocklist
+max_blocklist_file_size_KB="50000"
+
+# Minimum number of good lines in final postprocessed blocklist
+min_good_line_count="200000"
+
+# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
+use_compression="1"
 
 # restart dnsmasq if previous blocklist was extracted and before generation of
 # new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)
@@ -51,3 +63,6 @@ custom_script=""
 
 # Start delay in seconds when service is started from system boot
 boot_start_delay_s="120"
+
+# Crontab schedule expression for periodic list updates
+cron_schedule="disable"
