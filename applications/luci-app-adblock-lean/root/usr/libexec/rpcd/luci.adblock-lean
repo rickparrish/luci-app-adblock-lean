@@ -222,7 +222,7 @@ update_laabl_rpc() {
 	uclient-fetch "$url" -O "/tmp/luci-app-adblock-lean-latest.ipk" 1> /dev/null 2> "/tmp/luci-app-adblock-lean-fetch.err"
 	if grep -q "Download completed" "/tmp/luci-app-adblock-lean-fetch.err"
 	then
-		$(opkg install "/tmp/luci-app-adblock-lean-latest.ipk")
+		opkg install "/tmp/luci-app-adblock-lean-latest.ipk"
 		update_result="$?"
 		service rpcd reload
 	else
