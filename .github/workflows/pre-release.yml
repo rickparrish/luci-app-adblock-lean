@@ -44,11 +44,10 @@ jobs:
         run: wget https://raw.githubusercontent.com/openwrt/luci/openwrt-23.05/luci.mk
 
       - name: Build
-        uses: openwrt/gh-action-sdk@v5
+        uses: openwrt/gh-action-sdk@v7
         env:
           ARCH: ${{ matrix.arch }}-${{ env.BRANCH }}
           FEEDNAME: packages_ci
-          NO_DEFAULT_FEEDS: true
 
       - name: Move created packages to project dir
         run: cp bin/packages/${{ matrix.arch }}/packages_ci/*.ipk . || true
