@@ -44,7 +44,7 @@ jobs:
         run: wget https://raw.githubusercontent.com/openwrt/luci/openwrt-23.05/luci.mk
 
       - name: Build
-        uses: openwrt/gh-action-sdk@v7
+        uses: openwrt/gh-action-sdk@v6
         env:
           ARCH: ${{ matrix.arch }}-${{ env.BRANCH }}
           FEEDNAME: packages_ci
