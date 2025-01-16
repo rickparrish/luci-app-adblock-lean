@@ -43,6 +43,9 @@ jobs:
       - name: Download luci.mk
         run: wget https://raw.githubusercontent.com/openwrt/luci/openwrt-23.05/luci.mk
 
+      - name: Create dummy feeds.conf.default
+        run: echo "" >> feeds.conf.default
+
       - name: Build
         uses: openwrt/gh-action-sdk@v6
         env:
