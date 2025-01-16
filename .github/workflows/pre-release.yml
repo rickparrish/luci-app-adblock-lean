@@ -29,7 +29,7 @@ jobs:
 
       - name: Determine branch name
         run: |
-          BRANCH="main"
+          BRANCH="23.05.5"
           echo "Building for $BRANCH"
           echo "BRANCH=$BRANCH" >> $GITHUB_ENV
 
@@ -42,9 +42,6 @@ jobs:
 
       - name: Download luci.mk
         run: wget https://raw.githubusercontent.com/openwrt/luci/openwrt-23.05/luci.mk
-
-      - name: Create dummy feeds.conf.default
-        run: echo "" >> feeds.conf.default
 
       - name: Build
         uses: openwrt/gh-action-sdk@v6
