@@ -27,6 +27,19 @@ luci_unexp_keys=""			# \n separated list of config keys that are no longer used 
 luci_upd_config_format=-1   # Config format supported by adblock-lean update (when luci_update_status=1)
 luci_update_status=-1		# 0 = Up-to-date, 1 = Update available, 2 = Error checking
 
+# Global variables defined by adblock-lean setup() API
+## Directive variables
+luci_use_old_config=""		# Setting this variable will make setup() load and re-use existing config if it exists (skips gen_config)
+luci_install_packages=""	# Whitespace-separated list of utils to install, where util can be: <sed|sort|awk>
+							# If set, only missing packages are installed. If not set, packages installation is skipped.
+
+## Feedback variables defined by adblock-lean setup() API
+## setup() will set these to '1' and later unset when corresponding action succeeds
+luci_addnmount_failed=""
+luci_service_enable_failed=""
+luci_pkgs_install_failed=""
+luci_cron_job_creation_failed=""
+
 # Global variables set in this RPC script
 blocklist_age_s_rpc=-1		# Number of seconds since the blocklist was last modified
 blocklist_status_rpc=-1		# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
@@ -103,25 +116,27 @@ get_status_rpc() {
 }
 
 install_rpc() {
-	# Whilst AdBlock Lean does not require any dependencies to run, its performance can be improved by installing gawk, coreutils-sort, and sed
-	opkg update
-	opkg install gawk coreutils-sort sed
+	luci_use_old_config=1 # Remove this line if retaining the old config doesn't make sense
+	luci_install_packages="sed sort awk" # Maybe later implement options for the user to decide which packages they want to install
 
-	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean -O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
-	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err"
-	then
-		mv /tmp/adblock-lean-latest /etc/init.d/adblock-lean
-		chmod +x /etc/init.d/adblock-lean
-		service adblock-lean gen_config   # generates default config in /etc/adblock-lean/config
-		uci add_list dhcp.@dnsmasq[0].addnmount='/bin/busybox' && uci commit   # Optional/recommended.  Enables blocklist compression to reduce RAM usage
-		service adblock-lean enable   # this will allow the script to automatically run on boot
+	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean \
+		-O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
+	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err" &&
+			mv /tmp/adblock-lean-latest "$adblockLeanFilename"; then
+		if . "$adblockLeanFilename"; then
+			setup
+			install_result=$?
 
-		# RPC calls abort after 30 seconds, so can't do a 'service adblock-lean start' here.  Which is probably a good thing,
-		# user should be presented with the Overview page where they can change the settings they want to change first anyway.
-
-		install_result=0
+			# Optionally use following variables to check which setup actions failed:
+			# $luci_addnmount_failed
+			# $luci_service_enable_failed
+			# $luci_pkgs_install_failed
+			# $luci_cron_job_creation_failed
+		else
+			install_result=3 # this indicates error while initializing the script
+		fi
 	else
-		install_result=1
+		install_result=2 # this indicates download error
 	fi
 	rm -f /tmp/adblock-lean-latest /tmp/adblock-lean-fetch.err
 
