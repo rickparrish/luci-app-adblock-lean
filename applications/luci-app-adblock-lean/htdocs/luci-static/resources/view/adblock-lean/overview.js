@@ -495,38 +495,40 @@ report_success() {\n\
 				buttonElement,
 				manualInstructionElement
 			]);
-		} else if (loadData[2].config_status == 1) {
-			// Disable the save button
-			this.handleSave = null;
+		// TODOX config_status is coming back as 1, indicating an error, but when checking the config by running /etc/init.d/adblock-lean status
+		//       it doesn't complain about any issues.  I guess something changed that is causing the parse_config call in the rpcd script to fail?
+		// } else if (loadData[2].config_status == 1) {
+		// 	// Disable the save button
+		// 	this.handleSave = null;
 
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
+		// 	// Build the title element
+		// 	var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
 
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
-				To automatically reset it now, click the Reset button below.  Or to fix it manually,\
-				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
+		// 	// Build the instruction element
+		// 	var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
+		// 		To automatically reset it now, click the Reset button below.  Or to fix it manually,\
+		// 		SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
 
-			var buttonElement = E('button', {
-				'class': 'btn cbi-button cbi-button-positive',
-				'click': ui.createHandlerFn(this, function () { 
-					ui.showModal(null, [
-						E('p',
-							{ class: 'spinning' },
-							_('Resetting AdBlock Lean configuration file')
-						),
-					]);
-					L.resolveDefault(resetConfig())
-						.then(function (result) { location.reload() });
-				}),
-			}, [_('Reset Configuration File')]);
+		// 	var buttonElement = E('button', {
+		// 		'class': 'btn cbi-button cbi-button-positive',
+		// 		'click': ui.createHandlerFn(this, function () { 
+		// 			ui.showModal(null, [
+		// 				E('p',
+		// 					{ class: 'spinning' },
+		// 					_('Resetting AdBlock Lean configuration file')
+		// 				),
+		// 			]);
+		// 			L.resolveDefault(resetConfig())
+		// 				.then(function (result) { location.reload() });
+		// 		}),
+		// 	}, [_('Reset Configuration File')]);
 
-			// Combine the various elements into our result variable
-			return E([
-				titleElement,
-				instructionElement,
-				buttonElement
-			]);
+		// 	// Combine the various elements into our result variable
+		// 	return E([
+		// 		titleElement,
+		// 		instructionElement,
+		// 		buttonElement
+		// 	]);
 		}
 
 		if (loadData[0] == '') {
