@@ -1,6 +1,6 @@
 
 # adblock-lean configuration options
-# config_format=v5
+# config_format=v6
 #
 # values must be enclosed in double-quotes
 # custom comments are not preserved after automatic config update
@@ -11,7 +11,7 @@
 whitelist_mode="0"
 
 # One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces
-blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif-onlydomains.txt"
+blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.mini-onlydomains.txt"
 blocklist_ipv4_urls=""
 allowlist_urls=""
 
@@ -43,7 +43,7 @@ list_part_failed_action="SKIP"
 max_download_retries="3"
 
 # Minimum number of good lines in final postprocessed blocklist
-min_good_line_count="200000"
+min_good_line_count="20000"
 
 # Mininum number of lines of any individual downloaded part
 min_blocklist_part_line_count="1"
@@ -51,10 +51,10 @@ min_blocklist_ipv4_part_line_count="1"
 min_allowlist_part_line_count="1"
 
 # Maximum size of any individual downloaded blocklist part
-max_file_part_size_KB="30000"
+max_file_part_size_KB="2000"
 
 # Maximum total size of combined, processed blocklist
-max_blocklist_file_size_KB="50000"
+max_blocklist_file_size_KB="2000"
 
 # Whether to perform sorting and deduplication of entries (usually doesn't cause much slowdown, uses a bit more memory) - enable (1) or disable (0)
 deduplication="1"
@@ -78,3 +78,9 @@ custom_script=""
 
 # Crontab schedule expression for periodic list updates
 cron_schedule="disable"
+
+# dnsmasq instance and config directory
+# normally this should be set automatically by the 'setup' command
+DNSMASQ_INSTANCE="cfg01411c"
+DNSMASQ_INDEX="0"
+DNSMASQ_CONF_D="/tmp/dnsmasq.d"
