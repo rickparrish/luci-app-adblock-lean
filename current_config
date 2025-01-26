@@ -1,4 +1,6 @@
 # adblock-lean configuration options
+# config_format=v2
+#
 # values must be enclosed in double-quotes
 # comments must start at newline or inline after the closing double-quote
 
@@ -44,6 +46,7 @@ list_part_failed_action="SKIP"
 # one of these functions will be executed when adblock-lean completes the execution of some commands,
 # with the success or failure message passed in first argument
 # report_success() is only executed upon completion of the 'start' command
+# Recommended path is '/usr/libexec/abl_custom-script.sh' which the luci app has permission to access
 custom_script=""
 
 # Start delay in seconds when service is started from system boot
