@@ -162,7 +162,7 @@ print_status_rpc() {
 			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
 
 			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
-			blocklist_age_s_rpc=$(($(date +%s) - $(date -r /tmp/dnsmasq.d/blocklist +%s 2>/dev/null || date -r /tmp/dnsmasq.d/.blocklist.gz +%s 2>/dev/null)))
+			blocklist_age_s_rpc=$(($(date +%s) - $(date -r "${DNSMASQ_CONF_D}/.abl-blocklist.gz" +%s 2>/dev/null || date -r "${DNSMASQ_CONF_D}/abl-blocklist" +%s 2>/dev/null)))
 		fi
 
 		# get enabled/disabled status

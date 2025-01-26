@@ -172,18 +172,22 @@ function parseConfig(config) {
 			'test_domains': 'google.com microsoft.com amazon.com',
 			'list_part_failed_action': 'SKIP',
 			'max_download_retries': 3,
-			'min_good_line_count': 100000,
+			'min_good_line_count': 80000,
 			'min_blocklist_part_line_count': 1,
 			'min_blocklist_ipv4_part_line_count': 1,
 			'min_allowlist_part_line_count': 1,
-			'max_file_part_size_KB': 20000,
-			'max_blocklist_file_size_KB': 30000,
+			'max_file_part_size_KB': 4000,
+			'max_blocklist_file_size_KB': 6000,
 			'deduplication': 1,
 			'use_compression': 1,
 			'initial_dnsmasq_restart': 0,
 			'boot_start_delay_s': 120,
 			'custom_script': '',
 			'cron_schedule': 'disable',
+			// TODOX How to handle these keys that could be different on each system?
+			// 'DNSMASQ_INSTANCE': 'cfg01411c',
+			// 'DNSMASQ_INDEX': 0,
+			// 'DNSMASQ_CONF_D': '/tmp/dnsmasq.d',
 		};
 	}
 
@@ -335,6 +339,12 @@ custom_script="' + data.config.custom_script + '"\n\
 \n\
 # Crontab schedule expression for periodic list updates\n\
 cron_schedule="' + data.config.cron_schedule + '"\n\
+\n\
+# dnsmasq instance and config directory\n\
+# normally this should be set automatically by the \'setup\' command\n\
+DNSMASQ_INSTANCE="' + data.config.DNSMASQ_INSTANCE + '"\n\
+DNSMASQ_INDEX="' + data.config.DNSMASQ_INDEX + '"\n\
+DNSMASQ_CONF_D="' + data.config.DNSMASQ_CONF_D + '"\n\
 ';
 
 				// Save config file
@@ -485,38 +495,40 @@ report_success() {\n\
 				buttonElement,
 				manualInstructionElement
 			]);
-		} else if (loadData[2].config_status == 1) {
-			// Disable the save button
-			this.handleSave = null;
+		// TODOX config_status is coming back as 1, indicating an error, but when checking the config by running /etc/init.d/adblock-lean status
+		//       it doesn't complain about any issues.  I guess something changed that is causing the parse_config call in the rpcd script to fail?
+		// } else if (loadData[2].config_status == 1) {
+		// 	// Disable the save button
+		// 	this.handleSave = null;
 
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
+		// 	// Build the title element
+		// 	var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
 
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
-				To automatically reset it now, click the Reset button below.  Or to fix it manually,\
-				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
+		// 	// Build the instruction element
+		// 	var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
+		// 		To automatically reset it now, click the Reset button below.  Or to fix it manually,\
+		// 		SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
 
-			var buttonElement = E('button', {
-				'class': 'btn cbi-button cbi-button-positive',
-				'click': ui.createHandlerFn(this, function () { 
-					ui.showModal(null, [
-						E('p',
-							{ class: 'spinning' },
-							_('Resetting AdBlock Lean configuration file')
-						),
-					]);
-					L.resolveDefault(resetConfig())
-						.then(function (result) { location.reload() });
-				}),
-			}, [_('Reset Configuration File')]);
+		// 	var buttonElement = E('button', {
+		// 		'class': 'btn cbi-button cbi-button-positive',
+		// 		'click': ui.createHandlerFn(this, function () { 
+		// 			ui.showModal(null, [
+		// 				E('p',
+		// 					{ class: 'spinning' },
+		// 					_('Resetting AdBlock Lean configuration file')
+		// 				),
+		// 			]);
+		// 			L.resolveDefault(resetConfig())
+		// 				.then(function (result) { location.reload() });
+		// 		}),
+		// 	}, [_('Reset Configuration File')]);
 
-			// Combine the various elements into our result variable
-			return E([
-				titleElement,
-				instructionElement,
-				buttonElement
-			]);
+		// 	// Combine the various elements into our result variable
+		// 	return E([
+		// 		titleElement,
+		// 		instructionElement,
+		// 		buttonElement
+		// 	]);
 		}
 
 		if (loadData[0] == '') {

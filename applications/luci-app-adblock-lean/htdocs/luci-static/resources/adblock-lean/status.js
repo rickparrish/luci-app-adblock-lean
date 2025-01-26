@@ -4,7 +4,7 @@
 'require rpc';
 'require ui';
 
-const supportedConfigFormat = 5;
+const supportedConfigFormat = 6;
 
 var getStatus = rpc.declare({
 	object: 'luci.adblock-lean',
@@ -58,7 +58,7 @@ function setLaablUpdateStatus(showButtons) {
 		This shouldn't ever happen to anyone but me, so we'll report it as an error condition.
 		*/
 		if (!statusResult.laabl_package_info) {
-			updateStatus.textContent = _('An error occurred while checking update status');
+			updateStatus.textContent = _('An error occurred while checking update status (missing package info)');
 			return;
 		}
 
@@ -74,7 +74,7 @@ function setLaablUpdateStatus(showButtons) {
 		*/
 		var currentVersion = statusResult.laabl_package_info.match(/Version[:]\s?(.*?)\s/)[1];
 		if (!currentVersion) {
-			updateStatus.textContent = _('An error occurred while checking update status');
+			updateStatus.textContent = _('An error occurred while checking update status (missing current version)');
 			return;
 		}
 
@@ -315,7 +315,7 @@ var statusClass = baseclass.extend({
 							}
 							break;
 						case 2:
-							updateStatus.textContent = _('An error occurred while checking update status');
+							updateStatus.textContent = _('An error occurred while checking update status (checking adblock-lean status)');
 							break;
 						default:
 							updateStatus.textContent = _('Unknown');
@@ -335,7 +335,7 @@ var statusClass = baseclass.extend({
 				setLaablUpdateStatus(that.showButtons);
 			} else {
 				var updateStatus = document.getElementById('laabl-update-status');
-				updateStatus.textContent = _('An error occurred while checking update status');
+				updateStatus.textContent = _('An error occurred while checking update status (checking luci-app-adblock-lean status)');
 			}
 		});
 
