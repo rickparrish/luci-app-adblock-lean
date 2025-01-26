@@ -1,9 +1,14 @@
 
 # adblock-lean configuration options
-# config_format=v4
+# config_format=v5
 #
 # values must be enclosed in double-quotes
-# comments must start at newline or inline after the closing double-quote
+# custom comments are not preserved after automatic config update
+
+# Whitelist mode: only domains (and their subdomains) included in the allowlist(s) are allowed, all other domains are blocked
+# In this mode, if blocklists are used in addition to allowlists, subdomains included in the blocklists will be blocked,
+# including subdomains of allowed domains
+whitelist_mode="0"
 
 # One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces
 blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif-onlydomains.txt"
@@ -15,14 +20,30 @@ dnsmasq_blocklist_urls=""
 dnsmasq_blocklist_ipv4_urls=""
 dnsmasq_allowlist_urls=""
 
-# Path to optional local raw allowlist/blocklist domain files in the form:
+# Path to optional local *raw domain* allowlist/blocklist files in the form:
 # site1.com
 # site2.com
 local_allowlist_path="/etc/adblock-lean/allowlist"
 local_blocklist_path="/etc/adblock-lean/blocklist"
 
-# Whether to perform sorting and deduplication of entries (usually doesn't cause much slowdown, uses a bit more memory) - enable (1) or disable (0)
-deduplication="1"
+# Test domains are automatically querried after loading the blocklist into dnsmasq,
+# in order to verify that the blocklist didn't break DNS resolution
+# If query for any of the test domains fails, previous blocklist is restored from backup
+# If backup doesn't exist, the blocklist is removed and adblock-lean is stopped
+# Leaving this empty will disable verification
+test_domains="google.com microsoft.com amazon.com"
+
+# List part failed action:
+# This option applies to blocklist/allowlist parts which failed to download or couldn't pass validation checks
+# SKIP - skip failed blocklist file part and continue blocklist generation
+# STOP - stop blocklist generation (and fall back to previous blocklist if available)
+list_part_failed_action="SKIP"
+
+# Maximum number of download retries
+max_download_retries="3"
+
+# Minimum number of good lines in final postprocessed blocklist
+min_good_line_count="200000"
 
 # Mininum number of lines of any individual downloaded part
 min_blocklist_part_line_count="1"
@@ -35,8 +56,8 @@ max_file_part_size_KB="30000"
 # Maximum total size of combined, processed blocklist
 max_blocklist_file_size_KB="50000"
 
-# Minimum number of good lines in final postprocessed blocklist
-min_good_line_count="200000"
+# Whether to perform sorting and deduplication of entries (usually doesn't cause much slowdown, uses a bit more memory) - enable (1) or disable (0)
+deduplication="1"
 
 # compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
 use_compression="1"
@@ -45,14 +66,8 @@ use_compression="1"
 # new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)
 initial_dnsmasq_restart="0"
 
-# Maximum number of download retries
-max_download_retries="3"
-
-# List part failed action:
-# This option applies to blocklist/allowlist parts which failed to download or couldn't pass validation checks
-# SKIP - skip failed blocklist file part and continue blocklist generation
-# STOP - stop blocklist generation (and fall back to previous blocklist if available)
-list_part_failed_action="SKIP"
+# Start delay in seconds when service is started from system boot
+boot_start_delay_s="120"
 
 # If a path to custom script is specified and that script defines functions 'report_success()' and 'report_failure()'',
 # one of these functions will be executed when adblock-lean completes the execution of some commands,
@@ -60,9 +75,6 @@ list_part_failed_action="SKIP"
 # report_success() is only executed upon completion of the 'start' command
 # Recommended path is '/usr/libexec/abl_custom-script.sh' which the luci app has permission to access
 custom_script=""
-
-# Start delay in seconds when service is started from system boot
-boot_start_delay_s="120"
 
 # Crontab schedule expression for periodic list updates
 cron_schedule="disable"
