@@ -81,6 +81,7 @@ check_config_rpc() {
 	# If AdBlock Lean is installed, then we want to call its parse_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
+		command -v detect_utils 1>/dev/null && detect_utils -n # this will avoid erroring out with earlier adblock-lean versions which do not have detect_utils()
 		parse_config "/etc/adblock-lean/config"
 		config_status_rpc="$?"
 	fi
