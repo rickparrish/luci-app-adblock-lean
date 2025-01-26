@@ -172,18 +172,22 @@ function parseConfig(config) {
 			'test_domains': 'google.com microsoft.com amazon.com',
 			'list_part_failed_action': 'SKIP',
 			'max_download_retries': 3,
-			'min_good_line_count': 100000,
+			'min_good_line_count': 80000,
 			'min_blocklist_part_line_count': 1,
 			'min_blocklist_ipv4_part_line_count': 1,
 			'min_allowlist_part_line_count': 1,
-			'max_file_part_size_KB': 20000,
-			'max_blocklist_file_size_KB': 30000,
+			'max_file_part_size_KB': 4000,
+			'max_blocklist_file_size_KB': 6000,
 			'deduplication': 1,
 			'use_compression': 1,
 			'initial_dnsmasq_restart': 0,
 			'boot_start_delay_s': 120,
 			'custom_script': '',
 			'cron_schedule': 'disable',
+			// TODOX How to handle these keys that could be different on each system?
+			// 'DNSMASQ_INSTANCE': 'cfg01411c',
+			// 'DNSMASQ_INDEX': 0,
+			// 'DNSMASQ_CONF_D': '/tmp/dnsmasq.d',
 		};
 	}
 
@@ -335,6 +339,12 @@ custom_script="' + data.config.custom_script + '"\n\
 \n\
 # Crontab schedule expression for periodic list updates\n\
 cron_schedule="' + data.config.cron_schedule + '"\n\
+\n\
+# dnsmasq instance and config directory\n\
+# normally this should be set automatically by the \'setup\' command\n\
+DNSMASQ_INSTANCE="' + data.config.DNSMASQ_INSTANCE + '"\n\
+DNSMASQ_INDEX="' + data.config.DNSMASQ_INDEX + '"\n\
+DNSMASQ_CONF_D="' + data.config.DNSMASQ_CONF_D + '"\n\
 ';
 
 				// Save config file
