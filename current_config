@@ -1,4 +1,6 @@
 # adblock-lean configuration options
+# values must be enclosed in double-quotes
+# comments must start at newline or inline after the closing double-quote
 
 # One or more dnsmasq blocklist urls separated by spaces
 blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/tif.mini.txt"
@@ -12,24 +14,25 @@ allowlist_urls=""
 local_allowlist_path="/root/adblock-lean/allowlist"
 local_blocklist_path="/root/adblock-lean/blocklist"
 
-# Mininum number of lines of any individual downloaded blocklist part
-min_blocklist_part_line_count=1
+# Mininum number of lines of any individual downloaded part
+min_blocklist_part_line_count="1"
+min_allowlist_part_line_count="1"
 # Maximum size of any individual downloaded blocklist part
-max_file_part_size_KB=20000
+max_file_part_size_KB="20000"
 # Maximum total size of combined, processed blocklist
-max_blocklist_file_size_KB=30000
+max_blocklist_file_size_KB="30000"
 # Minimum number of good lines in final postprocessed blocklist
-min_good_line_count=100000
+min_good_line_count="100000"
 
-# compress blocklist to save memory once blocklist has been loaded
-compress_blocklist=1 # enable (1) or disable (0) blocklist compression
+# compress blocklist to save memory once blocklist has been loaded - enable (1) or disable (0)
+compress_blocklist="1"
 
 # restart dnsmasq if previous blocklist was extracted and before generation of
-# new blocklist thereby to free up memory during generaiton of new blocklist
-initial_dnsmasq_restart=0 # enable (1) or disable (0) initial dnsmasq restart
+# new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)
+initial_dnsmasq_restart="0"
 
 # Maximum number of download retries
-max_download_retries=3
+max_download_retries="3"
 
 # List part failed action:
 # This option applies to blocklist/allowlist parts which failed to download or couldn't pass validation checks
@@ -37,12 +40,11 @@ max_download_retries=3
 # STOP - stop blocklist generation (and fall back to previous blocklist if available)
 list_part_failed_action="SKIP"
 
-# The following shell variables are invoked using:
-# 'eval ${report_failure}' and 'eval ${report_success}'
-# thereby to facilitate sending e.g. mailsend/sms notifications
-# The variables '${failure_msg}' and '${success_msg}' can be employed
-report_failure=""
-report_success=""
+# If a path to custom script is specified and that script defines functions 'report_success()' and 'report_failure()'',
+# one of these functions will be executed when adblock-lean completes the execution of some commands,
+# with the success or failure message passed in first argument
+# report_success() is only executed upon completion of the 'start' command
+custom_script=""
 
 # Start delay in seconds when service is started from system boot
-boot_start_delay_s=120
+boot_start_delay_s="120"
