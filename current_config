@@ -13,9 +13,9 @@ local_allowlist_path="/root/adblock-lean/allowlist"
 local_blocklist_path="/root/adblock-lean/blocklist"
 
 # Mininum number of lines of any individual downloaded blocklist part
-min_blocklist_file_part_line_count=1
+min_blocklist_part_line_count=1
 # Maximum size of any individual downloaded blocklist part
-max_blocklist_file_part_size_KB=20000
+max_file_part_size_KB=20000
 # Maximum total size of combined, processed blocklist
 max_blocklist_file_size_KB=30000
 # Minimum number of good lines in final postprocessed blocklist
@@ -31,21 +31,11 @@ initial_dnsmasq_restart=0 # enable (1) or disable (0) initial dnsmasq restart
 # Maximum number of download retries
 max_download_retries=3
 
-# Download failed action:
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)
-download_failed_action="SKIP_PARTIAL"
-
-# Rogue element action:
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)
-# IGNORE - ignore any rogue elements (warning: use with caution)
-rogue_element_action="SKIP_PARTIAL"
-
-# dnsmasq --test failed action:
-# SKIP_PARTIAL - skip failed blocklist file part and continue blocklist generation
-# STOP - stop blocklist generation (and fallback to previous blocklist if available)
-dnsmasq_test_failed_action="SKIP_PARTIAL"
+# List part failed action:
+# This option applies to blocklist/allowlist parts which failed to download or couldn't pass validation checks
+# SKIP - skip failed blocklist file part and continue blocklist generation
+# STOP - stop blocklist generation (and fall back to previous blocklist if available)
+list_part_failed_action="SKIP"
 
 # The following shell variables are invoked using:
 # 'eval ${report_failure}' and 'eval ${report_success}'
