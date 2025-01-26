@@ -26,8 +26,8 @@ max_blocklist_file_size_KB="30000"
 # Minimum number of good lines in final postprocessed blocklist
 min_good_line_count="100000"
 
-# compress blocklist to save memory once blocklist has been loaded - enable (1) or disable (0)
-compress_blocklist="1"
+# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
+use_compression="1"
 
 # restart dnsmasq if previous blocklist was extracted and before generation of
 # new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)
