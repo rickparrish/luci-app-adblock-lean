@@ -1,12 +1,12 @@
 
 # adblock-lean configuration options
-# config_format=v3
+# config_format=v4
 #
 # values must be enclosed in double-quotes
 # comments must start at newline or inline after the closing double-quote
 
 # One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces
-blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.mini-onlydomains.txt"
+blocklist_urls="https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif-onlydomains.txt"
 blocklist_ipv4_urls=""
 allowlist_urls=""
 
@@ -30,13 +30,13 @@ min_blocklist_ipv4_part_line_count="1"
 min_allowlist_part_line_count="1"
 
 # Maximum size of any individual downloaded blocklist part
-max_file_part_size_KB="20000"
+max_file_part_size_KB="30000"
 
 # Maximum total size of combined, processed blocklist
-max_blocklist_file_size_KB="30000"
+max_blocklist_file_size_KB="50000"
 
 # Minimum number of good lines in final postprocessed blocklist
-min_good_line_count="100000"
+min_good_line_count="200000"
 
 # compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
 use_compression="1"
@@ -63,3 +63,6 @@ custom_script=""
 
 # Start delay in seconds when service is started from system boot
 boot_start_delay_s="120"
+
+# Crontab schedule expression for periodic list updates
+cron_schedule="disable"
