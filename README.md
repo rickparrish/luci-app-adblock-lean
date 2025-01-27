@@ -30,3 +30,23 @@ scp -r applications/luci-app-adblock-lean/htdocs/* root@OpenWrt.lan:/www/
 # Screenshot
 
 ![image](https://github.com/user-attachments/assets/a3477e02-8cd7-4578-b9be-ac5e6d7c3971)
+
+# Helpful commands
+
+## Create an initial adblock-lean.pot i18n template
+
+This assumes you have the luci repo cloned to ~/github/luci, and that you have luci-app-adblock-lean symlinked into the applications
+subdirectory.
+
+```
+cd ~/github/luci
+mkdir -p applications/luci-app-adblock-lean/po/templates
+./build/i18n-scan.pl applications/luci-app-adblock-lean/ > applications/luci-app-adblock-lean/po/templates/adblock-lean.pot
+```
+
+## Create initial .po files
+
+```
+cd ~/github/luci/applications/luci-app-adblock-lean
+~/github/luci/build/i18n-add-language.sh
+```
