@@ -33,10 +33,14 @@ scp -r applications/luci-app-adblock-lean/htdocs/* root@OpenWrt.lan:/www/
 
 # Helpful commands
 
-## Create an initial adblock-lean.pot i18n template
+## Create a symlink for luci-app-adblock-lean in the luci repo
 
-This assumes you have the luci repo cloned to ~/github/luci, and that you have luci-app-adblock-lean symlinked into the applications
-subdirectory.
+```
+cd ~/github/luci/applications
+ln -s ~/github/luci-app-adblock-lean/applications/luci-app-adblock-lean/ luci-app-adblock-lean
+```
+
+## Create an adblock-lean.pot i18n template
 
 ```
 cd ~/github/luci
@@ -49,4 +53,15 @@ mkdir -p applications/luci-app-adblock-lean/po/templates
 ```
 cd ~/github/luci/applications/luci-app-adblock-lean
 ~/github/luci/build/i18n-add-language.sh
+```
+
+## Rebuild .po files
+
+NB: Need to update ./build/i18n-sync.sh first (because of the symlink):
+1. Add -L parameter to all the `find` commands
+2. Change `./build/i18n-scan.pl "$dir" > "$1"` to `./build/i18n-scan.pl "$dir/" > "$1"` (add the `/` after `$dir`)
+
+```
+cd ~/github/luci
+./build/i18n-sync.sh applications/luci-app-adblock-lean
 ```
