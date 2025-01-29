@@ -117,8 +117,8 @@ get_status_rpc() {
 }
 
 install_rpc() {
-	luci_use_old_config=1 # Remove this line if retaining the old config doesn't make sense
-	luci_install_packages="sed sort awk" # Maybe later implement options for the user to decide which packages they want to install
+	luci_preset="$1"			# mini, small, medium, or large, passed in from luci
+	luci_install_packages="$2" 	# whitepsace-separated list of utils to install is passed in from luci
 
 	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean \
 		-O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
@@ -281,7 +281,12 @@ case "$1" in
 				get_status_rpc
 				;;
 			install)
-				install_rpc
+				read -r input
+				json_load "$input"
+				json_get_var preset 'preset'
+				json_get_var utils 'utils'
+				json_cleanup
+				install_rpc "$preset" "$utils"
 				;;
 			resetConfig)
 				reset_config_rpc

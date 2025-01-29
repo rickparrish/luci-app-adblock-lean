@@ -5,6 +5,7 @@
 'require ui';
 'require view';
 'require adblock-lean.status as abls';
+'require adblock-lean.install as installClass';
 
 let m, data;
 
@@ -47,12 +48,6 @@ var hageziBlocklists = [
 var checkConfig = rpc.declare({
 	object: 'luci.adblock-lean',
 	method: 'checkConfig',
-	params: [],
-});
-
-var install = rpc.declare({
-	object: 'luci.adblock-lean',
-	method: 'install',
 	params: [],
 });
 
@@ -400,57 +395,29 @@ report_success() {\n\
 
 	load: function () {
 		return Promise.all([
-			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), ''),
 			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
+			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), ''),
 			L.resolveDefault(checkConfig(), '')
 		]);
 	},
 
 	render: function (loadData) {
+		var ablStatEntry = loadData[0];
+		var configFile = loadData[1];
+		var checkConfigResult = loadData[2];
+
+		// Check if adblock-lean is installed, and if not, display the install view
+		if (ablStatEntry === '') {
+			this.handleSave = null;
+			return new installClass.view().render();
+		}
+
 		let s, o;
 		var status;
 
-		// Check if AdBlock Lean is installed, and if not, display a button to automatically install as well as
-		// a link in case they want to manually install
-		if (loadData[1] == '') {
-			// Disable the save button
-			this.handleSave = null;
-
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Not Installed'));
-
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('AdBlock Lean is not currently installed on your system.<br /><br />\
-				To automatically install it now, click the Install button below.  Or to install it manually,\
-				<a href="https://github.com/lynxthecat/adblock-lean" target="_blank">follow the instructions here</a>.<br /><br />\
-				NOTE: The Install button will also install the <strong>gawk, coreutils-sort,</strong> and <strong>sed</strong> packages,\
-				which will improve performance.<br /><br />'));
-
-			var buttonElement = E('button', {
-				'class': 'btn cbi-button cbi-button-positive',
-				'click': ui.createHandlerFn(this, function () { 
-					ui.showModal(null, [
-						E('p',
-							{ class: 'spinning' },
-							_('Installing AdBlock Lean (this may take a minute or two)')
-						),
-					]);
-					L.resolveDefault(install())
-						.then(function (result) { location.reload() });
-				}),
-			}, [_('Install AdBlock Lean')]);
-
-			// Combine the various elements into our result variable
-			return E([
-				titleElement,
-				instructionElement,
-				buttonElement
-			]);
-		}
-
 		// Check if a configuration update is needed, and if so, display a button to automatically update it as well as
 		// instructions for if they want to manually update
-		if (loadData[2].config_status == 2) {
+		if (checkConfigResult.config_status == 2) {
 			// Disable the save button
 			this.handleSave = null;
 
@@ -460,7 +427,7 @@ report_success() {\n\
 			// Build the automatic instruction element
 			var autoInstructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
 				Click the Update button below the make the following automatic changes:\
-				' + getUnorderedList(loadData[2].conf_fixes)));
+				' + getUnorderedList(checkConfigResult.conf_fixes)));
 
 			var buttonElement = E('button', {
 				'class': 'btn cbi-button cbi-button-positive',
@@ -478,14 +445,14 @@ report_success() {\n\
 
 			// Build the manual instruction element
 			var config_format_message = ''
-			if (loadData[2].curr_config_format != loadData[2].def_config_format) {
-				config_format_message = '# config_format=v' + loadData[2].def_config_format
+			if (checkConfigResult.curr_config_format != checkConfigResult.def_config_format) {
+				config_format_message = '# config_format=v' + checkConfigResult.def_config_format
 			}
 			var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
 				these are the changes that are needed:<br /><br />\
-				' + getUnorderedListWithHeader('Remove old entries:', loadData[2].unexp_entries) + '\
-				' + getUnorderedListWithHeader('Add new entries:', loadData[2].missing_entries) + '\
-				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', loadData[2].legacy_entries) + '\
+				' + getUnorderedListWithHeader('Remove old entries:', checkConfigResult.unexp_entries) + '\
+				' + getUnorderedListWithHeader('Add new entries:', checkConfigResult.missing_entries) + '\
+				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', checkConfigResult.legacy_entries) + '\
 				' + getUnorderedListWithHeader('Add/update the config_format comment:', config_format_message)));
 
 			// Combine the various elements into our result variable
@@ -495,7 +462,7 @@ report_success() {\n\
 				buttonElement,
 				manualInstructionElement
 			]);
-		} else if (loadData[2].config_status == 1) {
+		} else if (checkConfigResult.config_status == 1) {
 			// Disable the save button
 			this.handleSave = null;
 
@@ -529,7 +496,7 @@ report_success() {\n\
 			]);
 		}
 
-		if (loadData[0] == '') {
+		if (configFile == '') {
 			// Display a message saying config doesn't exist yet
 			ui.addNotification(null, E('p',
 				_('Your AdBlock Lean configuration file does not exist.  Review the options below \
@@ -542,7 +509,7 @@ report_success() {\n\
 			status.showTitle = true;
 
 			// Ensure the config format matches the format we can support
-			if (loadData[0].indexOf('config_format=v' + abls.supportedConfigFormat) == -1) {
+			if (configFile.indexOf('config_format=v' + abls.supportedConfigFormat) == -1) {
 				// Disable the save button
 				this.handleSave = null;
 
@@ -568,7 +535,7 @@ report_success() {\n\
 		}
 
 		// Setup the form inputs for each config option
-		data = parseConfig(loadData[0]);
+		data = parseConfig(configFile);
 		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
 			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
