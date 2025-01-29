@@ -407,7 +407,7 @@ report_success() {\n\
 		var checkConfigResult = loadData[2];
 
 		// Check if adblock-lean is installed, and if not, display the install view
-		if (ablStatEntry === '') {
+		if (!L.isObject(ablStatEntry)) {
 			this.handleSave = null;
 			return new installClass.view().render();
 		}
