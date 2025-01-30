@@ -30,7 +30,7 @@ function handleInstallClick() {
 	L.resolveDefault(rpcInstall(preset, utils)).then(function (result) { location.reload() });
 }
 
-var installClass = baseclass.extend({
+var notInstalledClass = baseclass.extend({
 	render: function () {
 		// Build the title element
 		var titleElement = E('h1', {}, _('Install adblock-lean'));
@@ -140,5 +140,5 @@ var installClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: installClass,
+	view: notInstalledClass,
 });

@@ -3,7 +3,7 @@
 'require ui';
 'require view';
 
-var fileEditorClass = view.extend({
+var editFileClass = view.extend({
 	doLowercase: false,
 
 	filename: 'invalid-filename',
@@ -63,5 +63,5 @@ var fileEditorClass = view.extend({
 });
 
 return L.Class.extend({
-	fileEditor: fileEditorClass,
+	view: editFileClass,
 });

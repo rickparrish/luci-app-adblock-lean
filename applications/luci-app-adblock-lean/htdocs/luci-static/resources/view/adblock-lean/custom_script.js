@@ -1,7 +1,7 @@
 'use strict';
-'require adblock-lean.fileeditor as ablfe';
+'require adblock-lean.edit-file as editFileClass';
 
-return ablfe.fileEditor.extend({
+return editFileClass.view.extend({
 	doLowercase: false,
 	
 	filename: '/usr/libexec/abl_custom-script.sh',

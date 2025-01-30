@@ -3,7 +3,7 @@
 'require rpc';
 'require ui';
 
-var configMissingClass = baseclass.extend({
+var missingConfigClass = baseclass.extend({
 	render: function () {
 		// Build the title element
 		var titleElement = E('h1', {}, _('adblock-lean config missing'));
@@ -28,5 +28,5 @@ var configMissingClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: configMissingClass,
+	view: missingConfigClass,
 });

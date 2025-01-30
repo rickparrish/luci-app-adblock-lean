@@ -5,8 +5,8 @@
 'require ui';
 'require view';
 'require adblock-lean.status as abls';
-'require adblock-lean.config-missing as configMissingClass';
-'require adblock-lean.install as installClass';
+'require adblock-lean.missing-config as missingConfigClass';
+'require adblock-lean.not-installed as notInstalledClass';
 
 let m, data;
 
@@ -410,13 +410,13 @@ report_success() {\n\
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
 			this.handleSave = null;
-			return new installClass.view().render();
+			return new notInstalledClass.view().render();
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
 		if (configFile === '') {
 			this.handleSave = null;
-			return new configMissingClass.view().render();
+			return new missingConfigClass.view().render();
 		}
 
 		let s, o;
