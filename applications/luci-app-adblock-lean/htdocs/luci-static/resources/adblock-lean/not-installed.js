@@ -1,36 +1,25 @@
 'use strict';
 'require baseclass';
-'require rpc';
 'require ui';
-
-var rpcInstall = rpc.declare({
-	object: 'luci.adblock-lean',
-	method: 'install',
-	params: ['preset', 'utils'],
-});
-
-var rpcSystemInfo = rpc.declare({
-	object: 'system',
-	method: 'info'
-});
-
-function handleInstallClick() {
-	// Display the spinning cursor dialog
-	ui.showModal(null, [
-		E('p', { class: 'spinning' }, _('Installing adblock-lean')),
-	]);
-	
-	// Determine which preset the user wants to use
-	var preset = document.querySelector('input[name=preset]:checked').value;
-
-	// Determine which utils the user wants to install
-	var utils = Array.from(document.querySelectorAll("input[name=utils]:checked"), e => e.value).join(' ');
-
-	// Call the install RPC method and reload the page when it completes
-	L.resolveDefault(rpcInstall(preset, utils)).then(function (result) { location.reload() });
-}
+'require adblock-lean.rpc as rpc';
 
 var notInstalledClass = baseclass.extend({
+	handleInstallClick: function () {
+		// Display the spinning cursor dialog
+		ui.showModal(null, [
+			E('p', { class: 'spinning' }, _('Installing adblock-lean')),
+		]);
+		
+		// Determine which preset the user wants to use
+		var preset = document.querySelector('input[name=preset]:checked').value;
+	
+		// Determine which utils the user wants to install
+		var utils = Array.from(document.querySelectorAll("input[name=utils]:checked"), e => e.value).join(' ');
+	
+		// Call the install RPC method and reload the page when it completes
+		L.resolveDefault(rpc.install(preset, utils)).then(function (result) { location.reload() });
+	},
+
 	render: function () {
 		// Build the title element
 		var titleElement = E('h1', {}, _('Install adblock-lean'));
@@ -100,11 +89,11 @@ var notInstalledClass = baseclass.extend({
 		// Build the Install button element
 		var buttonElement = E('button', {
 			'class': 'btn cbi-button cbi-button-positive',
-			'click': ui.createHandlerFn(this, handleInstallClick),
+			'click': ui.createHandlerFn(this, this.handleInstallClick),
 		}, _('Install adblock-lean'));
 
 		// Get mem usage to select the recommended preset
-		L.resolveDefault(rpcSystemInfo()).then(function (result) { 
+		L.resolveDefault(rpc.systemInfo()).then(function (result) { 
 			var mem = L.isObject(result.memory) ? result.memory : {};
 			if (mem.total) {
 				var preset;
