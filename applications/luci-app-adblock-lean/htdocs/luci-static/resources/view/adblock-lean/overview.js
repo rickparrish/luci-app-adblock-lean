@@ -4,7 +4,7 @@
 'require rpc';
 'require ui';
 'require view';
-'require adblock-lean.status as abls';
+'require adblock-lean.status as statusClass';
 'require adblock-lean.missing-config as missingConfigClass';
 'require adblock-lean.not-installed as notInstalledClass';
 
@@ -257,7 +257,7 @@ return view.extend({
 				
 				var config = '\n\
 # adblock-lean configuration options\n\
-# config_format=v' + abls.supportedConfigFormat + '\n\
+# config_format=v' + statusClass.supportedConfigFormat + '\n\
 #\n\
 # values must be enclosed in double-quotes\n\
 # custom comments are not preserved after automatic config update\n\
@@ -504,12 +504,12 @@ report_success() {\n\
 		}
 
 		// Show the status panel
-		status = new abls.status();
+		status = new statusClass.view();
 		status.showButtons = true;
 		status.showTitle = true;
 
 		// Ensure the config format matches the format we can support
-		if (configFile.indexOf('config_format=v' + abls.supportedConfigFormat) == -1) {
+		if (configFile.indexOf('config_format=v' + statusClass.supportedConfigFormat) == -1) {
 			// Disable the save button
 			this.handleSave = null;
 

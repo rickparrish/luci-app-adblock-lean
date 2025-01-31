@@ -344,6 +344,6 @@ var statusClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	status: statusClass,
+	view: statusClass,
 	supportedConfigFormat: supportedConfigFormat,
 });

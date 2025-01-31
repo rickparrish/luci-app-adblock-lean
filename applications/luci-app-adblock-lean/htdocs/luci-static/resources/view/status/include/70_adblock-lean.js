@@ -1,6 +1,6 @@
 'require baseclass';
 'require fs';
-'require adblock-lean.status as abls';
+'require adblock-lean.status as statusClass';
 
 var lastLoad = 0;
 
@@ -36,6 +36,6 @@ return baseclass.extend({
 		}
 
 		// Return our custom status object
-		return new abls.status().render();
+		return new statusClass.view().render();
 	},
 });
