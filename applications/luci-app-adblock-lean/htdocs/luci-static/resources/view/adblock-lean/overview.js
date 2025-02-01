@@ -4,70 +4,13 @@
 'require ui';
 'require view';
 'require adblock-lean.hagezi as hagezi';
+'require adblock-lean.helpers as helpers';
 'require adblock-lean.missing-config as missingConfigClass';
 'require adblock-lean.not-installed as notInstalledClass';
 'require adblock-lean.rpc as rpc';
 'require adblock-lean.status as statusClass';
 
 let m, data;
-
-function cleanValue(value) {
-	// Trim the value
-	value = value.trim();
-
-	// Check for string-quoted value
-	// From: https://stackoverflow.com/a/249937
-	var m = value.match(/"(?:[^"\\]|\\.)*"/);
-	if (m === null) {
-		// Not a string-quoted value, remove inline comments
-		var hashPos = value.indexOf('#');
-		if (hashPos == 0) {
-			value = '';
-		} else if (hashPos >= 1) {
-			value = value.substring(0, hashPos).trim();
-		}
-	} else {
-		// Is a string-quoted value, remove the surrounding quotes
-		// From: https://stackoverflow.com/a/18268011
-		value = m[0].trim().replace(/^"?|"?$/g, '');
-	}
-
-	// Return the now-cleaned value
-	return value;
-}
-
-function getUnorderedList(text) {
-	if (!text) { return ''; }
-
-	var result = '';
-
-	var lines = text.split('\n');
-	for (var i = 0; i < lines.length; i++) {
-		result += '<li>' + lines[i].replace(/[<]/g, '&lt;') + '</li>';
-	}
-
-	return '<ol style="list-style: decimal;">' + result + '</ol>';
-}
-
-function getUnorderedListWithHeader(header, text) {
-	if (!text) { return ''; }
-	return '<div><strong>' + header + '</strong></div>' + getUnorderedList(text);
-}
-
-function joinWithSemicolon(text) {
-	var lines = (text ?? '').replace(/\r\n/g, '\n').split('\n');
-	
-	var result = lines[0].trim();
-
-	for (var i = 1; i < lines.length; i++) {
-		if (!result.endsWith(';')) {
-			result += '; ';
-		}
-		result += lines[i].trim();
-	}
-
-	return result;
-}
 
 function parseConfig(config) {
 	var result = null
@@ -84,7 +27,7 @@ function parseConfig(config) {
 				var equalsPos = row.indexOf('=');
 				var key = row.substring(0, equalsPos);
 				var value = row.substring(equalsPos + 1);
-				return [key.trim(), cleanValue(value)];
+				return [key.trim(), helpers.getCleanValue(value)];
 			})
 			// use reduce to assign key-value pairs to a new object
 			// using Array.prototype.reduce
@@ -381,7 +324,7 @@ report_success() {\n\
 			// Build the automatic instruction element
 			var autoInstructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
 				Click the Update button below the make the following automatic changes:\
-				' + getUnorderedList(checkConfigResult.conf_fixes)));
+				' + helpers.getUnorderedList(checkConfigResult.conf_fixes)));
 
 			var buttonElement = E('button', {
 				'class': 'btn cbi-button cbi-button-positive',
@@ -404,10 +347,10 @@ report_success() {\n\
 			}
 			var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
 				these are the changes that are needed:<br /><br />\
-				' + getUnorderedListWithHeader('Remove old entries:', checkConfigResult.unexp_entries) + '\
-				' + getUnorderedListWithHeader('Add new entries:', checkConfigResult.missing_entries) + '\
-				' + getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', checkConfigResult.legacy_entries) + '\
-				' + getUnorderedListWithHeader('Add/update the config_format comment:', config_format_message)));
+				' + helpers.getUnorderedListWithHeader('Remove old entries:', checkConfigResult.unexp_entries) + '\
+				' + helpers.getUnorderedListWithHeader('Add new entries:', checkConfigResult.missing_entries) + '\
+				' + helpers.getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', checkConfigResult.legacy_entries) + '\
+				' + helpers.getUnorderedListWithHeader('Add/update the config_format comment:', config_format_message)));
 
 			// Combine the various elements into our result variable
 			return E([
