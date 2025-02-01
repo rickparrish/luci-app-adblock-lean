@@ -2,6 +2,12 @@
 'require rpc';
 
 return L.Class.extend({
+	checkConfig: rpc.declare({
+		object: 'luci.adblock-lean',
+		method: 'checkConfig',
+		params: [],
+	}),
+	
 	getStatus: rpc.declare({
 		object: 'luci.adblock-lean',
 		method: 'getStatus',
@@ -14,6 +20,12 @@ return L.Class.extend({
 		params: ['preset', 'utils'],
 	}),
 	
+	resetConfig: rpc.declare({
+		object: 'luci.adblock-lean',
+		method: 'resetConfig',
+		params: [],
+	}),
+
 	systemInfo: rpc.declare({
 		object: 'system',
 		method: 'info'
@@ -22,6 +34,12 @@ return L.Class.extend({
 	updateAdblockLean: rpc.declare({
 		object: 'luci.adblock-lean',
 		method: 'updateAdBlockLean',
+		params: [],
+	}),
+	
+	updateConfig: rpc.declare({
+		object: 'luci.adblock-lean',
+		method: 'updateConfig',
 		params: [],
 	}),
 	

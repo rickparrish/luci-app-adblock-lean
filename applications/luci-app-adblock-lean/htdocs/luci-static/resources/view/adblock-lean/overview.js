@@ -1,33 +1,15 @@
 'use strict';
 'require form';
 'require fs';
-'require rpc';
 'require ui';
 'require view';
 'require adblock-lean.hagezi as hagezi';
 'require adblock-lean.missing-config as missingConfigClass';
 'require adblock-lean.not-installed as notInstalledClass';
+'require adblock-lean.rpc as rpc';
 'require adblock-lean.status as statusClass';
 
 let m, data;
-
-var checkConfig = rpc.declare({
-	object: 'luci.adblock-lean',
-	method: 'checkConfig',
-	params: [],
-});
-
-var resetConfig = rpc.declare({
-	object: 'luci.adblock-lean',
-	method: 'resetConfig',
-	params: [],
-});
-
-var updateConfig = rpc.declare({
-	object: 'luci.adblock-lean',
-	method: 'updateConfig',
-	params: [],
-});
 
 function cleanValue(value) {
 	// Trim the value
@@ -363,7 +345,7 @@ report_success() {\n\
 		return Promise.all([
 			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
 			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), ''),
-			L.resolveDefault(checkConfig(), '')
+			L.resolveDefault(rpc.checkConfig(), '')
 		]);
 	},
 
@@ -410,7 +392,7 @@ report_success() {\n\
 							_('Updating AdBlock Lean configuration file')
 						),
 					]);
-					L.resolveDefault(updateConfig())
+					L.resolveDefault(rpc.updateConfig())
 						.then(function (result) { location.reload() });
 				}),
 			}, [_('Update Configuration File')]);
@@ -455,7 +437,7 @@ report_success() {\n\
 							_('Resetting AdBlock Lean configuration file')
 						),
 					]);
-					L.resolveDefault(resetConfig())
+					L.resolveDefault(rpc.resetConfig())
 						.then(function (result) { location.reload() });
 				}),
 			}, [_('Reset Configuration File')]);
