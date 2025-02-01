@@ -4,47 +4,12 @@
 'require rpc';
 'require ui';
 'require view';
-'require adblock-lean.status as statusClass';
+'require adblock-lean.hagezi as hagezi';
 'require adblock-lean.missing-config as missingConfigClass';
 'require adblock-lean.not-installed as notInstalledClass';
+'require adblock-lean.status as statusClass';
 
 let m, data;
-
-var hageziBaseUrl = 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/';
-var hageziBlocklists = [
-	{ filename: 'light', name: 'Multi LIGHT' },
-	{ filename: 'multi', name: 'Multi NORMAL' },
-	{ filename: 'pro', name: 'Multi PRO' },
-	{ filename: 'pro.mini', name: 'Multi PRO mini' },
-	{ filename: 'pro.plus', name: 'Multi PRO++' },
-	{ filename: 'pro.plus.mini', name: 'Multi PRO++ mini ' },
-	{ filename: 'ultimate', name: 'Multi ULTIMATE' },
-	{ filename: 'ultimate.mini', name: 'Multi ULTIMATE mini ' },
-	{ filename: 'fake', name: 'Fake' },
-	{ filename: 'popupads', name: 'Pop-Up Ads' },
-	{ filename: 'tif', name: 'Threat Intelligence Feeds' },
-	{ filename: 'tif.medium', name: 'Threat Intelligence Feeds - Medium' },
-	{ filename: 'tif.mini', name: 'Threat Intelligence Feeds - Mini' },
-	{ filename: 'doh-vpn-proxy-bypass', name: 'DoH/VPN/TOR/Proxy Bypass' },
-	{ filename: 'doh', name: 'Encrypted DNS Servers' },
-	{ filename: 'nosafesearch', name: 'Safesearch not supported' },
-	{ filename: 'dyndns', name: 'Dynamic DNS' },
-	{ filename: 'hoster', name: 'Badware Hoster' },
-	{ filename: 'anti.piracy', name: 'Anti Piracy' },
-	{ filename: 'gambling', name: 'Gambling' },
-	{ filename: 'gambling.medium', name: 'Gambling - Medium' },
-	{ filename: 'gambling.mini', name: 'Gambling - Mini' },
-	{ filename: 'native.amazon', name: 'Native Tracker - Amazon' },
-	{ filename: 'native.apple', name: 'Native Tracker - Apple' },
-	{ filename: 'native.huawei', name: 'Native Tracker - Huawei' },
-	{ filename: 'native.winoffice', name: 'Native Tracker - Microsoft' },
-	{ filename: 'native.tiktok', name: 'Native Tracker - TikTok' },
-	{ filename: 'native.tiktok.extended', name: 'Native Tracker - TikTok Aggressive' },
-	{ filename: 'native.lgwebos', name: 'Native Tracker - LG webOS' },
-	{ filename: 'native.vivo', name: 'Native Tracker - Vivo' },
-	{ filename: 'native.oppo-realme', name: 'Native Tracker - OPPO/Realme' },
-	{ filename: 'native.xiaomi', name: 'Native Tracker - Xiaomi' },
-];
 
 var checkConfig = rpc.declare({
 	object: 'luci.adblock-lean',
@@ -155,8 +120,8 @@ function parseConfig(config) {
 		result = {
 			'whitelist_mode': 0,
 			'blocklist_urls': [
-				hageziBaseUrl + 'pro',
-				hageziBaseUrl + 'tif.mini'
+				hagezi.baseUrl + 'pro',
+				hagezi.baseUrl + 'tif.mini'
 			],
 			'blocklist_ipv4_urls': [],
 			'allowlist_urls': [],
@@ -191,7 +156,7 @@ function parseConfig(config) {
 	result.hagezi_blocklists = [];
 	var nonHageziBlocklists = [];
 	for (var i = 0; i < result.blocklist_urls.length; i++) {
-		if (result.blocklist_urls[i].startsWith(hageziBaseUrl)) {
+		if (result.blocklist_urls[i].startsWith(hagezi.baseUrl)) {
 			result.hagezi_blocklists.push(result.blocklist_urls[i]);
 		} else {
 			nonHageziBlocklists.push(result.blocklist_urls[i]);
@@ -561,9 +526,9 @@ report_success() {\n\
 		o.retain = true;
 		o.rmempty = false;
 
-		for (var i = 0; i < hageziBlocklists.length; i++) {
-			var blocklist = hageziBlocklists[i];
-			o.value(hageziBaseUrl + blocklist.filename + '-onlydomains.txt', blocklist.name);
+		for (var i = 0; i < hagezi.blocklists.length; i++) {
+			var blocklist = hagezi.blocklists[i];
+			o.value(hagezi.baseUrl + blocklist.filename + '-onlydomains.txt', blocklist.name);
 		}
 
 		o = s.taboption(
