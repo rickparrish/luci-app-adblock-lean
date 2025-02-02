@@ -3,6 +3,7 @@
 'require fs';
 'require ui';
 'require view';
+'require adblock-lean.config as config';
 'require adblock-lean.hagezi as hagezi';
 'require adblock-lean.helpers as helpers';
 'require adblock-lean.missing-config as missingConfigClass';
@@ -10,9 +11,10 @@
 'require adblock-lean.rpc as rpc';
 'require adblock-lean.status as statusClass';
 
-let m, data;
-
 return view.extend({
+	// Holds the form.JSONMap, which is created during render() and accessed during save()
+	formMap: null,
+
 	handleReset: null,
 
 	handleSaveApply: null,
@@ -26,190 +28,24 @@ return view.extend({
 
 		// Call m.save() with silent=true, because we'll call ui.addNotification to display a banner
 		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
-		m.save(function() { /* do nothing */ }, true)
-			.then((result) => {
-				// Marge the hagezi blocklist and other blocklist selections into one array
-				var combined_blocklist_urls = [];
-				if (data.config.hagezi_blocklists) {
-					for (var i = 0; i < data.config.hagezi_blocklists.length; i++) {
-						combined_blocklist_urls.push(data.config.hagezi_blocklists[i]);
-					}
-				}
-				if (data.config.blocklist_urls) {
-					for (var i = 0; i < data.config.blocklist_urls.length; i++) {
-						combined_blocklist_urls.push(data.config.blocklist_urls[i]);
-					}
-				}
-
-				// Abort if user did not select or enter at least one blocklist
-				if (combined_blocklist_urls.length == 0) {
-					document.body.scrollTop = document.documentElement.scrollTop = 0;
-					ui.addNotification(null, E('p', _('Unable to save modifications: Must select or provide at least one blocklist')), 'error');
-					return;
-				}
-
-				// enable_custom_script needs to be mapped to custom_script
-				if (data.config.enable_custom_script) {
-					// User wants to use a custom script, so assign custom_script the default value if it doesn't already have one
-					if (!data.config.custom_script) {
-						data.config.custom_script = '/usr/libexec/abl_custom-script.sh';
-					}
-				} else {
-					// User doesn't want to use a custom script, so clear the custom_script value
-					data.config.custom_script = '';
-				}
-				
-				var config = '\n\
-# adblock-lean configuration options\n\
-# config_format=v' + statusClass.supportedConfigFormat + '\n\
-#\n\
-# values must be enclosed in double-quotes\n\
-# custom comments are not preserved after automatic config update\n\
-\n\
-# Whitelist mode: only domains (and their subdomains) included in the allowlist(s) are allowed, all other domains are blocked\n\
-# In this mode, if blocklists are used in addition to allowlists, subdomains included in the blocklists will be blocked,\n\
-# including subdomains of allowed domains\n\
-whitelist_mode="' + data.config.whitelist_mode + '"\n\
-\n\
-# One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
-blocklist_urls="' + combined_blocklist_urls.join(' ') + '"\n\
-blocklist_ipv4_urls="' + (data.config.blocklist_ipv4_urls ?? []).join(' ') + '"\n\
-allowlist_urls="' + (data.config.allowlist_urls ?? []).join(' ') + '"\n\
-\n\
-# One or more *dnsmasq format* domain blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
-dnsmasq_blocklist_urls="' + (data.config.dnsmasq_blocklist_urls ?? []).join(' ') + '"\n\
-dnsmasq_blocklist_ipv4_urls="' + (data.config.dnsmasq_blocklist_ipv4_urls ?? []).join(' ') + '"\n\
-dnsmasq_allowlist_urls="' + (data.config.dnsmasq_allowlist_urls ?? []).join(' ') + '"\n\
-\n\
-# Path to optional local raw allowlist/blocklist domain files in the form:\n\
-# site1.com\n\
-# site2.com\n\
-local_allowlist_path="' + data.config.local_allowlist_path + '"\n\
-local_blocklist_path="' + data.config.local_blocklist_path + '"\n\
-\n\
-# Test domains are automatically querried after loading the blocklist into dnsmasq,\n\
-# in order to verify that the blocklist didn\'t break DNS resolution\n\
-# If query for any of the test domains fails, previous blocklist is restored from backup\n\
-# If backup doesn\'t exist, the blocklist is removed and adblock-lean is stopped\n\
-# Leaving this empty will disable verification\n\
-test_domains="' + data.config.test_domains + '"\n\
-\n\
-# List part failed action:\n\
-# This option applies to blocklist/allowlist parts which failed to download or couldn\'t pass validation checks\n\
-# SKIP - skip failed blocklist file part and continue blocklist generation\n\
-# STOP - stop blocklist generation (and fall back to previous blocklist if available)\n\
-list_part_failed_action="' + data.config.list_part_failed_action + '"\n\
-\n\
-# Maximum number of download retries\n\
-max_download_retries="' + data.config.max_download_retries + '"\n\
-\n\
-# Minimum number of good lines in final postprocessed blocklist\n\
-min_good_line_count="' + data.config.min_good_line_count + '"\n\
-\n\
-# Mininum number of lines of any individual downloaded part\n\
-min_blocklist_part_line_count="' + data.config.min_blocklist_part_line_count + '"\n\
-min_blocklist_ipv4_part_line_count="' + data.config.min_blocklist_ipv4_part_line_count + '"\n\
-min_allowlist_part_line_count="' + data.config.min_allowlist_part_line_count + '"\n\
-\n\
-# Maximum size of any individual downloaded blocklist part\n\
-max_file_part_size_KB="' + data.config.max_file_part_size_KB + '"\n\
-\n\
-# Maximum total size of combined, processed blocklist\n\
-max_blocklist_file_size_KB="' + data.config.max_blocklist_file_size_KB + '"\n\
-\n\
-# Whether to perform sorting and deduplication of entries (usually doesn\'t cause much slowdown, uses a bit more memory) - enable (1) or disable (0)\n\
-deduplication="' + ((data.config.deduplication ?? false) ? '1' : '0') + '"\n\
-\n\
-# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)\n\
-use_compression="' + ((data.config.use_compression ?? false) ? '1' : '0') + '"\n\
-\n\
-# restart dnsmasq if previous blocklist was extracted and before generation of\n\
-# new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)\n\
-initial_dnsmasq_restart="' + ((data.config.initial_dnsmasq_restart ?? false) ? '1' : '0') + '"\n\
-\n\
-# Start delay in seconds when service is started from system boot\n\
-boot_start_delay_s="' + data.config.boot_start_delay_s + '"\n\
-\n\
-# If a path to custom script is specified and that script defines functions \'report_success()\' and \'report_failure()\',\n\
-# one of these functions will be executed when adblock-lean completes the execution of some commands,\n\
-# with the success or failure message passed in first argument\n\
-# report_success() is only executed upon completion of the \'start\' command\n\
-# Recommended path is \'/usr/libexec/abl_custom-script.sh\' which the luci app has permission to access\n\
-custom_script="' + data.config.custom_script + '"\n\
-\n\
-# Crontab schedule expression for periodic list updates\n\
-cron_schedule="' + data.config.cron_schedule + '"\n\
-\n\
-# dnsmasq instance and config directory\n\
-# normally this should be set automatically by the \'setup\' command\n\
-DNSMASQ_INSTANCE="' + data.config.DNSMASQ_INSTANCE + '"\n\
-DNSMASQ_INDEX="' + data.config.DNSMASQ_INDEX + '"\n\
-DNSMASQ_CONF_D="' + data.config.DNSMASQ_CONF_D + '"\n\
-';
-
-				// Save config file
-				return fs.write('/etc/adblock-lean/config', config)
-					.then(function () {
-						document.body.scrollTop = document.documentElement.scrollTop = 0;
-						ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
-
-						// Check if we should save the starter file.  We only do this if custom_script is set
-						// to the default path, which we have read/write access to
-						if (data.config.custom_script == '/usr/libexec/abl_custom-script.sh') {
-							fs.stat('/usr/libexec/abl_custom-script.sh')
-								.then(function(result) {
-									// Do nothing, file exists so we don't want to create it
-								})
-								.catch(function (e) {
-									if (e.name == 'NotFoundError') {
-										// File not found, so we can create the starter file
-										fs.write('/usr/libexec/abl_custom-script.sh', '# AdBlock Lean custom script for reporting success/failure conditions\n\
-\n\
-report_failure() {\n\
-	# Example to send an email:\n\
-	# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user BREVO@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Failure Report" -M "$1"\n\
-\n\
-	# Example to request an http(s) url:\n\
-	# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>/fail\n\
-\n\
-	:\n\
-}\n\
-\n\
-report_success() {\n\
-	# Example to send an email:\n\
-	# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user BREVO@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Success Report" -M "$1"\n\
-\n\
-	# Example to request an http(s) url:\n\
-	# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>\n\
-\n\
-	:\n\
-}\n');
-									}
-								});
-						}
-					}).catch(function (e) {
-						document.body.scrollTop = document.documentElement.scrollTop = 0;
-						ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
-					});
-			})
-			.catch((error) => {
-				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(error.message)), 'error');
-			});
+		this.formMap.save(function() { /* do nothing */ }, true).then((result) => {
+			config.save();
+		}).catch((error) => {
+			document.body.scrollTop = document.documentElement.scrollTop = 0;
+			ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(error.message)), 'error');
+		});
 	},
 
 	load: function () {
 		return Promise.all([
 			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
-			L.resolveDefault(fs.read_direct('/etc/adblock-lean/config'), ''),
 			L.resolveDefault(rpc.checkConfig(), '')
 		]);
 	},
 
-	render: function (loadData) {
+	render: async function (loadData) {
 		var ablStatEntry = loadData[0];
-		var configFile = loadData[1];
-		var checkConfigResult = loadData[2];
+		var checkConfigResult = loadData[1];
 
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
@@ -218,13 +54,11 @@ report_success() {\n\
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
-		if (configFile === '') {
+		await config.load();
+		if (!config.loaded) {
 			this.handleSave = null;
 			return new missingConfigClass.view().render();
 		}
-
-		let s, o;
-		var status;
 
 		// Check if a configuration update is needed, and if so, display a button to automatically update it as well as
 		// instructions for if they want to manually update
@@ -308,12 +142,12 @@ report_success() {\n\
 		}
 
 		// Show the status panel
-		status = new statusClass.view();
+		var status = new statusClass.view();
 		status.showButtons = true;
 		status.showTitle = true;
 
 		// Ensure the config format matches the format we can support
-		if (configFile.indexOf('config_format=v' + statusClass.supportedConfigFormat) == -1) {
+		if (!config.hasSupportedConfigFormat) {
 			// Disable the save button
 			this.handleSave = null;
 
@@ -338,14 +172,13 @@ report_success() {\n\
 		}
 
 		// Setup the form inputs for each config option
-		data = parseConfig(configFile);
-		m = new form.JSONMap(data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
+		this.formMap = new form.JSONMap(config.data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
 			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
 		/*
 			tabbed config section
 		*/
-		s = m.section(form.NamedSection, 'config', 'adblock-lean-section');
+		var s = this.formMap.section(form.NamedSection, 'config', 'adblock-lean-section');
 		s.addremove = false;
 		s.tab('general', _('General Settings'));
 		s.tab('advanced', _('Advanced Settings'));
@@ -353,7 +186,7 @@ report_success() {\n\
 		/*
 			general tab
 		*/
-		o = s.taboption(
+		var o = s.taboption(
 			'general',
 			form.MultiValue,
 			'hagezi_blocklists',
@@ -524,9 +357,9 @@ report_success() {\n\
 		o.rmempty = false;
 
 		if (status) {
-			return Promise.all([status.render(), m.render()]);
+			return Promise.all([status.render(), this.formMap.render()]);
 		} else {
-			return m.render();
+			return this.formMap.render();
 		}
 	},
 });
