@@ -22,11 +22,10 @@ var installAblClass = baseclass.extend({
 
 	render: function () {
 		// Build the title element
-		var titleElement = E('h1', {}, _('Install adblock-lean'));
+		var titleElement = E('h1', {}, _('adblock-lean is not installed'));
 
 		// Build the instruction element
 		var instructionElements = E([
-			E('p', {}, _('adblock-lean is not currently installed on your system.')),
 			E('p', {}, _('To install it now review and submit the form below, or <a %s>to install it manually follow the instructions here</a>.')
 						.format('href="https://github.com/lynxthecat/adblock-lean" target="_blank" rel="noreferrer"')),
 			E('hr'),
@@ -34,7 +33,7 @@ var installAblClass = baseclass.extend({
 
 		// Build the preset radiobuttons
 		var presetElements = E([
-			E('p', {}, _('Select one of the four pre-defined blocklist presets, each one intended for devices with a certain total memory capacity.')),
+			E('p', {}, _('Select one of the pre-defined blocklist presets, each one intended for devices with a certain total memory capacity.')),
 			E('p', { 'id': 'auto-preset-note', 'display': 'none' }, ''),
 			E('div', {}, [
 				E('input', { 'type': 'radio', 'name': 'preset', 'value': 'mini', }),
@@ -62,7 +61,15 @@ var installAblClass = baseclass.extend({
 				' ',
 				E('strong', {}, _('Large')),
 				': ',
-				_('for devices with 512MB of RAM or more. This preset includes circa 800k entries'),
+				_('for devices with 512MB of RAM. This preset includes circa 1M entries'),
+			]),
+			E('div', {}, [
+				E('input', { 'type': 'radio', 'name': 'preset', 'value': 'large_relaxed', }),
+				' ',
+				E('strong', {}, _('Large-Relaxed')),
+				': ',
+				E('span', {}, _('for devices with 1024MB of RAM or more. This preset includes circa 1M entries and same default blocklist URLs as %s but the max\
+				                 values are more relaxed and allow for larger fluctuations in downloaded blocklist sizes').format('<strong>' + _('Large') + '</strong>')),
 			]),
 			E('br'),
 		]);
@@ -98,7 +105,10 @@ var installAblClass = baseclass.extend({
 			if (mem.total) {
 				var preset;
 				
-				if (mem.total >= 512 * 1024 * 1024) {
+				if (mem.total >= 1024 * 1024 * 1024) {
+					preset = _('Large-Relaxed');
+					document.querySelector('input[name=preset][value=large_relaxed]').checked = true;
+				} else if (mem.total >= 512 * 1024 * 1024) {
 					preset = _('Large');
 					document.querySelector('input[name=preset][value=large]').checked = true;
 				} else if (mem.total >= 256 * 1024 * 1024) {
