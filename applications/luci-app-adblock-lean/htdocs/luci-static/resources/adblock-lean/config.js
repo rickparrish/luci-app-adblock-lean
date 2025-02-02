@@ -3,8 +3,11 @@
 'require fs';
 'require adblock-lean.hagezi as hagezi';
 'require adblock-lean.helpers as helpers';
+'require adblock-lean.rpc as rpc';
 
 return L.Class.extend({
+	checkConfigResult: null,
+
 	data: { 'config': null },
 
 	hasSupportedConfigFormat: false,
@@ -68,6 +71,9 @@ return L.Class.extend({
 
 			// Set the hasSupportedConfigFormat flag
 			this.hasSupportedConfigFormat = (this.rawConfig.indexOf('config_format=v' + this.supportedConfigFormat) >= 0)
+
+			// Call the checkConfig RPC method to see if an update/reset is needed
+			this.checkConfigResult = await rpc.checkConfig();
 		}
 	},
 

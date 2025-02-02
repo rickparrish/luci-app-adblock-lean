@@ -8,8 +8,10 @@
 'require adblock-lean.helpers as helpers';
 'require adblock-lean.missing-config as missingConfigClass';
 'require adblock-lean.not-installed as notInstalledClass';
+'require adblock-lean.reset-config as resetConfigClass';
 'require adblock-lean.rpc as rpc';
 'require adblock-lean.status as statusClass';
+'require adblock-lean.update-config as updateConfigClass';
 
 return view.extend({
 	// Holds the form.JSONMap, which is created during render() and accessed during save()
@@ -26,7 +28,7 @@ return view.extend({
 			notifications[i].style.display = 'none';
 		}
 
-		// Call m.save() with silent=true, because we'll call ui.addNotification to display a banner
+		// Call formMap.save() with silent=true, because we'll call ui.addNotification to display a banner
 		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
 		this.formMap.save(function() { /* do nothing */ }, true).then((result) => {
 			config.save();
@@ -39,13 +41,11 @@ return view.extend({
 	load: function () {
 		return Promise.all([
 			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
-			L.resolveDefault(rpc.checkConfig(), '')
 		]);
 	},
 
 	render: async function (loadData) {
 		var ablStatEntry = loadData[0];
-		var checkConfigResult = loadData[1];
 
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
@@ -58,87 +58,14 @@ return view.extend({
 		if (!config.loaded) {
 			this.handleSave = null;
 			return new missingConfigClass.view().render();
-		}
-
-		// Check if a configuration update is needed, and if so, display a button to automatically update it as well as
-		// instructions for if they want to manually update
-		if (checkConfigResult.config_status == 2) {
-			// Disable the save button
+		} else if (config.updateNeeded) {
 			this.handleSave = null;
-
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Update Needed'));
-
-			// Build the automatic instruction element
-			var autoInstructionElement = E('p', {}, _('AdBlock Lean\'s configuration format has changed.<br /><br />\
-				Click the Update button below the make the following automatic changes:\
-				' + helpers.getUnorderedList(checkConfigResult.conf_fixes)));
-
-			var buttonElement = E('button', {
-				'class': 'btn cbi-button cbi-button-positive',
-				'click': ui.createHandlerFn(this, function () { 
-					ui.showModal(null, [
-						E('p',
-							{ class: 'spinning' },
-							_('Updating AdBlock Lean configuration file')
-						),
-					]);
-					L.resolveDefault(rpc.updateConfig())
-						.then(function (result) { location.reload() });
-				}),
-			}, [_('Update Configuration File')]);
-
-			// Build the manual instruction element
-			var config_format_message = ''
-			if (checkConfigResult.curr_config_format != checkConfigResult.def_config_format) {
-				config_format_message = '# config_format=v' + checkConfigResult.def_config_format
-			}
-			var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
-				these are the changes that are needed:<br /><br />\
-				' + helpers.getUnorderedListWithHeader('Remove old entries:', checkConfigResult.unexp_entries) + '\
-				' + helpers.getUnorderedListWithHeader('Add new entries:', checkConfigResult.missing_entries) + '\
-				' + helpers.getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', checkConfigResult.legacy_entries) + '\
-				' + helpers.getUnorderedListWithHeader('Add/update the config_format comment:', config_format_message)));
-
-			// Combine the various elements into our result variable
-			return E([
-				titleElement,
-				autoInstructionElement,
-				buttonElement,
-				manualInstructionElement
-			]);
-		} else if (checkConfigResult.config_status == 1) {
-			// Disable the save button
+			var updateObj = new updateConfigClass.view();
+			updateObj.checkConfigResult = config.checkConfigResult;
+			return updateObj.render();
+		} else if (config.resetNeeded) {
 			this.handleSave = null;
-
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Configuration Error'));
-
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('AdBlock Lean\'s configuration file has an error.<br /><br />\
-				To automatically reset it now, click the Reset button below.  Or to fix it manually,\
-				SSH into your router and try executing <strong>service adblock-lean start</strong>.<br /><br />'));
-
-			var buttonElement = E('button', {
-				'class': 'btn cbi-button cbi-button-positive',
-				'click': ui.createHandlerFn(this, function () { 
-					ui.showModal(null, [
-						E('p',
-							{ class: 'spinning' },
-							_('Resetting AdBlock Lean configuration file')
-						),
-					]);
-					L.resolveDefault(rpc.resetConfig())
-						.then(function (result) { location.reload() });
-				}),
-			}, [_('Reset Configuration File')]);
-
-			// Combine the various elements into our result variable
-			return E([
-				titleElement,
-				instructionElement,
-				buttonElement
-			]);
+			return new resetConfigClass.view().render();
 		}
 
 		// Show the status panel
