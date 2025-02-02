@@ -6,25 +6,28 @@
 'require adblock-lean.partials.update-config as updateConfigClass';
 
 return L.Class.extend({
-	createCreateConfig: function () {
-		return new createConfigClass.partial();
+	renderCreateConfig: function () {
+		return new createConfigClass.partial().render();
 	},
 
-	createDisplayStatus: function () {
-		return new displayStatusClass.partial();
+	renderDisplayStatus: function (showButtons, showTitle) {
+		var result = new displayStatusClass.partial();
+		result.showButtons = showButtons;
+		result.showTitle = showTitle;
+		return result.render();
 	},
 
-	createInstallAbl: function () {
-		return new installAblClass.partial();
+	renderInstallAbl: function () {
+		return new installAblClass.partial().render();
 	},
 
-	createResetConfig: function () {
-		return new resetConfigClass.partial();
+	renderResetConfig: function () {
+		return new resetConfigClass.partial().render();
 	},
 
-	createUpdateConfig: function (checkConfigResult) {
+	renderUpdateConfig: function (checkConfigResult) {
 		var result = new updateConfigClass.partial();
 		result.checkConfigResult = checkConfigResult;
-		return result;
+		return result.render();
 	},
 });

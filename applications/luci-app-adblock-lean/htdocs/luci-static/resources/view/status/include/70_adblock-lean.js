@@ -36,6 +36,6 @@ return baseclass.extend({
 		}
 
 		// Return our custom status object
-		return partials.createDisplayStatus().render();
+		return partials.renderDisplayStatus();
 	},
 });

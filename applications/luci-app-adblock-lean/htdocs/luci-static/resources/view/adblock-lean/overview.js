@@ -47,26 +47,24 @@ return view.extend({
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
 			this.handleSave = null;
-			return partials.createInstallAbl().render();
+			return partials.renderInstallAbl();
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
 		await config.load();
 		if (!config.loaded) {
 			this.handleSave = null;
-			return partials.createCreateConfig().render();
+			return partials.renderCreateConfig();
 		} else if (config.updateNeeded) {
 			this.handleSave = null;
-			return partials.createUpdateConfig(config.checkConfigResult).render();
+			return partials.renderUpdateConfig(config.checkConfigResult);
 		} else if (config.resetNeeded) {
 			this.handleSave = null;
-			return partials.createResetConfig().render();
+			return partials.renderResetConfig();
 		}
 
-		// Show the status panel
-		var status = partials.createDisplayStatus();
-		status.showButtons = true;
-		status.showTitle = true;
+		// Create the status panel (true, true allows buttons and title to be shown)
+		var status = partials.renderDisplayStatus(true, true);
 
 		// Ensure the config format matches the format we can support
 		if (!config.hasSupportedConfigFormat) {
@@ -90,7 +88,7 @@ return view.extend({
 				instructionElement
 			]);
 
-			return Promise.all([status.render(), result]);
+			return Promise.all([status, result]);
 		}
 
 		// Setup the form inputs for each config option
@@ -279,7 +277,7 @@ return view.extend({
 		o.rmempty = false;
 
 		if (status) {
-			return Promise.all([status.render(), this.formMap.render()]);
+			return Promise.all([status, this.formMap.render()]);
 		} else {
 			return this.formMap.render();
 		}
