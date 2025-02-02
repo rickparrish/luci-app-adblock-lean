@@ -72,7 +72,7 @@ return L.Class.extend({
 		}
 	},
 
-	save: function() {
+	save: async function() {
 		var data = this.data.config;
 
 		// Marge the hagezi blocklist and other blocklist selections into one array
@@ -90,9 +90,7 @@ return L.Class.extend({
 
 		// Abort if user did not select or enter at least one blocklist
 		if (combined_blocklist_urls.length == 0) {
-			document.body.scrollTop = document.documentElement.scrollTop = 0;
-			ui.addNotification(null, E('p', _('Unable to save modifications: Must select or provide at least one blocklist')), 'error');
-			return;
+			throw new Error(_('Must select or provide at least one blocklist'));
 		}
 
 		// enable_custom_script needs to be mapped to custom_script
@@ -195,22 +193,26 @@ DNSMASQ_CONF_D="' + data.DNSMASQ_CONF_D + '"\n\
 ';
 
 		// Save config file
-		return fs.write('/etc/adblock-lean/config', config)
-			.then(function () {
-				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
-
-				// Check if we should save the starter file.  We only do this if custom_script is set
-				// to the default path, which we have read/write access to
-				if (data.custom_script == '/usr/libexec/abl_custom-script.sh') {
-					fs.stat('/usr/libexec/abl_custom-script.sh')
-						.then(function(result) {
-							// Do nothing, file exists so we don't want to create it
-						})
-						.catch(function (e) {
-							if (e.name == 'NotFoundError') {
-								// File not found, so we can create the starter file
-								fs.write('/usr/libexec/abl_custom-script.sh', '#!/bin/sh\n\
+		await fs.write('/etc/adblock-lean/config', config);
+	
+		// Check if we should save the starter custom script.  We only do this if custom_script is set
+		// to the default path, which we have read/write access to
+		if (data.custom_script == '/usr/libexec/abl_custom-script.sh') {
+			try {
+				// Try to stat the file.  If we get a result that means the file already exists so we'll return
+				var statResult = await fs.stat('/usr/libexec/abl_custom-script.sh');
+				if (L.isObject(statResult)) {
+					return;
+				}
+			} catch (e) {
+				// Failed to stat the file.  If it's NOT a NotFoundError, throw to report the error
+				if (e.name !== 'NotFoundError') {
+					throw e;
+				}
+			}
+					
+			// If we get here the file was not found, so we can write a new one
+			await fs.write('/usr/libexec/abl_custom-script.sh', '#!/bin/sh\n\
 \n\
 report_failure()\n\
 {\n\
@@ -233,12 +235,6 @@ mailbody="${1}"\n\
 # Example to request an http(s) url:\n\
 # uclient-fetch -q -O - --post-data="${mailbody}" https://hc-ping.com/<uuid>\n\
 }\n');
-							}
-						});
-				}
-			}).catch(function (e) {
-				document.body.scrollTop = document.documentElement.scrollTop = 0;
-				ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(e.message)), 'error');
-			});	
+		}
 	}
 });

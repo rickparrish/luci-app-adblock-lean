@@ -27,8 +27,11 @@ return view.extend({
 
 		// Call formMap.save() with silent=true, because we'll call ui.addNotification to display a banner
 		// in the event of an error (with silent=false it displays a modal, which is annoying to dismiss)
-		this.formMap.save(function() { /* do nothing */ }, true).then((result) => {
-			config.save();
+		this.formMap.save(function() { /* do nothing */ }, true).then(async (result) => {
+			await config.save();
+
+			document.body.scrollTop = document.documentElement.scrollTop = 0;
+			ui.addNotification(null, E('p', _('Config modifications have been saved, reload adblock-lean for changes to take effect.')), 'success');
 		}).catch((error) => {
 			document.body.scrollTop = document.documentElement.scrollTop = 0;
 			ui.addNotification(null, E('p', _('Unable to save modifications: %s').format(error.message)), 'error');
