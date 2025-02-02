@@ -47,7 +47,7 @@ config_status_rpc=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update neede
 laabl_package_info=""		# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
 service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 
-# Source the AdBlock Lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
+# Source the adblock-lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
 	. "$adblockLeanFilename"
@@ -59,11 +59,11 @@ fi
 # source jshn shell library
 . /usr/share/libubox/jshn.sh
 
-# RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (AdBlock Lean will do this for actual
+# RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (adblock-lean will do this for actual
 # RPC calls, but it won't do it when testing the RPC script via the CLI, hence why we set it here)
 msgs_dest="/dev/null"
 
-# AdBlock Lean will call this function before exiting, so for example the flow for a getStatus call looks like:
+# adblock-lean will call this function before exiting, so for example the flow for a getStatus call looks like:
 # RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> ??? -> exit
 # This means get_status_rpc() can only initiate the call to status(), but not actually output anything because the call
 # from get_status_rpc() to status() never returns to get_status_rpc()
@@ -77,9 +77,9 @@ abl_luci_exit() {
 	esac
 }
 
-# Call AdBlock Lean's parse_config() function to determine whether the config file needs updating
+# Call adblock-lean's parse_config() function to determine whether the config file needs updating
 check_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its parse_config method
+	# If adblock-lean is installed, then we want to call its parse_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		parse_config "/etc/adblock-lean/config"
@@ -102,17 +102,17 @@ check_config_rpc() {
 	json_dump
 }
 
-# Call AdBlock Lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
+# Call adblock-lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
 # correctly, etc.
 get_status_rpc() {
-	# If AdBlock Lean is installed, then we want to call its status method
+	# If adblock-lean is installed, then we want to call its status method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		status
 	fi
 
-	# AdBlock Lean exits at the end of all functions, so if status is called above then we won't get here
-	# BUT if AdBlock Lean is not installed, then we will get here, and we need to manually call print_status_rpc()
+	# adblock-lean exits at the end of all functions, so if status is called above then we won't get here
+	# BUT if adblock-lean is not installed, then we will get here, and we need to manually call print_status_rpc()
 	print_status_rpc
 }
 
@@ -149,7 +149,7 @@ install_rpc() {
 
 # Perform some additional status-related checks, and then output the JSON response payload
 print_status_rpc() {
-	# Only perform the additional checks if AdBlock Lean is installed
+	# Only perform the additional checks if adblock-lean is installed
 	if [ "$service_status_rpc" != 2 ]
 	then
 		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
@@ -195,9 +195,9 @@ print_status_rpc() {
 	json_dump
 }
 
-# Call AdBlock Lean's gen_config() function to reset the broken config file
+# Call adblock-lean's gen_config() function to reset the broken config file
 reset_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its gen_config method
+	# If adblock-lean is installed, then we want to call its gen_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		gen_config
@@ -207,9 +207,9 @@ reset_config_rpc() {
 	# because luci will reload after resetConfig returns
 }
 
-# Call AdBlock Lean's update() function to update to the latest version
+# Call adblock-lean's update() function to update to the latest version
 update_abl_rpc() {
-	# If AdBlock Lean is installed, then we want to call its update method
+	# If adblock-lean is installed, then we want to call its update method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		update
@@ -219,9 +219,9 @@ update_abl_rpc() {
 	# because luci will reload after updateConfig returns
 }
 
-# Call AdBlock Lean's load_config() function to update the outdated config file
+# Call adblock-lean's load_config() function to update the outdated config file
 update_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its load_config method
+	# If adblock-lean is installed, then we want to call its load_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		load_config "-f"

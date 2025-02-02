@@ -73,7 +73,7 @@ return view.extend({
 		}
 
 		// Setup the form inputs for each config option
-		this.formMap = new form.JSONMap(config.data, 'AdBlock Lean - Configuration', _('Configuration of the AdBlock Lean package. \
+		this.formMap = new form.JSONMap(config.data, 'Configuration', _('Configuration of the adblock-lean package. \
 			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
 		/*

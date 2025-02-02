@@ -1,6 +1,6 @@
 {
 	"admin/services/adblock-lean": {
-		"title": "AdBlock Lean",
+		"title": "adblock-lean",
 		"action": {
 			"type": "alias",
 			"path": "admin/services/adblock-lean/overview"

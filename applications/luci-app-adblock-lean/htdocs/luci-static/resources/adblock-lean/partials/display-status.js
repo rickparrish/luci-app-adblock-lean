@@ -15,7 +15,7 @@ var displayStatusClass = baseclass.extend({
 		ui.showModal(null, [
 			E('p',
 				{ class: 'spinning' },
-				_(actionLabel + ' AdBlock Lean...')
+				_(actionLabel + ' ' + _('adblock-lean') + '...')
 			),
 		]);
 		await fs.exec_direct('/etc/init.d/adblock-lean', [actionName]);
@@ -34,7 +34,7 @@ var displayStatusClass = baseclass.extend({
 	
 	render: function () {
 		// Build the title element, if showTitle is true
-		var titleElement = this.showTitle ? E('h2', {}, _('AdBlock Lean - Status')) : E('div');
+		var titleElement = this.showTitle ? E('h2', {}, _('Status')) : E('div');
 
 		// Build the table element with the status placeholders
 		var tableElement = E('table', { 'class': 'table', 'style': 'margin-bottom: 5px;' }, [
@@ -51,7 +51,7 @@ var displayStatusClass = baseclass.extend({
 				E('td', { 'class': 'td left', 'id': 'dnsmasq-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('AdBlock Lean Update Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('adblock-lean Update Status')),
 				E('td', { 'class': 'td left', 'id': 'abl-update-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
@@ -116,10 +116,10 @@ var displayStatusClass = baseclass.extend({
 				'\xa0',
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAdblockLean, 'Updating AdBlock Lean...'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAdblockLean, 'Updating adblock-lean...'); }),
 					'style': 'display: none',
 					'id': 'update-abl-button',
-				}, [_('Update AdBlock Lean')]),
+				}, [_('Update adblock-lean')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
 					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, 'Updating LuCI App...'); }),
@@ -144,19 +144,19 @@ var displayStatusClass = baseclass.extend({
 				serviceStatus.classList.remove('spinning');
 				switch (result.service_status) {
 					case 0:
-						serviceStatus.textContent = _('AdBlock Lean will autostart on boot');
+						serviceStatus.textContent = _('adblock-lean will autostart on boot');
 						if (that.showButtons) {
 							document.getElementById('disable-button').style.display = 'inline-block';
 						}
 						break;
 					case 1:
-						serviceStatus.textContent = _('AdBlock Lean will NOT autostart on boot');
+						serviceStatus.textContent = _('adblock-lean will NOT autostart on boot');
 						if (that.showButtons) {
 							document.getElementById('enable-button').style.display = 'inline-block';
 						}
 						break;
 					case 2:
-						serviceStatus.textContent = _('AdBlock Lean is not installed');
+						serviceStatus.textContent = _('adblock-lean is not installed');
 						break;
 					default:
 						serviceStatus.textContent = _('Unknown');
@@ -198,7 +198,7 @@ var displayStatusClass = baseclass.extend({
 							blocklistStatus.textContent = _('Error checking blocklist status, try again in a minute');
 							break;
 						case 2:
-							blocklistStatus.textContent = _('AdBlock Lean is performing an action: %s').format(result.pid_action);
+							blocklistStatus.textContent = _('adblock-lean is performing an action: %s').format(result.pid_action);
 							break;
 						case 3:
 							blocklistStatus.textContent = _('Blocklist is NOT active (paused)');
@@ -226,7 +226,7 @@ var displayStatusClass = baseclass.extend({
 						case 1:
 							if (result.update_config_format > config.supportedConfigFormat) {
 								updateStatus.textContent = _('An update is available, but it uses a newer config format than the LuCI App supports,\
-									so you will need to update the LuCI App before you can install the latest AdBlock Lean');
+									so you will need to update the LuCI App before you can install the latest adblock-lean');
 							} else {
 								updateStatus.textContent = _('An update is available');
 							
