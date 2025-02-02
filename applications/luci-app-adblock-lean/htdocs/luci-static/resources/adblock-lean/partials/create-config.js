@@ -1,7 +1,5 @@
 'use strict';
 'require baseclass';
-'require rpc';
-'require ui';
 
 var createConfigClass = baseclass.extend({
 	render: function () {
