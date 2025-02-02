@@ -210,26 +210,28 @@ DNSMASQ_CONF_D="' + data.DNSMASQ_CONF_D + '"\n\
 						.catch(function (e) {
 							if (e.name == 'NotFoundError') {
 								// File not found, so we can create the starter file
-								fs.write('/usr/libexec/abl_custom-script.sh', '# AdBlock Lean custom script for reporting success/failure conditions\n\
+								fs.write('/usr/libexec/abl_custom-script.sh', '#!/bin/sh\n\
 \n\
-report_failure() {\n\
-# Example to send an email:\n\
-# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user BREVO@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Failure Report" -M "$1"\n\
+report_failure()\n\
+{\n\
+mailbody="${1}"\n\
+\n\
+# Example to send an email\n\
+# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.COM -t TO@EMAIL.COM -user BREVO@USERNAME.COM -pass PASSWORD -sub "adblock-lean blocklist update failed" -M "${mailbody}"\n\
 \n\
 # Example to request an http(s) url:\n\
-# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>/fail\n\
-\n\
-:\n\
+# uclient-fetch -q -O - --post-data="${mailbody}" https://hc-ping.com/<uuid>/fail\n\
 }\n\
 \n\
-report_success() {\n\
+report_success()\n\
+{\n\
+mailbody="${1}"\n\
+\n\
 # Example to send an email:\n\
-# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.com -t TO@EMAIL.com -user BREVO@USERNAME.com -pass PASSWORD -sub "AdBlock Lean Success Report" -M "$1"\n\
+# mailsend -port 587 -smtp smtp-relay.brevo.com -auth -f FROM@EMAIL.COM -t TO@EMAIL.COM -user BREVO@USERNAME.COM -pass PASSWORD -sub "adblock-lean blocklist update success" -M "${mailbody}"\n\
 \n\
 # Example to request an http(s) url:\n\
-# uclient-fetch -q -O - --post-data="$1" https://hc-ping.com/<uuid>\n\
-\n\
-:\n\
+# uclient-fetch -q -O - --post-data="${mailbody}" https://hc-ping.com/<uuid>\n\
 }\n');
 							}
 						});
