@@ -47,14 +47,14 @@ return view.extend({
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
 			this.handleSave = null;
-			return partials.createNotInstalled().render();
+			return partials.createInstallAbl().render();
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
 		await config.load();
 		if (!config.loaded) {
 			this.handleSave = null;
-			return partials.createMissingConfig().render();
+			return partials.createCreateConfig().render();
 		} else if (config.updateNeeded) {
 			this.handleSave = null;
 			return partials.createUpdateConfig(config.checkConfigResult).render();
@@ -64,7 +64,7 @@ return view.extend({
 		}
 
 		// Show the status panel
-		var status = partials.createStatus();
+		var status = partials.createDisplayStatus();
 		status.showButtons = true;
 		status.showTitle = true;
 

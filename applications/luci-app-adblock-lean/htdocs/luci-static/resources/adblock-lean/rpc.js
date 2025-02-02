@@ -14,9 +14,9 @@ return L.Class.extend({
 		params: [],
 	}),
 
-	install: rpc.declare({
+	installAbl: rpc.declare({
 		object: 'luci.adblock-lean',
-		method: 'install',
+		method: 'install', // TODOX rename install_abl
 		params: ['preset', 'utils'],
 	}),
 	

@@ -5,7 +5,7 @@
 'require adblock-lean.config as config';
 'require adblock-lean.rpc as rpc';
 
-var statusClass = baseclass.extend({
+var displayStatusClass = baseclass.extend({
 	showButtons: false,
 	showTitle: false,
 	statusResult: null,
@@ -322,5 +322,5 @@ var statusClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	partial: statusClass,
+	partial: displayStatusClass,
 });

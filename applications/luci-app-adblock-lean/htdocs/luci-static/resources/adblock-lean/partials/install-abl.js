@@ -3,7 +3,7 @@
 'require ui';
 'require adblock-lean.rpc as rpc';
 
-var notInstalledClass = baseclass.extend({
+var installAblClass = baseclass.extend({
 	handleInstallClick: function () {
 		// Display the spinning cursor dialog
 		ui.showModal(null, [
@@ -17,7 +17,7 @@ var notInstalledClass = baseclass.extend({
 		var utils = Array.from(document.querySelectorAll("input[name=utils]:checked"), e => e.value).join(' ');
 	
 		// Call the install RPC method and reload the page when it completes
-		L.resolveDefault(rpc.install(preset, utils)).then(function (result) { location.reload() });
+		L.resolveDefault(rpc.installAbl(preset, utils)).then(function (result) { location.reload() });
 	},
 
 	render: function () {
@@ -129,5 +129,5 @@ var notInstalledClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	partial: notInstalledClass,
+	partial: installAblClass,
 });
