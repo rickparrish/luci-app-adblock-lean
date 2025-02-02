@@ -2,9 +2,8 @@
 'require baseclass';
 'require fs';
 'require ui';
+'require adblock-lean.config as config';
 'require adblock-lean.rpc as rpc';
-
-const supportedConfigFormat = 6;
 
 var statusClass = baseclass.extend({
 	showButtons: false,
@@ -283,7 +282,7 @@ var statusClass = baseclass.extend({
 							updateStatus.textContent = _('Up to date');
 							break;
 						case 1:
-							if (result.update_config_format > supportedConfigFormat) {
+							if (result.update_config_format > config.supportedConfigFormat) {
 								updateStatus.textContent = _('An update is available, but it uses a newer config format than the LuCI App supports,\
 									so you will need to update the LuCI App before you can install the latest AdBlock Lean');
 							} else {
@@ -324,6 +323,5 @@ var statusClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: statusClass,
-	supportedConfigFormat: supportedConfigFormat,
+	partial: statusClass,
 });

@@ -12,6 +12,8 @@ REM scp -O -r ../adblock-lean/adblock-lean root@OpenWrt.lan:/etc/init.d/adblock-
 ssh root@OpenWrt.lan chmod 755 /usr/libexec/rpcd/luci.adblock-lean
 ssh root@OpenWrt.lan chmod 755 /www/luci-static/resources/adblock-lean
 ssh root@OpenWrt.lan chmod 644 /www/luci-static/resources/adblock-lean/*
+ssh root@OpenWrt.lan chmod 755 /www/luci-static/resources/adblock-lean/partials
+ssh root@OpenWrt.lan chmod 644 /www/luci-static/resources/adblock-lean/partials/*
 ssh root@OpenWrt.lan chmod 755 /www/luci-static/resources/view/adblock-lean
 ssh root@OpenWrt.lan chmod 644 /www/luci-static/resources/view/adblock-lean/*
 ssh root@OpenWrt.lan chmod 644 /www/luci-static/resources/view/status/include/70_adblock-lean.js

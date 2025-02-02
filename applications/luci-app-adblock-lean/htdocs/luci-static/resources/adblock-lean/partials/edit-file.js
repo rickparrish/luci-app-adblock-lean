@@ -63,5 +63,5 @@ var editFileClass = view.extend({
 });
 
 return L.Class.extend({
-	view: editFileClass,
+	partial: editFileClass,
 });

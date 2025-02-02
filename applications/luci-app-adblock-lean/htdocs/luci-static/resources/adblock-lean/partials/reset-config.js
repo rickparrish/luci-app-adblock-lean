@@ -41,5 +41,5 @@ var resetConfigClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: resetConfigClass,
+	partial: resetConfigClass,
 });

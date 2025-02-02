@@ -50,5 +50,5 @@ var updateConfigClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: updateConfigClass,
+	partial: updateConfigClass,
 });

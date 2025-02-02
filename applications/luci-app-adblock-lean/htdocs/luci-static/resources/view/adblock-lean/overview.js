@@ -6,12 +6,8 @@
 'require adblock-lean.config as config';
 'require adblock-lean.hagezi as hagezi';
 'require adblock-lean.helpers as helpers';
-'require adblock-lean.missing-config as missingConfigClass';
-'require adblock-lean.not-installed as notInstalledClass';
-'require adblock-lean.reset-config as resetConfigClass';
+'require adblock-lean.partials as partials';
 'require adblock-lean.rpc as rpc';
-'require adblock-lean.status as statusClass';
-'require adblock-lean.update-config as updateConfigClass';
 
 return view.extend({
 	// Holds the form.JSONMap, which is created during render() and accessed during save()
@@ -50,26 +46,24 @@ return view.extend({
 		// Check if adblock-lean is installed, and if not, display the install view
 		if (!L.isObject(ablStatEntry)) {
 			this.handleSave = null;
-			return new notInstalledClass.view().render();
+			return partials.createNotInstalled().render();
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
 		await config.load();
 		if (!config.loaded) {
 			this.handleSave = null;
-			return new missingConfigClass.view().render();
+			return partials.createMissingConfig().render();
 		} else if (config.updateNeeded) {
 			this.handleSave = null;
-			var updateObj = new updateConfigClass.view();
-			updateObj.checkConfigResult = config.checkConfigResult;
-			return updateObj.render();
+			return partials.createUpdateConfig(config.checkConfigResult).render();
 		} else if (config.resetNeeded) {
 			this.handleSave = null;
-			return new resetConfigClass.view().render();
+			return partials.createResetConfig().render();
 		}
 
 		// Show the status panel
-		var status = new statusClass.view();
+		var status = partials.createStatus();
 		status.showButtons = true;
 		status.showTitle = true;
 

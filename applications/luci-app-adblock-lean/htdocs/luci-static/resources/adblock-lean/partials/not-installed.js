@@ -129,5 +129,5 @@ var notInstalledClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: notInstalledClass,
+	partial: notInstalledClass,
 });

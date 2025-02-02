@@ -28,5 +28,5 @@ var missingConfigClass = baseclass.extend({
 });
 
 return L.Class.extend({
-	view: missingConfigClass,
+	partial: missingConfigClass,
 });
