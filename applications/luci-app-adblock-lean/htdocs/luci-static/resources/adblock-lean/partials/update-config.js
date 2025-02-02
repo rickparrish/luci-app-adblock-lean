@@ -1,12 +1,11 @@
 'use strict';
 'require baseclass';
 'require ui';
+'require adblock-lean.config as config';
 'require adblock-lean.helpers as helpers';
 'require adblock-lean.rpc as rpc';
 
 var updateConfigClass = baseclass.extend({
-	checkConfigResult: null,
-
 	handleUpdateClick: function () {
 		// Display the spinning cursor dialog
 		ui.showModal(null, [
@@ -24,7 +23,7 @@ var updateConfigClass = baseclass.extend({
 		// Build the automatic instruction element
 		var autoInstructionElement = E([
 			E('p', {}, _('adblock-lean\'s config format has changed.')),
-			E('p', {}, _('Click the Update button below the make the following automatic changes:' + helpers.getUnorderedList(this.checkConfigResult.conf_fixes))),
+			E('p', {}, _('Click the Update button below the make the following automatic changes:' + helpers.getUnorderedList(config.checkConfigResult.conf_fixes))),
 		]);
 
 		var buttonElement = E('button', {
@@ -35,9 +34,9 @@ var updateConfigClass = baseclass.extend({
 		// Build the manual instruction element
 		var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
 			these are the changes that are needed:<br /><br />\
-			' + helpers.getUnorderedListWithHeader('Remove old entries:', this.checkConfigResult.unexp_entries) + '\
-			' + helpers.getUnorderedListWithHeader('Add new entries:', this.checkConfigResult.missing_entries) + '\
-			' + helpers.getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', this.checkConfigResult.legacy_entries)));
+			' + helpers.getUnorderedListWithHeader('Remove old entries:', config.checkConfigResult.unexp_entries) + '\
+			' + helpers.getUnorderedListWithHeader('Add new entries:', config.checkConfigResult.missing_entries) + '\
+			' + helpers.getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', config.checkConfigResult.legacy_entries)));
 
 		// Combine the various elements into our result variable
 		return E([

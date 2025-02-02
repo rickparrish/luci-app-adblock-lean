@@ -26,10 +26,8 @@ return L.Class.extend({
 		return new resetConfigClass.partial().render();
 	},
 
-	renderUpdateConfig: function (checkConfigResult) {
-		var result = new updateConfigClass.partial();
-		result.checkConfigResult = checkConfigResult;
-		return result.render();
+	renderUpdateConfig: function () {
+		return new updateConfigClass.partial().render();
 	},
 
 	renderUpdateSoftware: function () {

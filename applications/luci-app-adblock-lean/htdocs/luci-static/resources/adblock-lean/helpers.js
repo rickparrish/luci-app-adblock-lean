@@ -42,6 +42,6 @@ return L.Class.extend({
 	
 	getUnorderedListWithHeader: function(header, text) {
 		if (!text) { return ''; }
-		return '<div><strong>' + header + '</strong></div>' + getUnorderedList(text);
+		return '<div><strong>' + header + '</strong></div>' + this.getUnorderedList(text);
 	},
 });

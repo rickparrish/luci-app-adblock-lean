@@ -60,7 +60,7 @@ return view.extend({
 			return partials.renderCreateConfig();
 		} else if (config.updateNeeded) {
 			this.handleSave = null;
-			return partials.renderUpdateConfig(config.checkConfigResult);
+			return partials.renderUpdateConfig();
 		} else if (config.resetNeeded) {
 			this.handleSave = null;
 			return partials.renderResetConfig();

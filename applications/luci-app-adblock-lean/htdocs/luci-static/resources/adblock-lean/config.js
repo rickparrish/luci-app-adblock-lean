@@ -1,4 +1,3 @@
-// TODOX ui stuff should probably be throws that can be caught in overview.js?
 'use strict';
 'require fs';
 'require adblock-lean.hagezi as hagezi';
@@ -11,7 +10,9 @@ return L.Class.extend({
 	hasSupportedConfigFormat: false,
 	loaded: false,
 	rawConfig: null,
+	resetNeeded: false,
 	supportedConfigFormat: 6,
+	updateNeeded: false,
 
 	load: async function () {
 		try {
@@ -70,6 +71,10 @@ return L.Class.extend({
 
 				// Call the checkConfig RPC method to see if an update/reset is needed
 				this.checkConfigResult = await rpc.checkConfig();
+				switch (parseInt(this.checkConfigResult.config_status)) {
+					case 1: this.resetNeeded = true; break;
+					case 2: this.updateNeeded = true; break;
+				}
 			}
 		} catch (e) {
 			// Failed to read the file.  If it's NOT a NotFoundError, throw to report the error
