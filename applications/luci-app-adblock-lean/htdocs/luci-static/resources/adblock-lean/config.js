@@ -7,15 +7,10 @@
 
 return L.Class.extend({
 	checkConfigResult: null,
-
 	data: { 'config': null },
-
 	hasSupportedConfigFormat: false,
-
 	loaded: false,
-
 	rawConfig: null,
-
 	supportedConfigFormat: 6,
 
 	load: async function () {
