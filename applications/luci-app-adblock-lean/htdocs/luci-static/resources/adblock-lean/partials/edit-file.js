@@ -4,13 +4,14 @@
 'require view';
 
 var editFileClass = view.extend({
+	// Custom variables
 	doLowercase: false,
-
 	filename: 'invalid-filename',
-
 	instructions: '',
 
+	// View-inheriting variables
 	handleReset: null,
+	handleSaveApply: null,
 
 	handleSave: function (ev) {
 		// Remove any existing notifications
@@ -38,8 +39,6 @@ var editFileClass = view.extend({
 				ui.addNotification(null, E('p', _('Unable to save changes: %s').format(e.message)), 'error');
 			});
 	},
-
-	handleSaveApply: null,
 
 	load: function () {
 		return Promise.all([

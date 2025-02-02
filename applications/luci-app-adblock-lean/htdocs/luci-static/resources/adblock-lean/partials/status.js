@@ -8,7 +8,6 @@
 var statusClass = baseclass.extend({
 	showButtons: false,
 	showTitle: false,
-
 	statusResult: null,
 	latestLuciAppResult: null,
 	
@@ -31,63 +30,6 @@ var statusClass = baseclass.extend({
 			),
 		]);
 		L.resolveDefault(actionFunc()).then(function (result) { location.reload() });
-	},
-	
-	setLuciAppUpdateStatus: function(showButtons) {
-		if (this.statusResult && this.latestLuciAppResult) {
-			var updateStatus = document.getElementById('laabl-update-status');
-	
-			/*
-			If the luci app is not installed, then this.statusResult.laabl_package_info will be blank.
-			This shouldn't ever happen to anyone but me, so we'll report it as an error condition.
-			*/
-			if (!this.statusResult.laabl_package_info) {
-				updateStatus.textContent = _('An error occurred while checking update status (missing package info)');
-				return;
-			}
-	
-			/*
-			this.statusResult.laabl_package_info will look like this:
-				Package: luci-app-adblock-lean
-				Version: git-24.229.78998-f9aed0d
-				Depends: libc, luci-base
-				Status: install user installed
-				Architecture: all
-				Installed-Time: 1723846085
-			So we need to parse the Version: line
-			*/
-			var currentVersion = this.statusResult.laabl_package_info.match(/Version[:]\s?(.*?)\s/)[1];
-			if (!currentVersion) {
-				updateStatus.textContent = _('An error occurred while checking update status (missing current version)');
-				return;
-			}
-	
-			/*
-			this.latestLuciAppResult will contain this (snipped irrelevant bits):
-				{
-					"assets": [
-						{
-							"name": "luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk",
-							"browser_download_url": "https://github.com/rickparrish/luci-app-adblock-lean/releases/download/latest/luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk"
-						}
-					],
-				}
-			So we need to check assets[0].name to see if it contains currentVersion.  If it does, we're up to date.  If it doesn't, we can update using assets[0].browser_download_url
-			*/
-			if (this.latestLuciAppResult.assets[0].name.indexOf(currentVersion) == -1) {
-				updateStatus.textContent = _('An update is available');
-	
-				if (showButtons) {
-					document.getElementById('update-laabl-button').style.display = 'inline-block';
-				}
-			} else {
-				updateStatus.textContent = _('Up to date');
-			}
-		}
-	},
-	
-	updateAdblockLean: async function () {
-		await rpc.updateAdblockLean(this.latestLuciAppResult.assets[0].browser_download_url);
 	},
 	
 	render: function () {
@@ -319,6 +261,63 @@ var statusClass = baseclass.extend({
 		});
 
 		return result;
+	},
+
+	setLuciAppUpdateStatus: function(showButtons) {
+		if (this.statusResult && this.latestLuciAppResult) {
+			var updateStatus = document.getElementById('laabl-update-status');
+	
+			/*
+			If the luci app is not installed, then this.statusResult.laabl_package_info will be blank.
+			This shouldn't ever happen to anyone but me, so we'll report it as an error condition.
+			*/
+			if (!this.statusResult.laabl_package_info) {
+				updateStatus.textContent = _('An error occurred while checking update status (missing package info)');
+				return;
+			}
+	
+			/*
+			this.statusResult.laabl_package_info will look like this:
+				Package: luci-app-adblock-lean
+				Version: git-24.229.78998-f9aed0d
+				Depends: libc, luci-base
+				Status: install user installed
+				Architecture: all
+				Installed-Time: 1723846085
+			So we need to parse the Version: line
+			*/
+			var currentVersion = this.statusResult.laabl_package_info.match(/Version[:]\s?(.*?)\s/)[1];
+			if (!currentVersion) {
+				updateStatus.textContent = _('An error occurred while checking update status (missing current version)');
+				return;
+			}
+	
+			/*
+			this.latestLuciAppResult will contain this (snipped irrelevant bits):
+				{
+					"assets": [
+						{
+							"name": "luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk",
+							"browser_download_url": "https://github.com/rickparrish/luci-app-adblock-lean/releases/download/latest/luci-app-adblock-lean_git-24.229.78998-f9aed0d_all.ipk"
+						}
+					],
+				}
+			So we need to check assets[0].name to see if it contains currentVersion.  If it does, we're up to date.  If it doesn't, we can update using assets[0].browser_download_url
+			*/
+			if (this.latestLuciAppResult.assets[0].name.indexOf(currentVersion) == -1) {
+				updateStatus.textContent = _('An update is available');
+	
+				if (showButtons) {
+					document.getElementById('update-laabl-button').style.display = 'inline-block';
+				}
+			} else {
+				updateStatus.textContent = _('Up to date');
+			}
+		}
+	},
+	
+	updateLuciApp: async function () {
+		await rpc.updateLuciApp(this.latestLuciAppResult.assets[0].browser_download_url);
 	},
 });
 

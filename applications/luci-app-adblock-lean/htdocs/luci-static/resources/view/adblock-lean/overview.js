@@ -10,11 +10,12 @@
 'require adblock-lean.rpc as rpc';
 
 return view.extend({
+	// Custom variables
 	// Holds the form.JSONMap, which is created during render() and accessed during save()
 	formMap: null,
 
+	// View-inheriting variables
 	handleReset: null,
-
 	handleSaveApply: null,
 
 	handleSave: function (ev) {
