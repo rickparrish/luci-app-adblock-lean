@@ -68,27 +68,8 @@ return view.extend({
 
 		// Ensure the config format matches the format we can support
 		if (!config.hasSupportedConfigFormat) {
-			// Disable the save button
 			this.handleSave = null;
-
-			// Build the title element
-			var titleElement = E('h2', {}, _('AdBlock Lean - Unsupported Configuration'));
-
-			// Build the instruction element
-			var instructionElement = E('p', {}, _('The currently installed versions of adblock-lean and luci-app-adblock-lean\
-				are not compatable with each other (they do not support the same config format).<br /><br />\
-				Check the status panel above to see whether there are updates for one (or both) packages, and update as necessary.<br /><br />\
-				NOTE: adblock-lean will continue to function as expected while this incompatability exists, the only functionality\
-				you are missing out on is the configuration form.'));
-
-			// Combine the various elements into our result variable
-			var result = E([
-				E('p', {}, '&nbsp;'),
-				titleElement,
-				instructionElement
-			]);
-
-			return Promise.all([status, result]);
+			return Promise.all([status, partials.renderUpdateSoftware()]);
 		}
 
 		// Setup the form inputs for each config option

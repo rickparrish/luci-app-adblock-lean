@@ -4,6 +4,7 @@
 'require adblock-lean.partials.reset-config as resetConfigClass';
 'require adblock-lean.partials.display-status as displayStatusClass';
 'require adblock-lean.partials.update-config as updateConfigClass';
+'require adblock-lean.partials.update-software as updateSoftwareClass';
 
 return L.Class.extend({
 	renderCreateConfig: function () {
@@ -29,5 +30,9 @@ return L.Class.extend({
 		var result = new updateConfigClass.partial();
 		result.checkConfigResult = checkConfigResult;
 		return result.render();
+	},
+
+	renderUpdateSoftware: function () {
+		return new updateSoftwareClass.partial().render();
 	},
 });
