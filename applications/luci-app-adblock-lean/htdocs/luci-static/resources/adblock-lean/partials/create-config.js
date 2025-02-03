@@ -10,7 +10,7 @@ var createConfigClass = baseclass.extend({
 		var instructionElements = E([
 			E('p', {}, _('adblock-lean is installed but the config file is missing.')),
 			E('p', {}, _('If you installed adblock-lean via this app, a config file should have been created for you, which means something went \
-				          wrong and you should <a %s>create an issue here</a>.')
+				          wrong and you should <a %s>create an Issue here</a>.')
 						.format('href="https://github.com/rickparrish/luci-app-adblock-lean/issues" target="_blank" rel="noreferrer"')),
 			E('p', {}, _('Either way, you should now <a %s>manually create a config file following the instructions here</a>.')
 				        .format('href="https://github.com/lynxthecat/adblock-lean" target="_blank" rel="noreferrer"')),

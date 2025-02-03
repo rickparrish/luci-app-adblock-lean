@@ -24,7 +24,7 @@ return L.Class.extend({
 				// From: https://stackoverflow.com/a/52043870
 				var result = this.rawConfig
 					// split the data by line
-					.split("\n")
+					.split('\n')
 					// filter comments
 					.filter(row => (row.trim() != '') && !row.trim().startsWith('#') && (row.indexOf('=') > 0))
 					// split each row into key and property

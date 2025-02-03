@@ -15,7 +15,7 @@ var editFileClass = view.extend({
 
 	handleSave: function (ev) {
 		// Remove any existing notifications
-		var notifications = document.getElementsByClassName("alert-message");
+		var notifications = document.getElementsByClassName('alert-message');
 		for (var i = 0; i < notifications.length; i++) {
 			notifications[i].style.display = 'none';
 		}

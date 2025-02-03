@@ -5,7 +5,7 @@
 var lastLoad = 0;
 
 return baseclass.extend({
-	title: _("adblock-lean"),
+	title: _('adblock-lean'),
 
 	load: function () {
 		// Check if it's been 1 hour since the last load
@@ -30,7 +30,7 @@ return baseclass.extend({
 
 		// Return a message saying config doesn't exist yet, if it doesn't exist yet
 		if (loadData[0] == '') {
-			return E('p', { style: "color: red;" },
+			return E('p', { 'style': 'color: red;' },
 				_('Your adblock-lean configuration file does not exist.  Click \
 					<strong>Services -> adblock-lean</strong> to configure adblock-lean now.'));
 		}

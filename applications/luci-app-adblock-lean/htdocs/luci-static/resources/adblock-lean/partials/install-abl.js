@@ -14,7 +14,7 @@ var installAblClass = baseclass.extend({
 		var preset = document.querySelector('input[name=preset]:checked').value;
 	
 		// Determine which utils the user wants to install
-		var utils = Array.from(document.querySelectorAll("input[name=utils]:checked"), e => e.value).join(' ');
+		var utils = Array.from(document.querySelectorAll('input[name=utils]:checked'), e => e.value).join(' ');
 	
 		// Call the install RPC method and reload the page when it completes
 		L.resolveDefault(rpc.installAbl(preset, utils)).then(function (result) { location.reload() });
