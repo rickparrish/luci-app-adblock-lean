@@ -47,9 +47,9 @@
 				"luci.adblock-lean": [
 					"checkConfig",
 					"getStatus",
-					"install",
+					"installAbl",
 					"resetConfig",
-					"updateAdBlockLean",
+					"updateAbl",
 					"updateConfig",
 					"updateLuciApp"
 				]

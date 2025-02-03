@@ -4,7 +4,7 @@
 # TESTS
 # ubus -v list luci.adblock-lean
 # ubus -v call luci.adblock-lean getStatus
-# ubus -v call luci.adblock-lean install
+# ubus -v call luci.adblock-lean installAbl
 
 # Exported variables for when adblock-lean is called via a service command isntead of sourced (eg during install)
 export luci_preset=auto		# When gen_config is called, use the recommended preset
@@ -116,7 +116,7 @@ get_status_rpc() {
 	print_status_rpc
 }
 
-install_rpc() {
+install_abl_rpc() {
 	luci_preset="$1"			# mini, small, medium, or large, passed in from luci
 	luci_install_packages="$2" 	# whitepsace-separated list of utils to install is passed in from luci
 
@@ -126,7 +126,7 @@ install_rpc() {
 			mv /tmp/adblock-lean-latest "$adblockLeanFilename"; then
 		if . "$adblockLeanFilename"; then
 			setup
-			install_result=$?
+			install_abl_result=$?
 
 			# Optionally use following variables to check which setup actions failed:
 			# $luci_addnmount_failed
@@ -134,16 +134,16 @@ install_rpc() {
 			# $luci_pkgs_install_failed
 			# $luci_cron_job_creation_failed
 		else
-			install_result=3 # this indicates error while initializing the script
+			install_abl_result=3 # this indicates error while initializing the script
 		fi
 	else
-		install_result=2 # this indicates download error
+		install_abl_result=2 # this indicates download error
 	fi
 	rm -f /tmp/adblock-lean-latest /tmp/adblock-lean-fetch.err
 
 	# Return a json response
 	json_init
-	json_add_int "install_result" "$install_result"
+	json_add_int "install_abl_result" "$install_abl_result"
 	json_dump
 }
 
@@ -262,9 +262,9 @@ case "$1" in
 		printf '{\n'
 		printf '	"checkConfig": { },\n'
 		printf '	"getStatus": { },\n'
-		printf '	"install": { },\n'
+		printf '	"installAbl": { },\n'
 		printf '	"resetConfig": { },\n'
-		printf '	"updateAdBlockLean": { },\n'
+		printf '	"updateAbl": { },\n'
 		printf '	"updateConfig": { },\n'
 		printf '	"updateLuciApp": { "url": "url" }\n'
 		printf '}\n'
@@ -280,18 +280,18 @@ case "$1" in
 			getStatus)
 				get_status_rpc
 				;;
-			install)
+			installAbl)
 				read -r input
 				json_load "$input"
 				json_get_var preset 'preset'
 				json_get_var utils 'utils'
 				json_cleanup
-				install_rpc "$preset" "$utils"
+				install_abl_rpc "$preset" "$utils"
 				;;
 			resetConfig)
 				reset_config_rpc
 				;;
-			updateAdBlockLean)
+			updateAbl)
 				update_abl_rpc
 				;;
 			updateConfig)

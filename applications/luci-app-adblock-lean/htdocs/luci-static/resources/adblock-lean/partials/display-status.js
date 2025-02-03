@@ -116,7 +116,7 @@ var displayStatusClass = baseclass.extend({
 				'\xa0',
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAdblockLean, 'Updating adblock-lean...'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAbl, 'Updating adblock-lean...'); }),
 					'style': 'display: none',
 					'id': 'update-abl-button',
 				}, [_('Update adblock-lean')]),
