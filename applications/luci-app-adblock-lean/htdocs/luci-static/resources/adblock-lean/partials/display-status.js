@@ -35,23 +35,23 @@ var displayStatusClass = baseclass.extend({
 		// Build the table element with the status placeholders
 		var tableElement = E('table', { 'class': 'table', 'style': 'margin-bottom: 5px;' }, [
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('Service Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('Service status')),
 				E('td', { 'class': 'td left spinning', 'id': 'service-status' }, '\xa0')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('Blocklist Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('Blocklist status')),
 				E('td', { 'class': 'td left', 'id': 'blocklist-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('dnsmasq Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('dnsmasq status')),
 				E('td', { 'class': 'td left', 'id': 'dnsmasq-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('adblock-lean Update Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('adblock-lean update status')),
 				E('td', { 'class': 'td left', 'id': 'abl-update-status' }, '-')
 			]),
 			E('tr', { 'class': 'tr' }, [
-				E('td', { 'class': 'td left', 'width': '33%' }, _('LuCI App Update Status')),
+				E('td', { 'class': 'td left', 'width': '33%' }, _('LuCI App update status')),
 				E('td', { 'class': 'td left', 'id': 'luci-app-update-status' }, '-')
 			]),
 		]);
@@ -65,13 +65,13 @@ var displayStatusClass = baseclass.extend({
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('enable', _('Enabling')); }),
 					'style': 'display: none',
 					'id': 'enable-button',
-				}, [_('Enable Service')]),
+				}, _('Enable Service')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('disable', _('Disabling')); }),
 					'style': 'display: none',
 					'id': 'disable-button',
-				}, [_('Disable Service')]),
+				}, _('Disable Service')),
 				'\xa0',
 				'\xa0',
 				'\xa0',
@@ -81,31 +81,31 @@ var displayStatusClass = baseclass.extend({
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('start', _('Activating')); }),
 					'style': 'display: none',
 					'id': 'start-button',
-				}, [_('Activate Blocklist')]),
+				}, _('Activate Blocklist')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('resume', _('Resuming')); }),
 					'style': 'display: none',
 					'id': 'resume-button',
-				}, [_('Resume Blocklist')]),
+				}, _('Resume Blocklist')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('pause', _('Pausing')); }),
 					'style': 'display: none',
 					'id': 'pause-button',
-				}, [_('Pause Blocklist')]),
+				}, _('Pause Blocklist')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('stop', _('Deactivating')); }),
 					'style': 'display: none',
 					'id': 'stop-button',
-				}, [_('Deactivate Blocklist')]),
+				}, _('Deactivate Blocklist')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-reload',
 					'click': ui.createHandlerFn(this, function () { return this.handleAction('reload', _('Reloading')); }),
 					'style': 'display: none',
 					'id': 'reload-button',
-				}, [_('Reload Blocklist')]),
+				}, _('Reload Blocklist')),
 				'\xa0',
 				'\xa0',
 				'\xa0',
@@ -115,13 +115,13 @@ var displayStatusClass = baseclass.extend({
 					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAbl, _('Updating adblock-lean...')); }),
 					'style': 'display: none',
 					'id': 'update-abl-button',
-				}, [_('Update adblock-lean')]),
+				}, _('Update adblock-lean')),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, _('Updating LuCI App...')); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, _('Updating LuCI app...')); }),
 					'style': 'display: none',
 					'id': 'update-luci-app-button',
-				}, [_('Update LuCI App')]),
+				}, _('Update LuCI App')),
 			]);
 		}
 		
@@ -135,6 +135,8 @@ var displayStatusClass = baseclass.extend({
 		var that = this;
 		L.resolveDefault(rpc.getStatus())
 			.then(function (result) {
+				that.statusResult = result;
+
 				var serviceStatus = document.getElementById('service-status');
 				serviceStatus.classList.remove('spinning');
 				switch (result.service_status) {
@@ -174,7 +176,7 @@ var displayStatusClass = baseclass.extend({
 							dnsmasqStatus.textContent = _('ERROR: Test domain resolved to 0.0.0.0');
 							break;
 						default:
-							dnsmasqStatus.textContent = 'Unknown';
+							dnsmasqStatus.textContent = _('Unknown');
 							break;
 					}
 
@@ -221,7 +223,7 @@ var displayStatusClass = baseclass.extend({
 						case 1:
 							if (result.update_config_format > config.supportedConfigFormat) {
 								updateStatus.textContent = _('An update is available, but it uses a newer config format than the LuCI App supports,\
-									so you will need to update the LuCI App before you can install the latest adblock-lean');
+									                          so you will need to update the LuCI App before you can install the latest adblock-lean');
 							} else {
 								updateStatus.textContent = _('An update is available');
 							
@@ -239,8 +241,7 @@ var displayStatusClass = baseclass.extend({
 					}
 				}
 
-				that.statusResult = result;
-				that.setLuciAppUpdateStatus(that.showButtons);
+				that.setLuciAppUpdateStatus();
 			}
 		);
 
@@ -248,7 +249,7 @@ var displayStatusClass = baseclass.extend({
 		L.get('https://api.github.com/repos/rickparrish/luci-app-adblock-lean/releases/tags/latest', '', function(xhr, data) {
 			if (data) {
 				that.latestLuciAppResult = data;
-				that.setLuciAppUpdateStatus(that.showButtons);
+				that.setLuciAppUpdateStatus();
 			} else {
 				var updateStatus = document.getElementById('luci-app-update-status');
 				updateStatus.textContent = _('An error occurred while checking update status (checking luci-app-adblock-lean status)');
@@ -258,7 +259,7 @@ var displayStatusClass = baseclass.extend({
 		return result;
 	},
 
-	setLuciAppUpdateStatus: function(showButtons) {
+	setLuciAppUpdateStatus: function() {
 		if (this.statusResult && this.latestLuciAppResult) {
 			var updateStatus = document.getElementById('luci-app-update-status');
 	
@@ -302,7 +303,7 @@ var displayStatusClass = baseclass.extend({
 			if (this.latestLuciAppResult.assets[0].name.indexOf(currentVersion) == -1) {
 				updateStatus.textContent = _('An update is available');
 	
-				if (showButtons) {
+				if (this.showButtons) {
 					document.getElementById('update-luci-app-button').style.display = 'inline-block';
 				}
 			} else {

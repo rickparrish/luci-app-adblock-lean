@@ -29,7 +29,7 @@ var resetConfigClass = baseclass.extend({
 		var buttonElement = E('button', {
 			'class': 'btn cbi-button cbi-button-positive',
 			'click': ui.createHandlerFn(this, this.handleResetClick),
-		}, [_('Reset Config File')]);
+		}, _('Reset Config File'));
 
 		// Combine the various elements into our result variable
 		return E([

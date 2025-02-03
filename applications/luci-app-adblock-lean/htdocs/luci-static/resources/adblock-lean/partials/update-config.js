@@ -23,20 +23,24 @@ var updateConfigClass = baseclass.extend({
 		// Build the automatic instruction element
 		var autoInstructionElement = E([
 			E('p', {}, _('adblock-lean\'s config format has changed.')),
-			E('p', {}, _('Click the Update button below the make the following automatic changes:' + helpers.getUnorderedList(config.checkConfigResult.conf_fixes))),
+			E('p', {}, _('Click the Update button below the make the following automatic changes:')),
+			E('div', {}, helpers.getUnorderedList(config.checkConfigResult.conf_fixes)),
 		]);
 
 		var buttonElement = E('button', {
 			'class': 'btn cbi-button cbi-button-positive',
 			'click': ui.createHandlerFn(this, this.handleUpdateClick),
-		}, [_('Update Config File')]);
+		}, _('Update Config File'));
 
 		// Build the manual instruction element
-		var manualInstructionElement = E('p', {}, _('<br /><br />Or, if you\'d like to manually update your config file,\
-			these are the changes that are needed:<br /><br />\
-			' + helpers.getUnorderedListWithHeader('Remove old entries:', config.checkConfigResult.unexp_entries) + '\
-			' + helpers.getUnorderedListWithHeader('Add new entries:', config.checkConfigResult.missing_entries) + '\
-			' + helpers.getUnorderedListWithHeader('Wrap values in double-quotes and/or remove inline comments:', config.checkConfigResult.legacy_entries)));
+		var manualInstructionElement = E([
+			E('<br>'),
+			E('<br>'),
+			E('p', {}, _('Or, if you\'d like to manually update your config file, these are the changes that are needed:')),
+			E('div', {}, helpers.getUnorderedListWithHeader(_('Remove old entries:'), config.checkConfigResult.unexp_entries)),
+			E('div', {}, helpers.getUnorderedListWithHeader(_('Add new entries:'), config.checkConfigResult.missing_entries)),
+			E('div', {}, helpers.getUnorderedListWithHeader(_('Wrap values in double-quotes and/or remove inline comments:'), config.checkConfigResult.legacy_entries)),
+		]);
 
 		// Combine the various elements into our result variable
 		return E([
