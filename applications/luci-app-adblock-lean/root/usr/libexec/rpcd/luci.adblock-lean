@@ -44,7 +44,7 @@ luci_cron_job_creation_failed=""
 blocklist_age_s_rpc=-1		# Number of seconds since the blocklist was last modified
 blocklist_status_rpc=-1		# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
 config_status_rpc=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update needed (auto or manual)
-laabl_package_info=""		# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
+luci_app_package_info=""	# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
 service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 
 # Source the adblock-lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
@@ -64,15 +64,11 @@ fi
 msgs_dest="/dev/null"
 
 # adblock-lean will call this function before exiting, so for example the flow for a getStatus call looks like:
-# RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> ??? -> exit
-# This means get_status_rpc() can only initiate the call to status(), but not actually output anything because the call
-# from get_status_rpc() to status() never returns to get_status_rpc()
-# And this means abl_luci_exit() needs to determine which print method to call to return the correct JSON payload
-# (ie what to do in the ??? above), so we use a previously-set $exit_action variable to determine this
+# RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> get_status_rpc(status result) -> exit
 abl_luci_exit() {
 	case "$exit_action" in
 		getStatus)
-			print_status_rpc "$1"
+			get_status_rpc "$1"
 			;;
 	esac
 }
@@ -103,17 +99,59 @@ check_config_rpc() {
 }
 
 # Call adblock-lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
-# correctly, etc.
+# correctly, etc.  Initial call will not have an argument, so status() will be called.  But status() will not return,
+# and instead when it completes abl_luci_exit() will be called, which in turn will re-call this method with the status
+# result as an argument.  On this second call the status() call will be skipped, so then it can print the result json.
 get_status_rpc() {
-	# If adblock-lean is installed, then we want to call its status method
+	# Call status() if we weren't passed any arguments
 	if [ "$service_status_rpc" != 2 ]
 	then
-		status
+		if [ -z "$1" ]
+		then
+			status
+		fi
+
+		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
+		# in as an arg to the print_status_rpc() function
+		blocklist_status_rpc="$1"
+
+		# Get additional details if the dnsmasq checks passed
+		if [ "$luci_dnsmasq_status" = 0 ]
+		then
+			# luci_good_line_count will be something like "774775 /tmp/dnsmasq.d/blocklist," and we just want the line count
+			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
+
+			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
+			blocklist_age_s_rpc=$(($(date +%s) - $(date -r "${DNSMASQ_CONF_D}/.abl-blocklist.gz" +%s 2>/dev/null || date -r "${DNSMASQ_CONF_D}/abl-blocklist" +%s 2>/dev/null)))
+		fi
+
+		# get enabled/disabled status
+		case $(service 2>/dev/null | grep "adblock-lean") in 
+			*disabled*)
+				service_status_rpc=1
+				;;
+			*enabled*)
+				service_status_rpc=0
+				;;
+		esac
 	fi
 
-	# adblock-lean exits at the end of all functions, so if status is called above then we won't get here
-	# BUT if adblock-lean is not installed, then we will get here, and we need to manually call print_status_rpc()
-	print_status_rpc
+	# Get luci-app-adblock-lean info
+	luci_app_package_info=$(opkg info luci-app-adblock-lean)
+
+	# Return a json response
+	json_init
+	json_add_int "service_status" "$service_status_rpc"
+	json_add_int "dnsmasq_status" "$luci_dnsmasq_status"
+	json_add_int "blocklist_status" "$blocklist_status_rpc"
+	json_add_int "blocklist_line_count" "$luci_good_line_count"
+	json_add_int "blocklist_age_s" "$blocklist_age_s_rpc"
+	json_add_int "update_status" "$luci_update_status"
+	json_add_int "update_config_format" "$luci_upd_config_format"
+	json_add_string "pid_action" "$luci_pid_action"
+	json_add_string "errors" "$luci_errors"
+	json_add_string "luci_app_package_info" "$luci_app_package_info"
+	json_dump
 }
 
 install_abl_rpc() {
@@ -144,54 +182,6 @@ install_abl_rpc() {
 	# Return a json response
 	json_init
 	json_add_int "install_abl_result" "$install_abl_result"
-	json_dump
-}
-
-# Perform some additional status-related checks, and then output the JSON response payload
-print_status_rpc() {
-	# Only perform the additional checks if adblock-lean is installed
-	if [ "$service_status_rpc" != 2 ]
-	then
-		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
-		# in as an arg to the print_status_rpc() function
-		blocklist_status_rpc="$1"
-
-		# Get additional details if the dnsmasq checks passed
-		if [ "$luci_dnsmasq_status" = 0 ]
-		then
-			# luci_good_line_count will be something like "774775 /tmp/dnsmasq.d/blocklist," and we just want the line count
-			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
-
-			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
-			blocklist_age_s_rpc=$(($(date +%s) - $(date -r "${DNSMASQ_CONF_D}/.abl-blocklist.gz" +%s 2>/dev/null || date -r "${DNSMASQ_CONF_D}/abl-blocklist" +%s 2>/dev/null)))
-		fi
-
-		# get enabled/disabled status
-		case $(service 2>/dev/null | grep "adblock-lean") in 
-			*disabled*)
-				service_status_rpc=1
-				;;
-			*enabled*)
-				service_status_rpc=0
-				;;
-		esac
-	fi
-
-	# Get luci-app-adblock-lean info
-	laabl_package_info=$(opkg info luci-app-adblock-lean)
-
-	# Return a json response
-	json_init
-	json_add_int "service_status" "$service_status_rpc"
-	json_add_int "dnsmasq_status" "$luci_dnsmasq_status"
-	json_add_int "blocklist_status" "$blocklist_status_rpc"
-	json_add_int "blocklist_line_count" "$luci_good_line_count"
-	json_add_int "blocklist_age_s" "$blocklist_age_s_rpc"
-	json_add_int "update_status" "$luci_update_status"
-	json_add_int "update_config_format" "$luci_upd_config_format"
-	json_add_string "pid_action" "$luci_pid_action"
-	json_add_string "errors" "$luci_errors"
-	json_add_string "laabl_package_info" "$laabl_package_info"
 	json_dump
 }
 
@@ -232,7 +222,7 @@ update_config_rpc() {
 }
 
 # Install the luci-app-adblock-lean package from the given url
-update_laabl_rpc() {
+update_luci_app_rpc() {
 	local url="$1"
 
 	uclient-fetch "$url" -O "/tmp/luci-app-adblock-lean-latest.ipk" 1> /dev/null 2> "/tmp/luci-app-adblock-lean-fetch.err"
@@ -302,7 +292,7 @@ case "$1" in
 				json_load "$input"
 				json_get_var url 'url'
 				json_cleanup
-				update_laabl_rpc "$url"
+				update_luci_app_rpc "$url"
 				;;
 		esac
 	;;

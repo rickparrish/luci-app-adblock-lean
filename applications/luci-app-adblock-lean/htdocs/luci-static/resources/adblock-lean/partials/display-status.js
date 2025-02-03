@@ -56,7 +56,7 @@ var displayStatusClass = baseclass.extend({
 			]),
 			E('tr', { 'class': 'tr' }, [
 				E('td', { 'class': 'td left', 'width': '33%' }, _('LuCI App Update Status')),
-				E('td', { 'class': 'td left', 'id': 'laabl-update-status' }, '-')
+				E('td', { 'class': 'td left', 'id': 'luci-app-update-status' }, '-')
 			]),
 		]);
 
@@ -124,7 +124,7 @@ var displayStatusClass = baseclass.extend({
 					'class': 'btn cbi-button cbi-button-action',
 					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, 'Updating LuCI App...'); }),
 					'style': 'display: none',
-					'id': 'update-laabl-button',
+					'id': 'update-luci-app-button',
 				}, [_('Update LuCI App')]),
 			]);
 		}
@@ -255,7 +255,7 @@ var displayStatusClass = baseclass.extend({
 				that.latestLuciAppResult = data;
 				that.setLuciAppUpdateStatus(that.showButtons);
 			} else {
-				var updateStatus = document.getElementById('laabl-update-status');
+				var updateStatus = document.getElementById('luci-app-update-status');
 				updateStatus.textContent = _('An error occurred while checking update status (checking luci-app-adblock-lean status)');
 			}
 		});
@@ -265,19 +265,19 @@ var displayStatusClass = baseclass.extend({
 
 	setLuciAppUpdateStatus: function(showButtons) {
 		if (this.statusResult && this.latestLuciAppResult) {
-			var updateStatus = document.getElementById('laabl-update-status');
+			var updateStatus = document.getElementById('luci-app-update-status');
 	
 			/*
-			If the luci app is not installed, then this.statusResult.laabl_package_info will be blank.
+			If the luci app is not installed, then this.statusResult.luci_app_package_info will be blank.
 			This shouldn't ever happen to anyone but me, so we'll report it as an error condition.
 			*/
-			if (!this.statusResult.laabl_package_info) {
+			if (!this.statusResult.luci_app_package_info) {
 				updateStatus.textContent = _('An error occurred while checking update status (missing package info)');
 				return;
 			}
 	
 			/*
-			this.statusResult.laabl_package_info will look like this:
+			this.statusResult.luci_app_package_info will look like this:
 				Package: luci-app-adblock-lean
 				Version: git-24.229.78998-f9aed0d
 				Depends: libc, luci-base
@@ -286,7 +286,7 @@ var displayStatusClass = baseclass.extend({
 				Installed-Time: 1723846085
 			So we need to parse the Version: line
 			*/
-			var currentVersion = this.statusResult.laabl_package_info.match(/Version[:]\s?(.*?)\s/)[1];
+			var currentVersion = this.statusResult.luci_app_package_info.match(/Version[:]\s?(.*?)\s/)[1];
 			if (!currentVersion) {
 				updateStatus.textContent = _('An error occurred while checking update status (missing current version)');
 				return;
@@ -308,7 +308,7 @@ var displayStatusClass = baseclass.extend({
 				updateStatus.textContent = _('An update is available');
 	
 				if (showButtons) {
-					document.getElementById('update-laabl-button').style.display = 'inline-block';
+					document.getElementById('update-luci-app-button').style.display = 'inline-block';
 				}
 			} else {
 				updateStatus.textContent = _('Up to date');
