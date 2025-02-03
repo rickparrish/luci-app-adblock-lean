@@ -138,7 +138,7 @@ dnsmasq_blocklist_urls="' + (data.dnsmasq_blocklist_urls ?? []).join(' ') + '"\n
 dnsmasq_blocklist_ipv4_urls="' + (data.dnsmasq_blocklist_ipv4_urls ?? []).join(' ') + '"\n\
 dnsmasq_allowlist_urls="' + (data.dnsmasq_allowlist_urls ?? []).join(' ') + '"\n\
 \n\
-# Path to optional local raw allowlist/blocklist domain files in the form:\n\
+# Path to optional local *raw domain* allowlist/blocklist files in the form:\n\
 # site1.com\n\
 # site2.com\n\
 local_allowlist_path="' + data.local_allowlist_path + '"\n\
@@ -201,8 +201,7 @@ cron_schedule="' + data.cron_schedule + '"\n\
 # normally this should be set automatically by the \'setup\' command\n\
 DNSMASQ_INSTANCE="' + data.DNSMASQ_INSTANCE + '"\n\
 DNSMASQ_INDEX="' + data.DNSMASQ_INDEX + '"\n\
-DNSMASQ_CONF_D="' + data.DNSMASQ_CONF_D + '"\n\
-';
+DNSMASQ_CONF_D="' + data.DNSMASQ_CONF_D + '"\n';
 
 		// Save config file
 		await fs.write('/etc/adblock-lean/config', config);
