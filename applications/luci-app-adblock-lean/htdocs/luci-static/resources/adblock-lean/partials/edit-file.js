@@ -47,6 +47,8 @@ var editFileClass = view.extend({
 	},
 	
 	render: function (loadData) {
+		var fileContents = loadData[0] ?? '';
+
 		return E([
 			E('p', {}, this.instructions),
 			E('p', {},
@@ -55,7 +57,7 @@ var editFileClass = view.extend({
 					'spellcheck': 'false',
 					'wrap': 'off',
 					'rows': 25
-				}, [loadData[0] ?? ''])
+				}, fileContents)
 			)
 		]);
 	},

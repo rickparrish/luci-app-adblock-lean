@@ -23,13 +23,15 @@ return baseclass.extend({
 	},
 
 	render: function (loadData) {
-		// Bail out if we don't have loadData (means our interval between status updates was not met)
-		if (!loadData) {
+		var configFile = loadData[0];
+
+		// Bail out if we don't have a config file (means our interval between status updates was not met)
+		if (!configFile) {
 			return;
 		}
 
 		// Return a message saying config doesn't exist yet, if it doesn't exist yet
-		if (loadData[0] == '') {
+		if (configFile == '') {
 			return E('p', { 'style': 'color: red;' },
 				_('Your adblock-lean configuration file does not exist.  Click \
 					<strong>Services -> adblock-lean</strong> to configure adblock-lean now.'));
