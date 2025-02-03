@@ -76,7 +76,7 @@ return view.extend({
 		}
 
 		// Setup the form inputs for each config option
-		this.formMap = new form.JSONMap(config.data, 'Configuration', _('Configuration of the adblock-lean package. \
+		this.formMap = new form.JSONMap(config.data, '', _('adblock-lean configuration options. \
 			For further information please check the <a style="font-weight: bold;" href="https://github.com/lynxthecat/adblock-lean/blob/master/README.md" target="_blank" rel="noreferrer noopener">online documentation</a>'));
 
 		/*
@@ -261,7 +261,7 @@ return view.extend({
 		o.rmempty = false;
 
 		if (status) {
-			return Promise.all([status, this.formMap.render()]);
+			return Promise.all([status, E('<br>'), this.formMap.render()]);
 		} else {
 			return this.formMap.render();
 		}
