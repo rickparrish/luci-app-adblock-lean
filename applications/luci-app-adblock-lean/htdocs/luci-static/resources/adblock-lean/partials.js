@@ -11,10 +11,9 @@ return L.Class.extend({
 		return new createConfigClass.partial().render();
 	},
 
-	renderDisplayStatus: function (showButtons, showTitle) {
+	renderDisplayStatus: function (showButtons) {
 		var result = new displayStatusClass.partial();
 		result.showButtons = showButtons;
-		result.showTitle = showTitle;
 		return result.render();
 	},
 

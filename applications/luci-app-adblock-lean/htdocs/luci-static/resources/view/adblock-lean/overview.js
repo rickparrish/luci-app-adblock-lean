@@ -66,8 +66,8 @@ return view.extend({
 			return partials.renderResetConfig();
 		}
 
-		// Create the status panel (true, true allows buttons and title to be shown)
-		var status = partials.renderDisplayStatus(true, true);
+		// Create the status panel (true arg shows buttons)
+		var status = partials.renderDisplayStatus(true);
 
 		// Ensure the config format matches the format we can support
 		if (!config.hasSupportedConfigFormat) {

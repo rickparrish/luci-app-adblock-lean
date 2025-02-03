@@ -35,7 +35,7 @@ return baseclass.extend({
 					<strong>Services -> adblock-lean</strong> to configure adblock-lean now.'));
 		}
 
-		// Return our custom status object
-		return partials.renderDisplayStatus();
+		// Return our custom status object (false arg hides buttons)
+		return partials.renderDisplayStatus(false);
 	},
 });

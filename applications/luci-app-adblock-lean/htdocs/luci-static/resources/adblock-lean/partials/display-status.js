@@ -7,7 +7,6 @@
 
 var displayStatusClass = baseclass.extend({
 	showButtons: false,
-	showTitle: false,
 	statusResult: null,
 	latestLuciAppResult: null,
 	
@@ -33,9 +32,6 @@ var displayStatusClass = baseclass.extend({
 	},
 	
 	render: function () {
-		// Build the title element, if showTitle is true
-		var titleElement = this.showTitle ? E('h2', {}, _('Status')) : E('div');
-
 		// Build the table element with the status placeholders
 		var tableElement = E('table', { 'class': 'table', 'style': 'margin-bottom: 5px;' }, [
 			E('tr', { 'class': 'tr' }, [
@@ -66,13 +62,13 @@ var displayStatusClass = baseclass.extend({
 			buttonElements = E('div', { class: 'right' }, [
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('enable', 'Enabling'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('enable', _('Enabling')); }),
 					'style': 'display: none',
 					'id': 'enable-button',
 				}, [_('Enable Service')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('disable', 'Disabling'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('disable', _('Disabling')); }),
 					'style': 'display: none',
 					'id': 'disable-button',
 				}, [_('Disable Service')]),
@@ -82,31 +78,31 @@ var displayStatusClass = baseclass.extend({
 				'\xa0',
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('start', 'Activating'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('start', _('Activating')); }),
 					'style': 'display: none',
 					'id': 'start-button',
 				}, [_('Activate Blocklist')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-positive',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('resume', 'Resuming'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('resume', _('Resuming')); }),
 					'style': 'display: none',
 					'id': 'resume-button',
 				}, [_('Resume Blocklist')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('pause', 'Pausing'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('pause', _('Pausing')); }),
 					'style': 'display: none',
 					'id': 'pause-button',
 				}, [_('Pause Blocklist')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-negative',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('stop', 'Deactivating'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('stop', _('Deactivating')); }),
 					'style': 'display: none',
 					'id': 'stop-button',
 				}, [_('Deactivate Blocklist')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-reload',
-					'click': ui.createHandlerFn(this, function () { return this.handleAction('reload', 'Reloading'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleAction('reload', _('Reloading')); }),
 					'style': 'display: none',
 					'id': 'reload-button',
 				}, [_('Reload Blocklist')]),
@@ -116,13 +112,13 @@ var displayStatusClass = baseclass.extend({
 				'\xa0',
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAbl, 'Updating adblock-lean...'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleRpc(rpc.updateAbl, _('Updating adblock-lean...')); }),
 					'style': 'display: none',
 					'id': 'update-abl-button',
 				}, [_('Update adblock-lean')]),
 				E('button', {
 					'class': 'btn cbi-button cbi-button-action',
-					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, 'Updating LuCI App...'); }),
+					'click': ui.createHandlerFn(this, function () { return this.handleRpc(this.updateLuciApp, _('Updating LuCI App...')); }),
 					'style': 'display: none',
 					'id': 'update-luci-app-button',
 				}, [_('Update LuCI App')]),
