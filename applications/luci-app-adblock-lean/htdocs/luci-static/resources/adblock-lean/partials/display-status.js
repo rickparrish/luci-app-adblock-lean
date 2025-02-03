@@ -127,7 +127,6 @@ var displayStatusClass = baseclass.extend({
 		
 		// Combine the various elements into our result variable
 		var result = E([
-			titleElement,
 			tableElement,
 			buttonElements
 		]);
