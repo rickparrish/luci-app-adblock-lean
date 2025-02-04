@@ -5,6 +5,10 @@
 'require adblock-lean.config as config';
 'require adblock-lean.rpc as rpc';
 
+// TODOX updateLuciApp loses "this" so can't read this.latestLuciAppResult.assets[0].browser_download_url
+//       This is a hacky workaround, so should try to find a better solution later
+var latestLuciAppDownloadUrl = null;
+
 var displayStatusClass = baseclass.extend({
 	showButtons: false,
 	statusResult: null,
@@ -305,6 +309,7 @@ var displayStatusClass = baseclass.extend({
 	
 				if (this.showButtons) {
 					document.getElementById('update-luci-app-button').style.display = 'inline-block';
+					latestLuciAppDownloadUrl = this.latestLuciAppResult.assets[0].browser_download_url;
 				}
 			} else {
 				updateStatus.textContent = _('Up to date');
@@ -313,7 +318,7 @@ var displayStatusClass = baseclass.extend({
 	},
 	
 	updateLuciApp: async function () {
-		await rpc.updateLuciApp(this.latestLuciAppResult.assets[0].browser_download_url);
+		await rpc.updateLuciApp(latestLuciAppDownloadUrl);
 	},
 });
 
