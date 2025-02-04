@@ -1,11 +1,11 @@
 'require baseclass';
 'require fs';
-'require adblock-lean.status as abls';
+'require adblock-lean.partials as partials';
 
 var lastLoad = 0;
 
 return baseclass.extend({
-	title: _("AdBlock Lean"),
+	title: _('adblock-lean'),
 
 	load: function () {
 		// Check if it's been 1 hour since the last load
@@ -23,19 +23,21 @@ return baseclass.extend({
 	},
 
 	render: function (loadData) {
-		// Bail out if we don't have loadData (means our interval between status updates was not met)
-		if (!loadData) {
+		var configFile = loadData[0];
+
+		// Bail out if we don't have a config file (means our interval between status updates was not met)
+		if (!configFile) {
 			return;
 		}
 
 		// Return a message saying config doesn't exist yet, if it doesn't exist yet
-		if (loadData[0] == '') {
-			return E('p', { style: "color: red;" },
-				_('Your AdBlock Lean configuration file does not exist.  Click \
-					<strong>Services -> AdBlock Lean</strong> to configure AdBlock Lean now.'));
+		if (configFile == '') {
+			return E('p', { 'style': 'color: red;' },
+				_('Your adblock-lean configuration file does not exist.  Click \
+					<strong>Services -> adblock-lean</strong> to configure adblock-lean now.'));
 		}
 
-		// Return our custom status object
-		return new abls.status().render();
+		// Return our custom status object (false arg hides buttons)
+		return partials.renderDisplayStatus(false);
 	},
 });

@@ -4,7 +4,7 @@
 # TESTS
 # ubus -v list luci.adblock-lean
 # ubus -v call luci.adblock-lean getStatus
-# ubus -v call luci.adblock-lean install
+# ubus -v call luci.adblock-lean installAbl
 
 # Exported variables for when adblock-lean is called via a service command isntead of sourced (eg during install)
 export luci_preset=auto		# When gen_config is called, use the recommended preset
@@ -44,10 +44,10 @@ luci_cron_job_creation_failed=""
 blocklist_age_s_rpc=-1		# Number of seconds since the blocklist was last modified
 blocklist_status_rpc=-1		# 0 = Active, 1 = Locking error, 2 = Other action being performed, 3 = Paused, 4 = Not active
 config_status_rpc=-1		# 0 = OK, 1 = Manual fix or reset needed, 2 = Update needed (auto or manual)
-laabl_package_info=""		# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
+luci_app_package_info=""	# Result of opk info luci-app-adblock-lean, which includes version information used to detect updates
 service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 
-# Source the AdBlock Lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
+# Source the adblock-lean script if it exists, or set service_status_rpc to 2=Not installed if it doesn't exist
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
 	. "$adblockLeanFilename"
@@ -59,27 +59,23 @@ fi
 # source jshn shell library
 . /usr/share/libubox/jshn.sh
 
-# RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (AdBlock Lean will do this for actual
+# RPC scripts must output a JSON payload, so ensure msgs_dest is set to /dev/null (adblock-lean will do this for actual
 # RPC calls, but it won't do it when testing the RPC script via the CLI, hence why we set it here)
 msgs_dest="/dev/null"
 
-# AdBlock Lean will call this function before exiting, so for example the flow for a getStatus call looks like:
-# RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> ??? -> exit
-# This means get_status_rpc() can only initiate the call to status(), but not actually output anything because the call
-# from get_status_rpc() to status() never returns to get_status_rpc()
-# And this means abl_luci_exit() needs to determine which print method to call to return the correct JSON payload
-# (ie what to do in the ??? above), so we use a previously-set $exit_action variable to determine this
+# adblock-lean will call this function before exiting, so for example the flow for a getStatus call looks like:
+# RPC call getStatus -> get_status_rpc() -> status() -> abl_luci_exit() -> get_status_rpc(status result) -> exit
 abl_luci_exit() {
 	case "$exit_action" in
 		getStatus)
-			print_status_rpc "$1"
+			get_status_rpc "$1"
 			;;
 	esac
 }
 
-# Call AdBlock Lean's parse_config() function to determine whether the config file needs updating
+# Call adblock-lean's parse_config() function to determine whether the config file needs updating
 check_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its parse_config method
+	# If adblock-lean is installed, then we want to call its parse_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		parse_config "/etc/adblock-lean/config"
@@ -102,56 +98,19 @@ check_config_rpc() {
 	json_dump
 }
 
-# Call AdBlock Lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
-# correctly, etc.
+# Call adblock-lean's status() function to determine whether the blocklist is active, whether dnsmasq is functioning
+# correctly, etc.  Initial call will not have an argument, so status() will be called.  But status() will not return,
+# and instead when it completes abl_luci_exit() will be called, which in turn will re-call this method with the status
+# result as an argument.  On this second call the status() call will be skipped, so then it can print the result json.
 get_status_rpc() {
-	# If AdBlock Lean is installed, then we want to call its status method
+	# Call status() if we weren't passed any arguments
 	if [ "$service_status_rpc" != 2 ]
 	then
-		status
-	fi
-
-	# AdBlock Lean exits at the end of all functions, so if status is called above then we won't get here
-	# BUT if AdBlock Lean is not installed, then we will get here, and we need to manually call print_status_rpc()
-	print_status_rpc
-}
-
-install_rpc() {
-	luci_use_old_config=1 # Remove this line if retaining the old config doesn't make sense
-	luci_install_packages="sed sort awk" # Maybe later implement options for the user to decide which packages they want to install
-
-	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean \
-		-O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
-	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err" &&
-			mv /tmp/adblock-lean-latest "$adblockLeanFilename"; then
-		if . "$adblockLeanFilename"; then
-			setup
-			install_result=$?
-
-			# Optionally use following variables to check which setup actions failed:
-			# $luci_addnmount_failed
-			# $luci_service_enable_failed
-			# $luci_pkgs_install_failed
-			# $luci_cron_job_creation_failed
-		else
-			install_result=3 # this indicates error while initializing the script
+		if [ -z "$1" ]
+		then
+			status
 		fi
-	else
-		install_result=2 # this indicates download error
-	fi
-	rm -f /tmp/adblock-lean-latest /tmp/adblock-lean-fetch.err
 
-	# Return a json response
-	json_init
-	json_add_int "install_result" "$install_result"
-	json_dump
-}
-
-# Perform some additional status-related checks, and then output the JSON response payload
-print_status_rpc() {
-	# Only perform the additional checks if AdBlock Lean is installed
-	if [ "$service_status_rpc" != 2 ]
-	then
 		# We already called status in the get_status_rpc() method, so now we just need to grab the return value, which is passed
 		# in as an arg to the print_status_rpc() function
 		blocklist_status_rpc="$1"
@@ -178,7 +137,7 @@ print_status_rpc() {
 	fi
 
 	# Get luci-app-adblock-lean info
-	laabl_package_info=$(opkg info luci-app-adblock-lean)
+	luci_app_package_info=$(opkg info luci-app-adblock-lean)
 
 	# Return a json response
 	json_init
@@ -191,13 +150,44 @@ print_status_rpc() {
 	json_add_int "update_config_format" "$luci_upd_config_format"
 	json_add_string "pid_action" "$luci_pid_action"
 	json_add_string "errors" "$luci_errors"
-	json_add_string "laabl_package_info" "$laabl_package_info"
+	json_add_string "luci_app_package_info" "$luci_app_package_info"
 	json_dump
 }
 
-# Call AdBlock Lean's gen_config() function to reset the broken config file
+install_abl_rpc() {
+	luci_preset="$1"			# mini, small, medium, or large, passed in from luci
+	luci_install_packages="$2" 	# whitepsace-separated list of utils to install is passed in from luci
+
+	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean \
+		-O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
+	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err" &&
+			mv /tmp/adblock-lean-latest "$adblockLeanFilename"; then
+		if . "$adblockLeanFilename"; then
+			setup
+			install_abl_result=$?
+
+			# Optionally use following variables to check which setup actions failed:
+			# $luci_addnmount_failed
+			# $luci_service_enable_failed
+			# $luci_pkgs_install_failed
+			# $luci_cron_job_creation_failed
+		else
+			install_abl_result=3 # this indicates error while initializing the script
+		fi
+	else
+		install_abl_result=2 # this indicates download error
+	fi
+	rm -f /tmp/adblock-lean-latest /tmp/adblock-lean-fetch.err
+
+	# Return a json response
+	json_init
+	json_add_int "install_abl_result" "$install_abl_result"
+	json_dump
+}
+
+# Call adblock-lean's gen_config() function to reset the broken config file
 reset_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its gen_config method
+	# If adblock-lean is installed, then we want to call its gen_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		gen_config
@@ -207,9 +197,9 @@ reset_config_rpc() {
 	# because luci will reload after resetConfig returns
 }
 
-# Call AdBlock Lean's update() function to update to the latest version
+# Call adblock-lean's update() function to update to the latest version
 update_abl_rpc() {
-	# If AdBlock Lean is installed, then we want to call its update method
+	# If adblock-lean is installed, then we want to call its update method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		update
@@ -219,9 +209,9 @@ update_abl_rpc() {
 	# because luci will reload after updateConfig returns
 }
 
-# Call AdBlock Lean's load_config() function to update the outdated config file
+# Call adblock-lean's load_config() function to update the outdated config file
 update_config_rpc() {
-	# If AdBlock Lean is installed, then we want to call its load_config method
+	# If adblock-lean is installed, then we want to call its load_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
 		load_config "-f"
@@ -232,7 +222,7 @@ update_config_rpc() {
 }
 
 # Install the luci-app-adblock-lean package from the given url
-update_laabl_rpc() {
+update_luci_app_rpc() {
 	local url="$1"
 
 	uclient-fetch "$url" -O "/tmp/luci-app-adblock-lean-latest.ipk" 1> /dev/null 2> "/tmp/luci-app-adblock-lean-fetch.err"
@@ -262,9 +252,9 @@ case "$1" in
 		printf '{\n'
 		printf '	"checkConfig": { },\n'
 		printf '	"getStatus": { },\n'
-		printf '	"install": { },\n'
+		printf '	"installAbl": { },\n'
 		printf '	"resetConfig": { },\n'
-		printf '	"updateAdBlockLean": { },\n'
+		printf '	"updateAbl": { },\n'
 		printf '	"updateConfig": { },\n'
 		printf '	"updateLuciApp": { "url": "url" }\n'
 		printf '}\n'
@@ -280,13 +270,18 @@ case "$1" in
 			getStatus)
 				get_status_rpc
 				;;
-			install)
-				install_rpc
+			installAbl)
+				read -r input
+				json_load "$input"
+				json_get_var preset 'preset'
+				json_get_var utils 'utils'
+				json_cleanup
+				install_abl_rpc "$preset" "$utils"
 				;;
 			resetConfig)
 				reset_config_rpc
 				;;
-			updateAdBlockLean)
+			updateAbl)
 				update_abl_rpc
 				;;
 			updateConfig)
@@ -297,7 +292,7 @@ case "$1" in
 				json_load "$input"
 				json_get_var url 'url'
 				json_cleanup
-				update_laabl_rpc "$url"
+				update_luci_app_rpc "$url"
 				;;
 		esac
 	;;

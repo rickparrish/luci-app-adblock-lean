@@ -2,9 +2,9 @@
 
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=AdBlock Lean Web UI
+LUCI_TITLE:=adblock-lean web interface
 LUCI_URL:=https://github.com/rickparrish/luci-app-adblock-lean/
-LUCI_DESCRIPTION:=Provides Web UI for adblock-lean service.
+LUCI_DESCRIPTION:=Provides a web interface for adblock-lean service.
 LUCI_DEPENDS:=+luci-base
 LUCI_PKGARCH:=all
 

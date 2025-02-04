@@ -9,134 +9,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:484
-msgid ""
-"<br /><br />Or, if you'd like to manually update your config file, these are "
-"the changes that are needed:<br /><br />"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/custom_script.js:17
+msgid "%s is only executed upon completion of the %s command."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/custom_script.js:9
-msgid ""
-"<p>This is the AdBlock Lean custom script, stored at <b>/usr/libexec/"
-"abl_custom-script.sh</b></p> <p>This script should define the functions "
-"<b>report_success()</b> and <b>report_failure()</b>, and one of these "
-"functions will be executed when adblock-lean completes the execution of some "
-"commands, with the success or failure message passed in first argument.</p> "
-"<p>report_success() is only executed upon completion of the 'start' command."
-"</p>"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:9
-msgid ""
-"<p>This is the local AdBlock Lean config file, stored at <b>/etc/adblock-"
-"lean/config</b></p> <p>In most cases you should make configuration changes "
-"via the <b>Overview</b> page, but if for some reason you want to view/edit "
-"the raw config file, you can do so here.</p> <em><b>Please note:</b></em> "
-"you should not modify <b>local_allowlist_path</b> or "
-"<b>local_blocklist_path</b> as the Allowlist and Blocklist tabs will only "
-"work with the default paths."
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/allowlist.js:9
-msgid ""
-"<p>This is your local AdBlock Lean allowlist, stored at <b>/etc/adblock-lean/"
-"allowlist</b></p> <p>This is useful if the blocklist urls you subscribe to "
-"block something you need -- rather than having to manually pause/resume "
-"AdBlock Lean when you need to access the domain(s), or having to switch to a "
-"more permissive blocklist, you can just list the domain(s) here to ensure "
-"they don't get blocked.</p> <p><em><b>Please note:</b></em> add only exactly "
-"one domain name per line.</p>"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/blocklist.js:9
-msgid ""
-"<p>This is your local AdBlock Lean blocklist, stored at <b>/etc/adblock-lean/"
-"blocklist</b></p> <p>This is useful if the blocklist urls you subscribe to "
-"miss something you want to block -- rather than having to switch to a more "
-"restrictive blocklist, you can just list the domain(s) here to ensure they "
-"get blocked.</p> <p><em><b>Please note:</b></em> add only exactly one domain "
-"name per line.</p>"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:167
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:84
 msgid "Activate Blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/status/include/70_adblock-lean.js:8
-#: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:3
-msgid "AdBlock Lean"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:81
+msgid "Activating"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:503
-msgid "AdBlock Lean - Configuration Error"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:41
+msgid "Add new entries:"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:458
-msgid "AdBlock Lean - Configuration Update Needed"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:420
-msgid "AdBlock Lean - Not Installed"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:116
-msgid "AdBlock Lean - Status"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:550
-msgid "AdBlock Lean - Unsupported Configuration"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:133
-msgid "AdBlock Lean Update Status"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:423
-msgid ""
-"AdBlock Lean is not currently installed on your system.<br /><br /> To "
-"automatically install it now, click the Install button below. Or to install "
-"it manually, <a href=\"https://github.com/lynxthecat/adblock-lean\" "
-"target=\"_blank\">follow the instructions here</a>.<br /><br /> NOTE: The "
-"Install button will also install the <strong>gawk, coreutils-sort,</strong> "
-"and <strong>sed</strong> packages, which will improve performance.<br /><br /"
-">"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:238
-msgid "AdBlock Lean is not installed"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:280
-msgid "AdBlock Lean is performing an action: %s"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:232
-msgid "AdBlock Lean will NOT autostart on boot"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:226
-msgid "AdBlock Lean will autostart on boot"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:506
-msgid ""
-"AdBlock Lean's configuration file has an error.<br /><br /> To automatically "
-"reset it now, click the Reset button below. Or to fix it manually, SSH into "
-"your router and try executing <strong>service adblock-lean start</strong>."
-"<br /><br />"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:461
-msgid ""
-"AdBlock Lean's configuration format has changed.<br /><br /> Click the "
-"Update button below the make the following automatic changes:"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:34
-msgid "AdBlock Lean..."
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:581
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:88
 msgid "Advanced Settings"
 msgstr ""
 
@@ -144,73 +33,89 @@ msgstr ""
 msgid "Allowlist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:618
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:125
 msgid "Allowlist urls"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:318
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:236
 msgid ""
 "An error occurred while checking update status (checking adblock-lean status)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:338
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:255
 msgid ""
 "An error occurred while checking update status (checking luci-app-adblock-"
 "lean status)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:77
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:287
 msgid ""
 "An error occurred while checking update status (missing current version)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:61
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:271
 msgid "An error occurred while checking update status (missing package info)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:94
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:310
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:228
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:304
 msgid "An update is available"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:307
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:225
 msgid ""
 "An update is available, but it uses a newer config format than the LuCI App "
 "supports, so you will need to update the LuCI App before you can install the "
-"latest AdBlock Lean"
+"latest adblock-lean"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:125
+msgid ""
+"Based on your total memory size of %sMB, the recommended preset of %s has "
+"been selected."
 msgstr ""
 
 #: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:31
 msgid "Blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:125
-msgid "Blocklist Status"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:283
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:201
 msgid "Blocklist is NOT active (paused)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:290
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:208
 msgid "Blocklist is NOT active (stopped)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:268
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:186
 msgid "Blocklist is active. Good line count: %s. Last updated %d hour(s) ago."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:748
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:42
+msgid "Blocklist status"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:255
 msgid "Boot start delay (seconds)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:690
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:197
 msgid ""
 "Call custom resport_success() and report_failure() functions when certain "
 "commands complete.<br />See <b>Custom Script</b> tab for more details."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:674
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-software.js:13
+msgid ""
+"Check the status panel above to see whether there are updates for one (or "
+"both) packages, and update as necessary."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:26
+msgid "Click the Update button below the make the following automatic changes:"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:181
 msgid ""
 "Compress final blocklist, intermediate blocklist parts and the backup "
 "blocklist to save memory"
@@ -220,187 +125,328 @@ msgstr ""
 msgid "Config"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:354
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:34
 msgid ""
 "Config modifications have been saved, reload adblock-lean for changes to "
 "take effect."
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:572
-msgid ""
-"Configuration of the AdBlock Lean package. For further information please "
-"check the <a style=\"font-weight: bold;\" href=\"https://github.com/"
-"lynxthecat/adblock-lean/blob/master/README.md\" target=\"_blank\" "
-"rel=\"noreferrer noopener\">online documentation</a>"
 msgstr ""
 
 #: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:39
 msgid "Custom Script"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:185
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:102
 msgid "Deactivate Blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:665
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:99
+msgid "Deactivating"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:172
 msgid "Deduplication"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:157
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:74
 msgid "Disable Service"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:255
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:71
+msgid "Disabling"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:173
 msgid "ERROR: Test domain lookup failed"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:258
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:176
 msgid "ERROR: Test domain resolved to 0.0.0.0"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:151
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/create-config.js:15
+msgid ""
+"Either way, you should now <a %s>manually create a config file following the "
+"instructions here</a>."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:68
 msgid "Enable Service"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:689
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:196
 msgid "Enable custom script"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:277
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:65
+msgid "Enabling"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:195
 msgid "Error checking blocklist status, try again in a minute"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:580
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:87
 msgid "General Settings"
 msgstr ""
 
 #: applications/luci-app-adblock-lean/root/usr/share/rpcd/acl.d/luci-app-adblock-lean.json:3
-msgid "Grant access to LuCI app AdBlock Lean"
+msgid "Grant access to LuCI app adblock-lean"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:590
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:97
 msgid "Hagezi blocklists"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:441
-msgid "Install AdBlock Lean"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/create-config.js:12
+msgid ""
+"If you installed adblock-lean via this app, a config file should have been "
+"created for you, which means something went wrong and you should <a "
+"%s>create an Issue here</a>."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:435
-msgid "Installing AdBlock Lean (this may take a minute or two)"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:11
+msgid ""
+"In most cases you should make configuration changes via the %s page, but if "
+"for some reason you want to view/edit the raw config file, you can do so "
+"here."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:700
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:100
+msgid "Install adblock-lean"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:10
+msgid "Installing adblock-lean"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:62
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:72
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:112
+msgid "Large"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:69
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:109
+msgid "Large-Relaxed"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:207
 msgid "List part failed action"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:137
-msgid "LuCI App Update Status"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:54
+msgid "LuCI App update status"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:712
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:219
 msgid "Max download retries"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:629
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:136
 msgid "Max file size (KB)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:641
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:148
 msgid "Max total size (KB)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:713
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:220
 msgid "Maximum number of download retries"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:630
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:137
 msgid "Maximum size of any individual downloaded blocklist part"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:642
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:149
 msgid "Maximum total size of combined, processed blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:736
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:55
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:115
+msgid "Medium"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:243
 msgid "Min allowlist part line count"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:724
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:231
 msgid "Min blocklist part line count"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:653
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:160
 msgid "Min good lines"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:654
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:41
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:121
+msgid "Mini"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:161
 msgid "Minimum number of good lines in final postprocessed blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:725
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:737
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:232
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:244
 msgid "Mininum number of lines of any individual downloaded part"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:607
-msgid "Other blocklist urls"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/config.js:105
+msgid "Must select or provide at least one blocklist"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:15
-msgid "Overview"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:179
-msgid "Pause Blocklist"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:191
-msgid "Reload Blocklist"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:522
-msgid "Reset Configuration File"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:516
-msgid "Resetting AdBlock Lean configuration file"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:681
-msgid "Restart dnsmasq"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:682
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-software.js:14
 msgid ""
-"Restart dnsmasq if previous blocklist was extracted and before generation of "
-"new blocklist thereby to free up memory during generaiton of new blocklist"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:173
-msgid "Resume Blocklist"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:121
-msgid "Service Status"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:749
-msgid "Start delay in seconds when service is started from system boot"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:553
-msgid ""
-"The currently installed versions of adblock-lean and luci-app-adblock-lean "
-"are not compatable with each other (they do not support the same config "
-"format).<br /><br /> Check the status panel above to see whether there are "
-"updates for one (or both) packages, and update as necessary.<br /><br /> "
 "NOTE: adblock-lean will continue to function as expected while this "
 "incompatability exists, the only functionality you are missing out on is the "
 "configuration form."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:701
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/create-config.js:17
+msgid "Once you've created a config file, please reload this page."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:26
+msgid "Or to fix it manually, SSH into your router and try executing %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:39
+msgid ""
+"Or, if you'd like to manually update your config file, these are the changes "
+"that are needed:"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:114
+msgid "Other blocklist urls"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:12
+#: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:15
+msgid "Overview"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:96
+msgid "Pause Blocklist"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:93
+msgid "Pausing"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/allowlist.js:15
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/blocklist.js:14
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:14
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/custom_script.js:15
+msgid "Please note"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:108
+msgid "Reload Blocklist"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:105
+msgid "Reloading"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:40
+msgid "Remove old entries:"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:32
+msgid "Reset Config File"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:11
+msgid "Resetting adblock-lean config file"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:188
+msgid "Restart dnsmasq"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:189
+msgid ""
+"Restart dnsmasq if previous blocklist was extracted and before generation of "
+"new blocklist thereby to free up memory during generaiton of new blocklist"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:90
+msgid "Resume Blocklist"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:87
+msgid "Resuming"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:36
+msgid ""
+"Select one of the pre-defined blocklist presets, each one intended for "
+"devices with a certain total memory capacity."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:79
+msgid ""
+"Select the package(s) you would also like to install to make list processing "
+"significantly faster (doesn't affect DNS resolution speed). gawk (including "
+"dependencies) may consume around 1MB, so consider unselecting gawk if flash "
+"space is an issue."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:38
+msgid "Service status"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:48
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:118
+msgid "Small"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:256
+msgid "Start delay in seconds when service is started from system boot"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-software.js:11
+msgid ""
+"The currently installed versions of adblock-lean and luci-app-adblock-lean "
+"are not compatable with each other (they do not support the same config "
+"format)."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:10
+msgid "This is the adblock-lean config file, stored at %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/custom_script.js:10
+msgid "This is the adblock-lean custom script, stored at %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/allowlist.js:11
+msgid ""
+"This is useful if the blocklist urls you subscribe to block something you "
+"need -- rather than having to manually pause/resume adblock-lean when you "
+"need to access the domain(s), or having to switch to a more permissive "
+"blocklist, you can just list the domain(s) here to ensure they don't get "
+"blocked."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/blocklist.js:11
+msgid ""
+"This is useful if the blocklist urls you subscribe to miss something you "
+"want to block -- rather than having to switch to a more restrictive "
+"blocklist, you can just list the domain(s) here to ensure they get blocked."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/allowlist.js:10
+msgid "This is your local adblock-lean allowlist, stored at %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/blocklist.js:10
+msgid "This is your local adblock-lean blocklist, stored at %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:208
 msgid ""
 "This option applies to blocklist/allowlist parts which failed to download or "
 "couldn't pass validation checks<br /> SKIP - skip failed blocklist file part "
@@ -408,87 +454,169 @@ msgid ""
 "(and fall back to previous blocklist if available)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/fileeditor.js:38
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/custom_script.js:11
+msgid ""
+"This script should define the functions %s and %s, and one of these "
+"functions will be executed when adblock-lean completes the execution of some "
+"commands with the success or failure message passed in first argument."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:25
+msgid "To automatically reset it now, click the Reset button below."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:29
+msgid ""
+"To install it now review and submit the form below, or <a %s>to install it "
+"manually follow the instructions here</a>."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/edit-file.js:39
 msgid "Unable to save changes: %s"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:392
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:397
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:37
 msgid "Unable to save modifications: %s"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:247
-msgid ""
-"Unable to save modifications: Must select or provide at least one blocklist"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:241
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:296
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:321
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:159
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:179
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:214
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:239
 msgid "Unknown"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:100
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:303
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:221
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:310
 msgid "Up to date"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:201
-msgid "Update AdBlock Lean"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:33
+msgid "Update Config File"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:477
-msgid "Update Configuration File"
-msgstr ""
-
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:207
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:124
 msgid "Update LuCI App"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:471
-msgid "Updating AdBlock Lean configuration file"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:118
+msgid "Update adblock-lean"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:673
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:121
+msgid "Updating LuCI app..."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:12
+msgid "Updating adblock-lean config file"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:115
+msgid "Updating adblock-lean..."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:180
 msgid "Use compression"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:666
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:173
 msgid ""
 "Whether to perform sorting and deduplication of entries (usually doesn't "
 "cause much slowdown, uses a bit more memory)"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/status/include/70_adblock-lean.js:34
-msgid ""
-"Your AdBlock Lean configuration file does not exist. Click <strong>Services -"
-"> AdBlock Lean</strong> to configure AdBlock Lean now."
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:42
+msgid "Wrap values in double-quotes and/or remove inline comments:"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:535
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/status/include/70_adblock-lean.js:36
 msgid ""
-"Your AdBlock Lean configuration file does not exist. Review the options "
-"below and click <strong>Save</strong> to configure AdBlock Lean now."
+"Your adblock-lean configuration file does not exist. Click <strong>Services -"
+"> adblock-lean</strong> to configure adblock-lean now."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/fileeditor.js:35
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/edit-file.js:36
 msgid ""
 "Your changes have been saved. Reload adblock-lean for changes to take effect."
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:129
-msgid "dnsmasq Status"
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:17
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/status/include/70_adblock-lean.js:8
+#: applications/luci-app-adblock-lean/root/usr/share/luci/menu.d/luci-app-adblock-lean.json:3
+msgid "adblock-lean"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:619
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:20
+msgid "adblock-lean config error"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/create-config.js:7
+msgid "adblock-lean config missing"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:21
+msgid "adblock-lean config update needed"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:79
+msgid ""
+"adblock-lean configuration options. For further information please check the "
+"<a style=\"font-weight: bold;\" href=\"https://github.com/lynxthecat/adblock-"
+"lean/blob/master/README.md\" target=\"_blank\" rel=\"noreferrer "
+"noopener\">online documentation</a>"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/create-config.js:11
+msgid "adblock-lean is installed but the config file is missing."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:156
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:25
+msgid "adblock-lean is not installed"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:198
+msgid "adblock-lean is performing an action: %s"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-software.js:7
+msgid "adblock-lean software update needed"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:50
+msgid "adblock-lean update status"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:150
+msgid "adblock-lean will NOT autostart on boot"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:144
+msgid "adblock-lean will autostart on boot"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/reset-config.js:24
+msgid "adblock-lean's config file has an error."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/update-config.js:25
+msgid "adblock-lean's config format has changed."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/allowlist.js:17
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/blocklist.js:16
+msgid "add exactly one domain name per line."
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:126
 msgid "dnsmasq allowlist urls"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:608
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:115
 msgid "dnsmasq blocklist urls"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:591
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/overview.js:98
 msgid ""
 "dnsmasq blocklists provided by hagezi. For blocklist information, please "
 "check the <a style=\"font-weight: bold;\" href=\"https://github.com/hagezi/"
@@ -496,10 +624,49 @@ msgid ""
 "noopener\">online documentation</a>"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:252
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:170
 msgid "dnsmasq is NOT running"
 msgstr ""
 
-#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/status.js:249
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:167
 msgid "dnsmasq is running"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/display-status.js:46
+msgid "dnsmasq status"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:71
+msgid ""
+"for devices with 1024MB of RAM or more. This preset includes circa 1M "
+"entries and same default blocklist URLs as %s but the max values are more "
+"relaxed and allow for larger fluctuations in downloaded blocklist sizes"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:50
+msgid ""
+"for devices with 128MB of RAM. Aim for <300k entries. This preset includes "
+"circa 250k entries"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:57
+msgid ""
+"for devices with 256MB of RAM. Aim for <600k entries. This preset includes "
+"circa 450k entries"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:64
+msgid "for devices with 512MB of RAM. This preset includes circa 1M entries"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/adblock-lean/partials/install-abl.js:43
+msgid ""
+"for devices with 64MB of RAM. Aim for <100k entries. This preset includes "
+"circa 85k entries"
+msgstr ""
+
+#: applications/luci-app-adblock-lean/htdocs/luci-static/resources/view/adblock-lean/config.js:16
+msgid ""
+"you should not modify %s or %s as the Allowlist and Blocklist tabs will only "
+"work with the default paths."
 msgstr ""

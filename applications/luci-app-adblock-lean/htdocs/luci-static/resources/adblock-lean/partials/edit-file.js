@@ -3,18 +3,19 @@
 'require ui';
 'require view';
 
-var fileEditorClass = view.extend({
+var editFileClass = view.extend({
+	// Custom variables
 	doLowercase: false,
-
 	filename: 'invalid-filename',
-
 	instructions: '',
 
+	// View-inheriting variables
 	handleReset: null,
+	handleSaveApply: null,
 
 	handleSave: function (ev) {
 		// Remove any existing notifications
-		var notifications = document.getElementsByClassName("alert-message");
+		var notifications = document.getElementsByClassName('alert-message');
 		for (var i = 0; i < notifications.length; i++) {
 			notifications[i].style.display = 'none';
 		}
@@ -39,8 +40,6 @@ var fileEditorClass = view.extend({
 			});
 	},
 
-	handleSaveApply: null,
-
 	load: function () {
 		return Promise.all([
 			L.resolveDefault(fs.read_direct(this.filename), '')
@@ -48,6 +47,8 @@ var fileEditorClass = view.extend({
 	},
 	
 	render: function (loadData) {
+		var fileContents = loadData[0] ?? '';
+
 		return E([
 			E('p', {}, this.instructions),
 			E('p', {},
@@ -56,12 +57,12 @@ var fileEditorClass = view.extend({
 					'spellcheck': 'false',
 					'wrap': 'off',
 					'rows': 25
-				}, [loadData[0] ?? ''])
+				}, fileContents)
 			)
 		]);
 	},
 });
 
 return L.Class.extend({
-	fileEditor: fileEditorClass,
+	partial: editFileClass,
 });

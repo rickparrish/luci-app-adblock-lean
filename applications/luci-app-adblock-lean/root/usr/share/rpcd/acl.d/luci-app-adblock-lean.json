@@ -1,6 +1,6 @@
 {
 	"luci-app-adblock-lean": {
-		"description": "Grant access to LuCI app AdBlock Lean",
+		"description": "Grant access to LuCI app adblock-lean",
 		"write": {
 			"file": {
 				"/etc/adblock-lean/*": [
@@ -47,9 +47,9 @@
 				"luci.adblock-lean": [
 					"checkConfig",
 					"getStatus",
-					"install",
+					"installAbl",
 					"resetConfig",
-					"updateAdBlockLean",
+					"updateAbl",
 					"updateConfig",
 					"updateLuciApp"
 				]
