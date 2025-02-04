@@ -1,9 +1,9 @@
-name: Pre-Release
+name: Pull-Request
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push events but only for the "main" branch
-  push:
+  # Triggers the workflow on pull request events but only for the "main" branch
+  pull_request:
     branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -61,12 +61,3 @@ jobs:
         with:
           name: ${{ matrix.arch}}-logs
           path: logs/
-
-      - name: Update pre-release
-        uses: "marvinpinto/action-automatic-releases@v1.2.1"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
