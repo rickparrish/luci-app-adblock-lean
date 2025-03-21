@@ -1,6 +1,7 @@
 'use strict';
 'require adblock-lean.partials.create-config as createConfigClass';
 'require adblock-lean.partials.install-abl as installAblClass';
+'require adblock-lean.partials.reboot-router as rebootRouterClass';
 'require adblock-lean.partials.reset-config as resetConfigClass';
 'require adblock-lean.partials.display-status as displayStatusClass';
 'require adblock-lean.partials.update-config as updateConfigClass';
@@ -19,6 +20,10 @@ return L.Class.extend({
 
 	renderInstallAbl: function () {
 		return new installAblClass.partial().render();
+	},
+
+	renderRebootRouter: function () {
+		return new rebootRouterClass.partial().render();
 	},
 
 	renderResetConfig: function () {

@@ -38,19 +38,20 @@ return view.extend({
 		});
 	},
 
-	load: function () {
-		return Promise.all([
-			L.resolveDefault(fs.stat('/etc/init.d/adblock-lean'), ''),
-		]);
-	},
-
-	render: async function (loadData) {
-		var ablStatEntry = loadData[0];
-
+	render: async function () {
 		// Check if adblock-lean is installed, and if not, display the install view
-		if (!L.isObject(ablStatEntry)) {
-			this.handleSave = null;
-			return partials.renderInstallAbl();
+		try {
+			await fs.stat('/etc/init.d/adblock-lean')
+		} catch (e) {
+			if (e.name === 'NotFoundError') {
+				this.handleSave = null;
+				return partials.renderInstallAbl();
+			} else if (e.name === 'PermissionError') {
+				this.handleSave = null;
+				return partials.renderRebootRouter();
+			} else {
+				throw e;
+			}
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
