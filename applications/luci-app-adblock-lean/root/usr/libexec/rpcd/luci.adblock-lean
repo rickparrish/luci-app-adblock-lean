@@ -158,21 +158,24 @@ install_abl_rpc() {
 	luci_preset="$1"			# mini, small, medium, or large, passed in from luci
 	luci_install_packages="$2" 	# whitepsace-separated list of utils to install is passed in from luci
 
-	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/main/adblock-lean \
-		-O /tmp/adblock-lean-latest 1> /dev/null 2> /tmp/adblock-lean-fetch.err
-	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err" &&
-			mv /tmp/adblock-lean-latest "$adblockLeanFilename"; then
-		if . "$adblockLeanFilename"; then
-			setup
-			install_abl_result=$?
+	uclient-fetch https://raw.githubusercontent.com/lynxthecat/adblock-lean/master/abl-install.sh \
+		-O /tmp/abl-install.sh 1> /dev/null 2> /tmp/adblock-lean-fetch.err
+	if grep -q "Download completed" "/tmp/adblock-lean-fetch.err"; then
+		if sh /tmp/abl-install.sh; then
+			if . "$adblockLeanFilename"; then
+				setup
+				install_abl_result=$?
 
-			# Optionally use following variables to check which setup actions failed:
-			# $luci_addnmount_failed
-			# $luci_service_enable_failed
-			# $luci_pkgs_install_failed
-			# $luci_cron_job_creation_failed
+				# Optionally use following variables to check which setup actions failed:
+				# $luci_addnmount_failed
+				# $luci_service_enable_failed
+				# $luci_pkgs_install_failed
+				# $luci_cron_job_creation_failed
+			else
+				install_abl_result=3 # this indicates error while initializing the script
+			fi
 		else
-			install_abl_result=3 # this indicates error while initializing the script
+			install_abl_result=4 # this indicates error while running abl-install.sh
 		fi
 	else
 		install_abl_result=2 # this indicates download error
