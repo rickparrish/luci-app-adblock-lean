@@ -11,7 +11,7 @@ return L.Class.extend({
 	loaded: false,
 	rawConfig: null,
 	resetNeeded: false,
-	supportedConfigFormat: 6,
+	supportedConfigFormat: 7,
 	updateNeeded: false,
 
 	load: async function () {
@@ -72,8 +72,10 @@ return L.Class.extend({
 				// Call the checkConfig RPC method to see if an update/reset is needed
 				this.checkConfigResult = await rpc.checkConfig();
 				switch (parseInt(this.checkConfigResult.config_status)) {
+					case 0: break; // Config file is OK, so do nothing
 					case 1: this.resetNeeded = true; break;
 					case 2: this.updateNeeded = true; break;
+					default: throw new Error(_('Error validating config file: %s returned an unexpected value (%s)').format('parse_config', this.checkConfigResult.config_status));
 				}
 			}
 		} catch (e) {
@@ -180,12 +182,15 @@ deduplication="' + ((data.deduplication ?? false) ? '1' : '0') + '"\n\
 # compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)\n\
 use_compression="' + ((data.use_compression ?? false) ? '1' : '0') + '"\n\
 \n\
-# restart dnsmasq if previous blocklist was extracted and before generation of\n\
-# new blocklist thereby to free up memory during generaiton of new blocklist - enable (1) or disable (0)\n\
-initial_dnsmasq_restart="' + ((data.initial_dnsmasq_restart ?? false) ? '1' : '0') + '"\n\
+# unload previous blocklist form memory and restart dnsmasq before generation of\n\
+# new blocklist in order to free up memory during generation of new blocklist - \'auto\' or enable (1) or disable (0)\n\
+unload_blocklist_before_update="' + data.unload_blocklist_before_update + '"\n\
 \n\
 # Start delay in seconds when service is started from system boot\n\
 boot_start_delay_s="' + data.boot_start_delay_s + '"\n\
+\n\
+# Maximal count of download and processing jobs run in parallel. \'auto\' sets this value to the count of CPU cores\n\
+MAX_PARALLEL_JOBS="' + data.MAX_PARALLEL_JOBS + '"\n\
 \n\
 # If a path to custom script is specified and that script defines functions \'report_success()\' and \'report_failure()\',\n\
 # one of these functions will be executed when adblock-lean completes the execution of some commands,\n\

@@ -51,6 +51,7 @@ service_status_rpc=-1		# 0 = Enabled, 1 = Disabled, 2 = Not installed
 adblockLeanFilename="/etc/init.d/adblock-lean"
 if [ -s "$adblockLeanFilename" ]; then
 	. "$adblockLeanFilename"
+	source_libs
 	command -v detect_utils 1>/dev/null && detect_utils -n # this will avoid erroring out with earlier adblock-lean versions which do not have detect_utils()
 else
 	service_status_rpc=2
@@ -78,6 +79,10 @@ check_config_rpc() {
 	# If adblock-lean is installed, then we want to call its parse_config method
 	if [ "$service_status_rpc" != 2 ]
 	then
+		# TODO - try_mkdir is a temporary fix until adblock-lean's next version where parse_config will do it
+		if [ -n  "${ABL_CONF_STAGING_DIR}" ]; then
+			try_mkdir -p "${ABL_CONF_STAGING_DIR}"
+		fi
 		parse_config "/etc/adblock-lean/config"
 		config_status_rpc="$?"
 	fi

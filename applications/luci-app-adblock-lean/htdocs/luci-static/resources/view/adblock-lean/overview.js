@@ -182,13 +182,14 @@ return view.extend({
 			_('Compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory')
 		);
 
-		o = s.taboption(
-			'general',
-			form.Flag,
-			'initial_dnsmasq_restart',
-			_('Restart dnsmasq'),
-			_('Restart dnsmasq if previous blocklist was extracted and before generation of new blocklist thereby to free up memory during generaiton of new blocklist')
-		);
+		// TODO - This option was replaced with unload_blocklist_before_update, which needs to support '1', '0', and 'auto' values
+		// o = s.taboption(
+		// 	'general',
+		// 	form.Flag,
+		// 	'initial_dnsmasq_restart',
+		// 	_('Restart dnsmasq'),
+		// 	_('Restart dnsmasq if previous blocklist was extracted and before generation of new blocklist thereby to free up memory during generaiton of new blocklist')
+		// );
 
 		o = s.taboption(
 			'general',
