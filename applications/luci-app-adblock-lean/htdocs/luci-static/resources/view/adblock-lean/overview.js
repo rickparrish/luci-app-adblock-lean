@@ -55,7 +55,16 @@ return view.extend({
 		}
 
 		// Check if adblock-lean's config file exists, and if not, display the config-missing view
-		await config.load();
+		try {
+			await config.load();
+		} catch (e) {
+			if (e.name === 'RPCError') {
+				this.handleSave = null;
+				return partials.renderRebootRouter();
+			} else {
+				throw e;
+			}
+		}
 		if (!config.loaded) {
 			this.handleSave = null;
 			return partials.renderCreateConfig();
