@@ -174,13 +174,14 @@ return view.extend({
 			_('Whether to perform sorting and deduplication of entries (usually doesn\'t cause much slowdown, uses a bit more memory)')
 		);
 
-		o = s.taboption(
-			'general',
-			form.Flag,
-			'use_compression',
-			_('Use compression'),
-			_('Compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory')
-		);
+		// TODO - This option was replaced with compression_util, intermediate_compression_options, and final_compression_options
+		// o = s.taboption(
+		// 	'general',
+		// 	form.Flag,
+		// 	'use_compression',
+		// 	_('Use compression'),
+		// 	_('Compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory')
+		// );
 
 		// TODO - This option was replaced with unload_blocklist_before_update, which needs to support '1', '0', and 'auto' values
 		// o = s.taboption(

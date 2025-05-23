@@ -11,7 +11,7 @@ return L.Class.extend({
 	loaded: false,
 	rawConfig: null,
 	resetNeeded: false,
-	supportedConfigFormat: 7,
+	supportedConfigFormat: 8,
 	updateNeeded: false,
 
 	load: async function () {
@@ -179,8 +179,17 @@ max_blocklist_file_size_KB="' + data.max_blocklist_file_size_KB + '"\n\
 # Whether to perform sorting and deduplication of entries (usually doesn\'t cause much slowdown, uses a bit more memory) - enable (1) or disable (0)\n\
 deduplication="' + ((data.deduplication ?? false) ? '1' : '0') + '"\n\
 \n\
-# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)\n\
-use_compression="' + ((data.use_compression ?? false) ? '1' : '0') + '"\n\
+# Utility to compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory\n\
+# Supported options: gzip, pigz, zstd or \'none\' to disable compression\n\
+compression_util="' + data.compression_util + '"\n\
+\n\
+# Compression options: passed as-is to the compression utility\n\
+# Available options depend on the compression utility. \'-[n]\' universally specifies compression level.\n\
+# Busybox gzip ignores any options.\n\
+#   Intermediate compression. Default: \'-3\'.\n\
+intermediate_compression_options="' + data.intermediate_compression_options + '"\n\
+#   Final blocklist compression. Default: \'-6\'\n\
+final_compression_options="' + data.final_compression_options + '"\n\
 \n\
 # unload previous blocklist form memory and restart dnsmasq before generation of\n\
 # new blocklist in order to free up memory during generation of new blocklist - \'auto\' or enable (1) or disable (0)\n\
@@ -192,10 +201,11 @@ boot_start_delay_s="' + data.boot_start_delay_s + '"\n\
 # Maximal count of download and processing jobs run in parallel. \'auto\' sets this value to the count of CPU cores\n\
 MAX_PARALLEL_JOBS="' + data.MAX_PARALLEL_JOBS + '"\n\
 \n\
-# If a path to custom script is specified and that script defines functions \'report_success()\' and \'report_failure()\',\n\
+# If a path to custom script is specified and that script defines functions\n\
+# \'report_success()\', \'report_failure()\' or \'report_update()\',\n\
 # one of these functions will be executed when adblock-lean completes the execution of some commands,\n\
-# with the success or failure message passed in first argument\n\
-# report_success() is only executed upon completion of the \'start\' command\n\
+# with corresponding message passed in first argument\n\
+# report_success() and report_update() are only executed upon completion of the \'start\' command\n\
 # Recommended path is \'/usr/libexec/abl_custom-script.sh\' which the luci app has permission to access\n\
 custom_script="' + data.custom_script + '"\n\
 \n\

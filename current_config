@@ -1,6 +1,6 @@
 
 # adblock-lean configuration options
-# config_format=v7
+# config_format=v8
 #
 # values must be enclosed in double-quotes
 # custom comments are not preserved after automatic config update
@@ -59,8 +59,17 @@ max_blocklist_file_size_KB="6100"
 # Whether to perform sorting and deduplication of entries (usually doesn't cause much slowdown, uses a bit more memory) - enable (1) or disable (0)
 deduplication="1"
 
-# compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory - enable (1) or disable (0)
-use_compression="1"
+# Utility to compress final blocklist, intermediate blocklist parts and the backup blocklist to save memory
+# Supported options: gzip, pigz, zstd or 'none' to disable compression
+compression_util="gzip"
+
+# Compression options: passed as-is to the compression utility
+# Available options depend on the compression utility. '-[n]' universally specifies compression level.
+# Busybox gzip ignores any options.
+#   Intermediate compression. Default: '-3'.
+intermediate_compression_options="-3"
+#   Final blocklist compression. Default: '-6'
+final_compression_options="-6"
 
 # unload previous blocklist form memory and restart dnsmasq before generation of
 # new blocklist in order to free up memory during generation of new blocklist - 'auto' or enable (1) or disable (0)
@@ -72,10 +81,11 @@ boot_start_delay_s="120"
 # Maximal count of download and processing jobs run in parallel. 'auto' sets this value to the count of CPU cores
 MAX_PARALLEL_JOBS="auto"
 
-# If a path to custom script is specified and that script defines functions 'report_success()' and 'report_failure()'',
+# If a path to custom script is specified and that script defines functions
+# 'report_success()', 'report_failure()' or 'report_update()',
 # one of these functions will be executed when adblock-lean completes the execution of some commands,
-# with the success or failure message passed in first argument
-# report_success() is only executed upon completion of the 'start' command
+# with corresponding message passed in first argument
+# report_success() and report_update() are only executed upon completion of the 'start' command
 # Recommended path is '/usr/libexec/abl_custom-script.sh' which the luci app has permission to access
 custom_script=""
 
