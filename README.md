@@ -8,6 +8,10 @@ Source for [luci-app-banip](https://github.com/openwrt/luci/tree/openwrt-23.05/a
 
 Source for [luci-app-adblock-fast](https://github.com/openwrt/luci/tree/master/applications/luci-app-adblock-fast) was also used as a reference for the RPC-portion of this app.
 
+# Supported Configurations
+
+The latest release of luci-app-adblock-lean was tested with adblock-lean 0.7.4.1, with a single dnsmasq instance.  It was not tested with multiple dnsmasq instances, and is not expected to work with multiple dnsmasq instances at this time.
+
 # Installation
 
 In all cases, you'll want to log out of the web interface and back in to force a cache refresh after installing the new package.

@@ -1,5 +1,7 @@
 'use strict';
 
+// TODOX Support the new short forms like "hagezi:pro" and "hagezi:tif.mini"
+
 return L.Class.extend({
 	baseUrl:  'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/',
 	

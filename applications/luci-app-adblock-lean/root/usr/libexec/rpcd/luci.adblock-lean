@@ -127,7 +127,8 @@ get_status_rpc() {
 			luci_good_line_count=$(echo "$luci_good_line_count" | awk '{print $1;}')
 
 			# Get the seconds since the blocklist was last modified, so we can tell if the scheduled task is running correctly
-			blocklist_age_s_rpc=$(($(date +%s) - $(date -r "${DNSMASQ_CONF_D}/.abl-blocklist.gz" +%s 2>/dev/null || date -r "${DNSMASQ_CONF_D}/abl-blocklist" +%s 2>/dev/null)))
+			# TODOX Not going to work if there are multiple conf dirs
+			blocklist_age_s_rpc=$(($(date +%s) - $(date -r "${DNSMASQ_CONF_DIRS}/.abl-extract_blocklist" +%s 2>/dev/null || date -r "${DNSMASQ_CONF_DIRS}/abl-conf-script" +%s 2>/dev/null)))
 		fi
 
 		# get enabled/disabled status

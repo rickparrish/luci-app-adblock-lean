@@ -11,7 +11,7 @@ return L.Class.extend({
 	loaded: false,
 	rawConfig: null,
 	resetNeeded: false,
-	supportedConfigFormat: 8,
+	supportedConfigFormat: 10,
 	updateNeeded: false,
 
 	load: async function () {
@@ -130,12 +130,12 @@ return L.Class.extend({
 # including subdomains of allowed domains\n\
 whitelist_mode="' + data.whitelist_mode + '"\n\
 \n\
-# One or more *raw domain* format blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
+# One or more *raw domain* format blocklist/ipv4 blocklist/allowlist URLs and/or short list identifiers separated by spaces\n\
 blocklist_urls="' + combined_blocklist_urls.join(' ') + '"\n\
 blocklist_ipv4_urls="' + (data.blocklist_ipv4_urls ?? []).join(' ') + '"\n\
 allowlist_urls="' + (data.allowlist_urls ?? []).join(' ') + '"\n\
 \n\
-# One or more *dnsmasq format* domain blocklist/ipv4 blocklist/allowlist urls separated by spaces\n\
+# One or more *dnsmasq format* domain blocklist/ipv4 blocklist/allowlist URLs separated by spaces\n\
 dnsmasq_blocklist_urls="' + (data.dnsmasq_blocklist_urls ?? []).join(' ') + '"\n\
 dnsmasq_blocklist_ipv4_urls="' + (data.dnsmasq_blocklist_ipv4_urls ?? []).join(' ') + '"\n\
 dnsmasq_allowlist_urls="' + (data.dnsmasq_allowlist_urls ?? []).join(' ') + '"\n\
@@ -212,11 +212,10 @@ custom_script="' + data.custom_script + '"\n\
 # Crontab schedule expression for periodic list updates\n\
 cron_schedule="' + data.cron_schedule + '"\n\
 \n\
-# dnsmasq instance and config directory\n\
+# dnsmasq instance indexes and config directories\n\
 # normally this should be set automatically by the \'setup\' command\n\
-DNSMASQ_INSTANCE="' + data.DNSMASQ_INSTANCE + '"\n\
-DNSMASQ_INDEX="' + data.DNSMASQ_INDEX + '"\n\
-DNSMASQ_CONF_D="' + data.DNSMASQ_CONF_D + '"\n';
+DNSMASQ_INDEXES="' + data.DNSMASQ_INDEXES + '"\n\
+DNSMASQ_CONF_DIRS="' + data.DNSMASQ_CONF_DIRS + '"\n';
 
 		// Save config file
 		await fs.write('/etc/adblock-lean/config', config);
