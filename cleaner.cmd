@@ -9,11 +9,13 @@ CALL clean.cmd
 
 ssh root@OpenWrt.lan service adblock-lean stop
 ssh root@OpenWrt.lan service adblock-lean disable
-ssh root@OpenWrt.lan rm /etc/rc.d/K4adblock-lean
+ssh root@OpenWrt.lan rm /etc/rc.d/K04adblock-lean
 ssh root@OpenWrt.lan rm /etc/rc.d/S99adblock-lean
 ssh root@OpenWrt.lan rm /etc/init.d/adblock-lean
+ssh root@OpenWrt.lan rm /tmp/adblock-lean_config.old
 ssh root@OpenWrt.lan rm /usr/libexec/abl_custom-script.sh
 ssh root@OpenWrt.lan rm -rf /etc/adblock-lean
 ssh root@OpenWrt.lan rm -rf /tmp/adblock-lean
 ssh root@OpenWrt.lan rm -rf /tmp/run/adblock-lean
+ssh root@OpenWrt.lan rm -rf /tmp/run/adblock-lean-update
 ssh root@OpenWrt.lan rm -rf /usr/lib/adblock-lean
