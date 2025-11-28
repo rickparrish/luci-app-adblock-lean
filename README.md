@@ -10,7 +10,9 @@ Source for [luci-app-adblock-fast](https://github.com/openwrt/luci/tree/master/a
 
 # Supported Configurations
 
-The latest release of luci-app-adblock-lean was tested with adblock-lean 0.7.4.1, with a single dnsmasq instance.  It was not tested with multiple dnsmasq instances, and is not expected to work with multiple dnsmasq instances at this time.
+The latest release of luci-app-adblock-lean is NOT compatable with the latest adblock-lean (0.8 at the time of this writing).  To continue using luci-app-adblock-lean you will need to stay on adblock-lean 0.7.4.1.  If you've upgraded to a newer version of adblock-lean, you can revert to this version using the command `/etc/init.d/adblock-lean update -v v0.7.4.1`.
+
+Also, luci-app-adblock-lean has not been tested with multiple dnsmasq instances, and is not expected to work with multiple dnsmasq instances at this time.
 
 # Installation
 
